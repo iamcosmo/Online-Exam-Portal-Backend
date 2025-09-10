@@ -8,7 +8,5 @@ namespace Infrastructure.Repositories.Implementations
 {
     internal class UserRepository
     {
-
-
     }
 }
