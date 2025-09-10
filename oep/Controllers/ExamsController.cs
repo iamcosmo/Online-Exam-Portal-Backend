@@ -15,6 +15,8 @@ namespace OEP.Controllers
         {
             _examRepository = new ExamRepository(context);
         }
+
+        [HttpGet("/")]
         public IActionResult Index()
         {
             return Ok("Index na");
