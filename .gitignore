@@ -364,3 +364,5 @@ FodyWeavers.xsd
 
 # Ignore all appsettings variants everywhere
 */appsettings*.json
+
+*/Migrations/
