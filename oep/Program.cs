@@ -10,7 +10,7 @@ namespace oep
     {
         public static void Main(string[] args)
         {
-            var builder = WebApplication.CreateBuilder(args);
+            try{var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
             builder.Services.AddScoped<IExamRepository,ExamRepository>();
@@ -25,11 +25,12 @@ namespace oep
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
+            //if (app.Environment.IsDevelopment())
+            //{
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
+            //}
+
 
             app.UseHttpsRedirection();
 
@@ -38,7 +39,10 @@ namespace oep
 
             app.MapControllers();
 
-            app.Run();
+                app.Run();
+            }
+            catch (Exception e){ Console.WriteLine(e); }
         }
+
     }
 }
