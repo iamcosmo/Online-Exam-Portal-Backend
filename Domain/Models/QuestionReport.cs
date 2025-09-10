@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace Domain.Models;
+
+public partial class QuestionReport
+{
+    public int Qid { get; set; }
+
+    public string? Feedback { get; set; }
+
+    public string UserId { get; set; } = null!;
+
+    public virtual Question QidNavigation { get; set; } = null!;
+
+    public virtual User User { get; set; } = null!;
+}
