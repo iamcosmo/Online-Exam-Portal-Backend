@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Domain.Data;
 using Infrastructure.Repositories.Implementations;
 using Microsoft.AspNetCore.Mvc;
 
