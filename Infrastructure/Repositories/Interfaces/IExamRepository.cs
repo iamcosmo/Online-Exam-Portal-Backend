@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Infrastructure.Repositories.Implementations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,5 +14,10 @@ namespace Infrastructure.Repositories.Interfaces
         public int UpdateExam(Exam exam);
         public List<Exam> GetExams();
         public Exam GetExamById(int examId);
+
+        // To-do GetExamsAttemptedByUser(id);
+        // To-do GetExamAttempts(userId, examId)
+
+
     }
 }
