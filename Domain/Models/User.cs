@@ -5,7 +5,9 @@ namespace Domain.Models;
 
 public partial class User
 {
-    public string UserId { get; set; } = null!;
+    public int UserId { get; set; }
+
+    public string? Email { get; set; }
 
     public string? FullName { get; set; }
 
@@ -25,8 +27,6 @@ public partial class User
 
     public DateTime? UpdatedAt { get; set; }
 
-    public virtual ICollection<Analytic> Analytics { get; set; } = new List<Analytic>();
-
     public virtual ICollection<ExamFeedback> ExamFeedbacks { get; set; } = new List<ExamFeedback>();
 
     public virtual ICollection<Exam> Exams { get; set; } = new List<Exam>();
@@ -37,5 +37,5 @@ public partial class User
 
     public virtual ICollection<Result> Results { get; set; } = new List<Result>();
 
-    public virtual ICollection<Subject> Subjects { get; set; } = new List<Subject>();
+    public virtual ICollection<Topic> Topics { get; set; } = new List<Topic>();
 }

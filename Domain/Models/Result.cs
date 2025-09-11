@@ -5,7 +5,7 @@ namespace Domain.Models;
 
 public partial class Result
 {
-    public string UserId { get; set; } = null!;
+    public int UserId { get; set; }
 
     public int Eid { get; set; }
 

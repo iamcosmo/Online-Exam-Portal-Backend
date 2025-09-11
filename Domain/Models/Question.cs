@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Domain.Models;
 
@@ -11,7 +7,7 @@ public partial class Question
 {
     public int Qid { get; set; }
 
-    public int? Sid { get; set; }
+    public int? Tid { get; set; }
 
     public int? Eid { get; set; }
 
@@ -31,5 +27,5 @@ public partial class Question
 
     public virtual ICollection<Response> Responses { get; set; } = new List<Response>();
 
-    public virtual Subject? SidNavigation { get; set; }
+    public virtual Topic? TidNavigation { get; set; }
 }

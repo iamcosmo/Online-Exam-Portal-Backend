@@ -7,7 +7,7 @@ public partial class Exam
 {
     public int Eid { get; set; }
 
-    public int? Sid { get; set; }
+    public string? Tids { get; set; }
 
     public int? TotalQuestions { get; set; }
 
@@ -21,11 +21,11 @@ public partial class Exam
 
     public int? ApprovalStatus { get; set; }
 
-    public string? ApprovedByUserId { get; set; }
+    public int? ApprovedByUserId { get; set; }
 
     public int? DisplayedQuestions { get; set; }
 
-    public virtual ICollection<Analytic> Analytics { get; set; } = new List<Analytic>();
+    public string? AdminRemarks { get; set; }
 
     public virtual User? ApprovedByUser { get; set; }
 
@@ -36,6 +36,4 @@ public partial class Exam
     public virtual ICollection<Response> Responses { get; set; } = new List<Response>();
 
     public virtual ICollection<Result> Results { get; set; } = new List<Result>();
-
-    public virtual Subject? SidNavigation { get; set; }
 }

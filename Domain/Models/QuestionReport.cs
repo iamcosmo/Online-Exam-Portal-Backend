@@ -9,7 +9,7 @@ public partial class QuestionReport
 
     public string? Feedback { get; set; }
 
-    public string UserId { get; set; } = null!;
+    public int UserId { get; set; }
 
     public virtual Question QidNavigation { get; set; } = null!;
 
