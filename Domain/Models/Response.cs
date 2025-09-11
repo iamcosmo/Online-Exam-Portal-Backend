@@ -9,7 +9,7 @@ public partial class Response
 
     public int Qid { get; set; }
 
-    public string UserId { get; set; } = null!;
+    public int UserId { get; set; }
 
     public string? Resp { get; set; }
 
