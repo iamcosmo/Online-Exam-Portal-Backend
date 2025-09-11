@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.Repositories.Interfaces.QuestionBank
+namespace Infrastructure.Repositories.Interfaces
 {
-    internal class Question
+    public interface IQuestionRepository
     {
-
     }
 }
