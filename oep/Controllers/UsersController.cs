@@ -14,12 +14,14 @@ namespace OEP.Controllers
 
         private readonly IUserRepository _userRepository;
         private readonly TokenService _tokenService;
+        private readonly IExamRepository _examRepository;
 
 
-        public UsersController(IUserRepository userRepository, TokenService tokenService)
+        public UsersController(IUserRepository userRepository, TokenService tokenService, IExamRepository examRepository)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
+            _examRepository = examRepository;
         }
 
         [HttpGet("adminindex")]
@@ -68,21 +70,21 @@ namespace OEP.Controllers
             return result > 0 ? Ok("User deleted successfully") : NotFound("User not found");
         }
 
-        //// GET /users/{id}/exams-attempted
-        //[HttpGet("{id}/exams-attempted")]
-        //public IActionResult GetExamsAttempted(string id)
-        //{
-        //    var exams = _userRepository.GetExamsAttemptedByUser(id);
-        //    return Ok(exams);
-        //}
+        // GET /users/{id}/exams-attempted
+        [HttpGet("{id}/exams-attempted")]
+        public IActionResult GetExamsAttempted(int id)
+        {
+            var exams = _examRepository.GetExamsAttemptedByUser(id);
+            return Ok(exams);
+        }
 
-        //// GET /users/{userId}/{examId}/attempts
-        //[HttpGet("{userId}/{examId}/attempts")]
-        //public IActionResult GetExamAttempts(string userId, int examId)
-        //{
-        //    var attempts = _userRepository.GetExamAttempts(userId, examId);
-        //    return Ok(attempts);
-        //}
+        // GET /users/{userId}/{examId}/attempts
+        [HttpGet("{userId}/{examId}/attempts")]
+        public IActionResult GetExamAttempts(int userId, int examId)
+        {
+            var attempts = _examRepository.GetExamAttempts(userId, examId);
+            return Ok(attempts);
+        }
 
 
 
@@ -99,7 +101,7 @@ namespace OEP.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var user = _userRepository.Login(2, request.Password);
+            var user = _userRepository.Login(request.Email, request.Password);
             if (user == null)
             {
                 return Unauthorized("Invalid credentials");
