@@ -38,7 +38,7 @@ namespace OEP.Controllers
 
         // GET /users/{id}
         [HttpGet("{id}")]
-        public IActionResult GetUserById(string id)
+        public IActionResult GetUserById(int id)
         {
             var user = _userRepository.GetUserById(id);
             if (user == null)
@@ -48,7 +48,7 @@ namespace OEP.Controllers
 
         // PATCH /users/{id}
         [HttpPatch("{id}")]
-        public IActionResult UpdateUser(string id, [FromBody] User user)
+        public IActionResult UpdateUser(int id, [FromBody] User user)
         {
             if (id != user.UserId)
                 return BadRequest("User ID mismatch");
@@ -59,7 +59,7 @@ namespace OEP.Controllers
 
         // DELETE /users/{id}
         [HttpDelete("{id}")]
-        public IActionResult DeleteUser(string id)
+        public IActionResult DeleteUser(int id)
         {
             var result = _userRepository.DeleteUser(id);
             return result > 0 ? Ok("User deleted successfully") : NotFound("User not found");
@@ -96,7 +96,7 @@ namespace OEP.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var user = _userRepository.Login(request.Email, request.Password);
+            var user = _userRepository.Login(1, request.Password);
             return user != null ? Ok(user) : Unauthorized("Invalid credentials");
         }
 

@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using Domain.Data;
+using Domain.Models;
 using Infrastructure.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -28,7 +29,7 @@ namespace Infrastructure.Repositories.Implementations
             return _context.Users.ToList();
         }
 
-        public User? GetUserById(string id)
+        public User? GetUserById(int id)
         {
             return _context.Users.FirstOrDefault(u => u.UserId == id);
         }
@@ -48,7 +49,7 @@ namespace Infrastructure.Repositories.Implementations
             return _context.SaveChanges();
         }
 
-        public int DeleteUser(string id)
+        public int DeleteUser(int id)
         {
             var user = _context.Users.FirstOrDefault(u => u.UserId == id);
             if (user == null)
@@ -58,7 +59,7 @@ namespace Infrastructure.Repositories.Implementations
             return _context.SaveChanges();
         }
 
-        public User? Login(string userId, string password)
+        public User? Login(int userId, string password)
         {
             return _context.Users.FirstOrDefault(u => u.UserId == userId && u.Password == password);
         }

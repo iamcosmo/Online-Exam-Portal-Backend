@@ -20,14 +20,14 @@ namespace OEP.Controllers
         [HttpGet("/")]
         public IActionResult Index()
         {
-            return Ok("Index na");
+            return Ok("Index Page for Exam Controller");
         }
 
 
         [HttpPost("add-exam")]
-        public IActionResult AddExam([FromBody] Exam exam)
+        public async Task<IActionResult> AddExam([FromBody] Exam exam)
         {
-            var result = _examRepository.AddExam(exam);
+            var result = await _examRepository.AddExam(exam);
             return result > 0 ? Ok("Exam added successfully") : BadRequest("Failed to add exam");
         }
 

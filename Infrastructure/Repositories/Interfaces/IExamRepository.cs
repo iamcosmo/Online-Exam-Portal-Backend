@@ -10,7 +10,7 @@ namespace Infrastructure.Repositories.Interfaces
 {
     public interface IExamRepository
     {
-        public int AddExam(Exam exam);
+        public Task<int> AddExam(Exam exam);
         public int UpdateExam(Exam exam);
         public List<Exam> GetExams();
         public Exam GetExamById(int examId);

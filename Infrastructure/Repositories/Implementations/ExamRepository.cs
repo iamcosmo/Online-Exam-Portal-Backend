@@ -18,10 +18,10 @@ namespace Infrastructure.Repositories.Implementations
             _context = dbContext;
         }
 
-        public int AddExam(Exam exam)
+        public async Task<int> AddExam(Exam exam)
         {
-            _context.Exams.Add(exam);
-            return _context.SaveChanges();
+            await _context.Exams.AddAsync(exam);
+            return await _context.SaveChangesAsync();
 
         }
 
