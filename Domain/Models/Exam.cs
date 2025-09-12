@@ -38,5 +38,6 @@ public partial class Exam
     public virtual ICollection<Response> Responses { get; set; } = new List<Response>();
 
     public virtual ICollection<Result> Results { get; set; } = new List<Result>();
+
     public virtual User? User { get; set; }
 }
