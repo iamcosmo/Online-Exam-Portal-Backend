@@ -11,12 +11,12 @@ namespace Infrastructure.Repositories.Interfaces
     {
         int RegisterUser(User user);
         List<User> GetAllUsers();
-        User? GetUserById(string id);
+        User? GetUserById(int id);
         List<User> GetUsersByRole(string role);
         int UpdateUser(User user);
-        int DeleteUser(string id);
+        int DeleteUser(int id);
 
-        User? Login(string userId, string password);
+        User? Login(int userId, string password);
 
 
     }
