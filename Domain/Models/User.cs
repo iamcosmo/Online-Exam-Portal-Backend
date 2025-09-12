@@ -27,9 +27,11 @@ public partial class User
 
     public DateTime? UpdatedAt { get; set; }
 
+    public virtual ICollection<Exam> ExamApprovedByUsers { get; set; } = new List<Exam>();
+
     public virtual ICollection<ExamFeedback> ExamFeedbacks { get; set; } = new List<ExamFeedback>();
 
-    public virtual ICollection<Exam> Exams { get; set; } = new List<Exam>();
+    public virtual ICollection<Exam> ExamUsers { get; set; } = new List<Exam>();
 
     public virtual ICollection<QuestionReport> QuestionReports { get; set; } = new List<QuestionReport>();
 
