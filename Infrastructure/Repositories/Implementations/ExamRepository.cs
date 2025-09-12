@@ -43,7 +43,7 @@ namespace Infrastructure.Repositories.Implementations
         }
         public List<Exam> GetExams()
         {
-            return _context.Exams.ToList();
+            return _context.Exams.Include(e => e.Questions).ToList();
         }
 
         public Exam GetExamById(int examId)

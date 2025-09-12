@@ -58,7 +58,8 @@ namespace OEP.Controllers
         {
             try
             {
-                return Ok("Working");
+                var StartExamData = _examRepository.StartExam(examId);
+                return Ok(new { ExamData = StartExamData, Success = true });
             }
             catch (Exception e)
             {
