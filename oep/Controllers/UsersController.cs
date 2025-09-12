@@ -14,12 +14,14 @@ namespace OEP.Controllers
 
         private readonly IUserRepository _userRepository;
         private readonly TokenService _tokenService;
+        private readonly IExamRepository _examRepository;
 
 
-        public UsersController(IUserRepository userRepository)
+        public UsersController(IUserRepository userRepository, TokenService tokenService, IExamRepository examRepository)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
+            _examRepository = examRepository;
         }
 
         [HttpGet("adminindex")]
@@ -99,7 +101,7 @@ namespace OEP.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var user = _userRepository.Login(2, request.Password);
+            var user = _userRepository.Login(request.Email, request.Password);
             if (user == null)
             {
                 return Unauthorized("Invalid credentials");
