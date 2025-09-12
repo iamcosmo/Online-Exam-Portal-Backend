@@ -28,7 +28,6 @@ namespace Infrastructure.Repositories.Implementations
             return await _context.SaveChangesAsync();
 
         }
-
         public int UpdateExam(Exam exam)
         {
             Exam ToBeUpdatedExam = _context.Exams.FirstOrDefault(e => e.Eid == exam.Eid);
@@ -94,6 +93,8 @@ namespace Infrastructure.Repositories.Implementations
 
             return Data;
         }
+
+        public int DeleteExam(int examId) { return 1; }
     }
 }
 
