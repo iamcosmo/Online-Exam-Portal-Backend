@@ -19,9 +19,9 @@ namespace Infrastructure.Repositories.Implementations
             _context = dbContext;
         }
 
-        public async Task<int> AddQuestion(Question question, Exam exm)
+        public async Task<int> AddQuestion(Question question, int eid)
         {
-            question.Eid = exm.Eid;
+            question.Eid = eid;
 
             await _context.Questions.AddAsync(question);
             return await _context.SaveChangesAsync();

@@ -9,7 +9,7 @@ namespace Infrastructure.Repositories.Interfaces
 {
     public interface IQuestionRepository
     {
-        public Task<int> AddQuestion(Question question, Exam eid);
+        public Task<int> AddQuestion(Question question, int eid);
 
         public Task<List<Question>> GetQuestionsByExamId(int examId);
 
