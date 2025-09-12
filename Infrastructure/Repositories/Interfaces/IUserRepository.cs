@@ -16,7 +16,8 @@ namespace Infrastructure.Repositories.Interfaces
         int UpdateUser(User user);
         int DeleteUser(int id);
 
-        User? Login(int userId, string password);
+       
+        User? Login(string email, string password);
 
 
     }
