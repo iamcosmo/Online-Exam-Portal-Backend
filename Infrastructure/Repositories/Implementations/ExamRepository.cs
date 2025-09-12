@@ -63,6 +63,8 @@ namespace Infrastructure.Repositories.Implementations
             var result = _context.Results.FirstOrDefault(r => r.UserId == userId && r.Eid == examId);
             return (int)result.Attempts;
         }
+
+        public int DeleteExam(int examId) { return 1; }
     }
 }
 
