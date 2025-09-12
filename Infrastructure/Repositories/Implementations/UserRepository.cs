@@ -62,6 +62,8 @@ namespace Infrastructure.Repositories.Implementations
         public User? Login(int userId, string password)
         {
             return _context.Users.FirstOrDefault(u => u.UserId == userId && u.Password == password);
+
+
         }
 
     }
