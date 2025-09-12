@@ -19,6 +19,8 @@ public partial class Question
 
     public string? Options { get; set; }
 
+    public string? CorrectOptions { get; set; }
+
     public int? ApprovalStatus { get; set; }
 
     public virtual Exam? EidNavigation { get; set; }

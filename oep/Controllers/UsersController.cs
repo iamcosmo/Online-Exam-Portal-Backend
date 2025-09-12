@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Infrastructure.Repositories.Interfaces;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,13 @@ namespace OEP.Controllers
     {
 
         private readonly IUserRepository _userRepository;
-        private readonly IExamRepository _examRepository;
+        private readonly TokenService _tokenService;
 
-        public UsersController(IUserRepository userRepository, IExamRepository examRepository)
+
+        public UsersController(IUserRepository userRepository)
         {
             _userRepository = userRepository;
-            _examRepository = examRepository;
+            _tokenService = tokenService;
         }
 
         [HttpGet("adminindex")]
@@ -97,8 +99,16 @@ namespace OEP.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest request)
         {
-            var user = _userRepository.Login(request.Email, request.Password);
-            return user != null ? Ok(user) : Unauthorized("Invalid credentials");
+            var user = _userRepository.Login(2, request.Password);
+            if (user == null)
+            {
+                return Unauthorized("Invalid credentials");
+            }
+
+            //jwt token creation
+            string token = _tokenService.GenerateJwtToken(user);
+
+            return user != null ? Ok(new { Token = token }) : Unauthorized("Invalid credentials");
         }
 
 

@@ -1,6 +1,7 @@
 ﻿using Domain.Data;
 using Domain.Models;
 using Infrastructure.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OEP.Controllers
@@ -23,7 +24,7 @@ namespace OEP.Controllers
             return Ok("Index Page for Exam Controller");
         }
 
-
+        [Authorize(Roles = "Examiner")]
         [HttpPost("add-exam")]
         public async Task<IActionResult> AddExam([FromBody] Exam exam)
         {
@@ -50,6 +51,19 @@ namespace OEP.Controllers
         {
             var exam = _examRepository.GetExamById(id);
             return exam != null ? Ok(exam) : NotFound("Exam not found");
+        }
+
+        [HttpPost("start-exam/{examId}")]
+        public IActionResult StartExamAction(int examId)
+        {
+            try
+            {
+                return Ok("Working");
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
         }
 
     }
