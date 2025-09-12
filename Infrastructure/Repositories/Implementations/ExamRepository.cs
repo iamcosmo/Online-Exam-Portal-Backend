@@ -52,10 +52,10 @@ namespace Infrastructure.Repositories.Implementations
         public List<Exam> GetExamsAttemptedByUser(int UserId)
         {
             var user = _context.Users
-                   .Include(u => u.Exams)
+                   .Include(u => u.ExamUsers)
                    .FirstOrDefault(u => u.UserId == UserId);
 
-            return (List<Exam>)user.Exams;
+            return (List<Exam>)user.ExamUsers;
 
         }
         public int GetExamAttempts(int userId, int examId)
