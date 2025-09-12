@@ -21,13 +21,13 @@ public partial class Exam
 
     public int? ApprovalStatus { get; set; }
 
-    public int? ApprovedByUserId { get; set; }
+    public int? AddedByUserId { get; set; }
 
     public int? DisplayedQuestions { get; set; }
 
     public string? AdminRemarks { get; set; }
 
-    public virtual User? ApprovedByUser { get; set; }
+    public virtual User? AddedByUser { get; set; }
 
     public virtual ICollection<ExamFeedback> ExamFeedbacks { get; set; } = new List<ExamFeedback>();
 
