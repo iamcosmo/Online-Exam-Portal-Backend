@@ -35,7 +35,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<Validation> Validations { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Data Source=LTIN487764;User ID=sa;Password=password-1;Initial Catalog=OEP_DB;Encrypt=false;");
+        => optionsBuilder.UseSqlServer("Data Source=LTIN617435;User ID=sa;Password=password-1;Initial Catalog=OEP_DB;Encrypt=false;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,7 +44,7 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.Eid).HasName("PK__Exams__C190170B667F7EE7");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
-            entity.Property(e => e.ApprovedByUserId).HasColumnName("ApprovedByUserID");
+            entity.Property(e => e.AddedByUserId).HasColumnName("AddedByUserId");
             entity.Property(e => e.Description).IsUnicode(false);
             entity.Property(e => e.Duration).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Name)
@@ -53,9 +53,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Tids).HasColumnName("TIDs");
             entity.Property(e => e.TotalMarks).HasColumnType("decimal(10, 2)");
 
-            entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.Exams)
-                .HasForeignKey(d => d.ApprovedByUserId)
-                .HasConstraintName("FK__Exams__ApprovedB__3E52440B");
+            entity.HasOne(d => d.AddedByUser).WithMany(p => p.Exams)
+                .HasForeignKey(d => d.AddedByUserId)
+                .HasConstraintName("FK__Exams__AddedByUser");
         });
 
         modelBuilder.Entity<ExamFeedback>(entity =>
