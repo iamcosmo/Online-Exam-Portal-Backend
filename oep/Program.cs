@@ -24,6 +24,7 @@ namespace oep
                 builder.Services.AddScoped<TokenService>();
                 builder.Services.AddScoped<IExamRepository, ExamRepository>();
                 builder.Services.AddScoped<IUserRepository, UserRepository>();
+                builder.Services.AddScoped<IAdminRepository, AdminRepository>();
                 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
