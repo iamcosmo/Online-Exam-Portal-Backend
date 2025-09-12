@@ -34,14 +34,15 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Validation> Validations { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Data Source=LTIN487764;User ID=sa;Password=password-1;Initial Catalog=OEP_DB;Encrypt=false;");
+    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+    //    => optionsBuilder.UseSqlServer("Data Source=LTIN487764;User ID=sa;Password=password-1;Initial Catalog=OEP_DB;Encrypt=false;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Exam>(entity =>
         {
-            entity.HasKey(e => e.Eid).HasName("PK__Exams__C190170B667F7EE7");
+            entity.HasKey(e => e.Eid).HasName("PK__Exams__C190170B8BB74B59");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
             entity.Property(e => e.ApprovedByUserId).HasColumnName("ApprovedByUserID");
@@ -53,14 +54,18 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Tids).HasColumnName("TIDs");
             entity.Property(e => e.TotalMarks).HasColumnType("decimal(10, 2)");
 
-            entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.Exams)
+            entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.ExamApprovedByUsers)
                 .HasForeignKey(d => d.ApprovedByUserId)
                 .HasConstraintName("FK__Exams__ApprovedB__3E52440B");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ExamUsers)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__Exams__UserId__3F466844");
         });
 
         modelBuilder.Entity<ExamFeedback>(entity =>
         {
-            entity.HasKey(e => new { e.Eid, e.UserId }).HasName("PK__ExamFeed__10E89BCFA08353B1");
+            entity.HasKey(e => new { e.Eid, e.UserId }).HasName("PK__ExamFeed__10E89BCFD9DB9B49");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
             entity.Property(e => e.Feedback).IsUnicode(false);
@@ -68,17 +73,17 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.EidNavigation).WithMany(p => p.ExamFeedbacks)
                 .HasForeignKey(d => d.Eid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ExamFeedbac__EID__534D60F1");
+                .HasConstraintName("FK__ExamFeedbac__EID__5441852A");
 
             entity.HasOne(d => d.User).WithMany(p => p.ExamFeedbacks)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ExamFeedb__UserI__5441852A");
+                .HasConstraintName("FK__ExamFeedb__UserI__5535A963");
         });
 
         modelBuilder.Entity<Question>(entity =>
         {
-            entity.HasKey(e => e.Qid).HasName("PK__Question__CAB147CB45B31890");
+            entity.HasKey(e => e.Qid).HasName("PK__Question__CAB147CB3E21122A");
 
             entity.Property(e => e.Qid).HasColumnName("QID");
             entity.Property(e => e.Eid).HasColumnName("EID");
@@ -93,33 +98,33 @@ public partial class AppDbContext : DbContext
 
             entity.HasOne(d => d.EidNavigation).WithMany(p => p.Questions)
                 .HasForeignKey(d => d.Eid)
-                .HasConstraintName("FK__Questions__EID__4222D4EF");
+                .HasConstraintName("FK__Questions__EID__4316F928");
 
             entity.HasOne(d => d.TidNavigation).WithMany(p => p.Questions)
                 .HasForeignKey(d => d.Tid)
-                .HasConstraintName("FK__Questions__TID__412EB0B6");
+                .HasConstraintName("FK__Questions__TID__4222D4EF");
         });
 
         modelBuilder.Entity<QuestionReport>(entity =>
         {
-            entity.HasKey(e => new { e.Qid, e.UserId }).HasName("PK__Question__1BC9CB0F80E7B8A4");
+            entity.HasKey(e => new { e.Qid, e.UserId }).HasName("PK__Question__1BC9CB0FAB70E3EE");
 
             entity.Property(e => e.Qid).HasColumnName("QID");
 
             entity.HasOne(d => d.QidNavigation).WithMany(p => p.QuestionReports)
                 .HasForeignKey(d => d.Qid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__QuestionRep__QID__4F7CD00D");
+                .HasConstraintName("FK__QuestionRep__QID__5070F446");
 
             entity.HasOne(d => d.User).WithMany(p => p.QuestionReports)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__QuestionR__UserI__5070F446");
+                .HasConstraintName("FK__QuestionR__UserI__5165187F");
         });
 
         modelBuilder.Entity<Response>(entity =>
         {
-            entity.HasKey(e => new { e.Eid, e.Qid, e.UserId }).HasName("PK__Response__202C8BBB1CE390CE");
+            entity.HasKey(e => new { e.Eid, e.Qid, e.UserId }).HasName("PK__Response__202C8BBB0591E635");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
             entity.Property(e => e.Qid).HasColumnName("QID");
@@ -130,22 +135,22 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.EidNavigation).WithMany(p => p.Responses)
                 .HasForeignKey(d => d.Eid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Responses__EID__44FF419A");
+                .HasConstraintName("FK__Responses__EID__45F365D3");
 
             entity.HasOne(d => d.QidNavigation).WithMany(p => p.Responses)
                 .HasForeignKey(d => d.Qid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Responses__QID__45F365D3");
+                .HasConstraintName("FK__Responses__QID__46E78A0C");
 
             entity.HasOne(d => d.User).WithMany(p => p.Responses)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Responses__UserI__46E78A0C");
+                .HasConstraintName("FK__Responses__UserI__47DBAE45");
         });
 
         modelBuilder.Entity<Result>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.Eid }).HasName("PK__Results__BB91CD3CD4BF0E70");
+            entity.HasKey(e => new { e.UserId, e.Eid }).HasName("PK__Results__BB91CD3CE62F56A2");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
             entity.Property(e => e.CreatedAt)
@@ -159,17 +164,17 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.EidNavigation).WithMany(p => p.Results)
                 .HasForeignKey(d => d.Eid)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Results__EID__4CA06362");
+                .HasConstraintName("FK__Results__EID__4D94879B");
 
             entity.HasOne(d => d.User).WithMany(p => p.Results)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Results__UserId__4BAC3F29");
+                .HasConstraintName("FK__Results__UserId__4CA06362");
         });
 
         modelBuilder.Entity<Topic>(entity =>
         {
-            entity.HasKey(e => e.Tid).HasName("PK__Topics__C456D7290C3633CF");
+            entity.HasKey(e => e.Tid).HasName("PK__Topics__C456D72928721521");
 
             entity.Property(e => e.Tid).HasColumnName("TID");
             entity.Property(e => e.ApprovedByUserId).HasColumnName("ApprovedByUserID");
@@ -182,7 +187,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4C523C0ECF");
+            entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4C7CB1D9F5");
 
             entity.ToTable("User");
 
