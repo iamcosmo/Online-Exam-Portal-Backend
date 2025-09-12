@@ -34,8 +34,8 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Validation> Validations { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Data Source=LTIN487764;User ID=sa;Password=password-1;Initial Catalog=OEP_DB;Encrypt=false;");
+    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    //    => optionsBuilder.UseSqlServer("Data Source=LTIN514951;User ID=SA;Password=password-1;Initial Catalog=OEP_DB;Encrypt=false;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
