@@ -1,4 +1,5 @@
-﻿using Domain.Models;
+﻿using Domain.Data;
+using Domain.Models;
 using Infrastructure.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;

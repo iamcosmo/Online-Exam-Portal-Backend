@@ -1,6 +1,6 @@
-﻿using Domain.Models;
-using Domain.Data;
-using Infrastructure.Repositories.Implementations;
+﻿using Domain.Data;
+using Domain.Models;
+using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OEP.Controllers
@@ -10,11 +10,11 @@ namespace OEP.Controllers
     [Route("api/[controller]")]
     public class ExamsController : Controller
     {
-        private readonly ExamRepository _examRepository;
+        private readonly IExamRepository _examRepository;
 
-        public ExamsController(AppDbContext context)
+        public ExamsController(IExamRepository repo)
         {
-            _examRepository = new ExamRepository(context);
+            _examRepository = repo;
         }
 
         [HttpGet("/")]
