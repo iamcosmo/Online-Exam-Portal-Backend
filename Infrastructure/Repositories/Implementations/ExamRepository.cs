@@ -1,6 +1,7 @@
 ﻿using Domain.Data;
 using Domain.Models;
 using Infrastructure.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,6 +47,21 @@ namespace Infrastructure.Repositories.Implementations
         public Exam GetExamById(int examId)
         {
             return _context.Exams.FirstOrDefault(e => e.Eid == examId);
+        }
+
+        public List<Exam> GetExamsAttemptedByUser(int UserId)
+        {
+            var user = _context.Users
+                   .Include(u => u.Exams)
+                   .FirstOrDefault(u => u.UserId == UserId);
+
+            return (List<Exam>)user.Exams;
+
+        }
+        public int GetExamAttempts(int userId, int examId)
+        {
+            var result = _context.Results.FirstOrDefault(r => r.UserId == userId && r.Eid == examId);
+            return (int)result.Attempts;
         }
     }
 }
