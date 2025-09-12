@@ -7,6 +7,8 @@ public partial class Exam
 {
     public int Eid { get; set; }
 
+    public int? UserId { get; set; }
+
     public string? Tids { get; set; }
 
     public int? TotalQuestions { get; set; }
@@ -36,4 +38,6 @@ public partial class Exam
     public virtual ICollection<Response> Responses { get; set; } = new List<Response>();
 
     public virtual ICollection<Result> Results { get; set; } = new List<Result>();
+
+    public virtual User? User { get; set; }
 }

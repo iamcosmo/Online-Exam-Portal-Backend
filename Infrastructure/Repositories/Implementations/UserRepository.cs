@@ -59,9 +59,9 @@ namespace Infrastructure.Repositories.Implementations
             return _context.SaveChanges();
         }
 
-        public User? Login(int userId, string password)
+        public User? Login(string email, string password)
         {
-            return _context.Users.FirstOrDefault(u => u.UserId == userId && u.Password == password);
+            return _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
         }
 
     }
