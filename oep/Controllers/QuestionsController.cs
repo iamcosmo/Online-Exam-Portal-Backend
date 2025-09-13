@@ -1,6 +1,7 @@
 ﻿using Domain.Models;
 using Infrastructure.Repositories.Implementations;
 using Infrastructure.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OEP.Controllers
@@ -22,6 +23,7 @@ namespace OEP.Controllers
             return Ok("Index Page for Exam Controller");
         }
 
+        [Authorize(Roles = "Student")]
         [HttpPost("add-question")]
         public async Task<IActionResult> AddQuestion([FromBody] Question question, [FromQuery] int examId)
         {
