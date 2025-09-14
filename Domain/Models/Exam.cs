@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Domain.Models;
 
@@ -7,6 +8,7 @@ public partial class Exam
 {
     public int Eid { get; set; }
 
+    [ForeignKey("User")]
     public int? UserId { get; set; }
 
     public string? Tids { get; set; }

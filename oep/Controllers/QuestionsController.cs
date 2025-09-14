@@ -24,7 +24,7 @@ namespace OEP.Controllers
             return Ok("Index Page for Exam Controller");
         }
 
-        [Authorize(Roles = "Student")]
+        [Authorize(Roles = "Examiner")]
         [HttpPost("add-question")]
         public async Task<IActionResult> AddQuestion([FromBody] QuestionDTO question, [FromQuery] int examId)
         {
