@@ -1,5 +1,6 @@
 ﻿using Domain.Data;
 using Domain.Models;
+using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -26,23 +27,48 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Examiner")]
         [HttpPost("add-exam")]
-        public async Task<IActionResult> AddExam([FromBody] Exam exam)
+        public async Task<IActionResult> AddExam([FromBody] AddExamDTO dto)
         {
+            Exam exam = new Exam
+            {
+
+                Name = dto.Name,
+                Description = dto.Description,
+                TotalQuestions = dto.TotalQuestions,
+                TotalMarks = dto.TotalMarks,
+                Duration = dto.Duration,
+                Tids = dto.Tids,
+                DisplayedQuestions = dto.DisplayedQuestions
+
+            };
             var result = await _examRepository.AddExam(exam);
             return result > 0 ? Ok("Exam added successfully") : BadRequest("Failed to add exam");
         }
 
         [HttpPut("update-exam")]
-        public IActionResult UpdateExam([FromBody] Exam exam)
+        public IActionResult UpdateExam([FromBody] AddExamDTO dto)
         {
+            Exam exam = new Exam
+            {
+
+                Name = dto.Name,
+                Description = dto.Description,
+                TotalQuestions = dto.TotalQuestions,
+                TotalMarks = dto.TotalMarks,
+                Duration = dto.Duration,
+                Tids = dto.Tids,
+                DisplayedQuestions = dto.DisplayedQuestions
+
+            };
             var result = _examRepository.UpdateExam(exam);
-            return result > 0 ? Ok("Exam updated successfully") : NotFound("Exam not found or no changes made");
+            return result > 0 ? Ok("Exam updated successfully") : StatusCode(500, "Exam was not updated due to Internal Errors.");
         }
 
         [HttpGet("get-exams")]
-        public IActionResult GetExams()
+        public IActionResult GetExamsAction()
         {
             var exams = _examRepository.GetExams();
+            if (exams == null) return Ok("No exams available.");
             return Ok(exams);
         }
 
@@ -67,5 +93,12 @@ namespace OEP.Controllers
             }
         }
 
+        [HttpPost("submit-exam/{examId}")]
+        public IActionResult SubmitExamAction(SubmittedExamDTO examdto)
+        {
+            var status = _examRepository.SubmitExam(examdto);
+
+            return Ok("Status Returned: " + status);
+        }
     }
 }
