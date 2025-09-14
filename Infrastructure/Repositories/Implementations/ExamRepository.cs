@@ -3,23 +3,19 @@ using Domain.Models;
 using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Repositories.Implementations
 {
     public class ExamRepository : IExamRepository
     {
         private readonly AppDbContext _context;
+        private readonly ILogger _log;
 
-        public ExamRepository(AppDbContext dbContext)
+        public ExamRepository(AppDbContext dbContext, ILogger logger)
         {
             _context = dbContext;
+            _log = logger;
         }
 
         public async Task<int> AddExam(Exam exam)
@@ -41,9 +37,24 @@ namespace Infrastructure.Repositories.Implementations
             }
             return _context.SaveChanges();
         }
-        public List<Exam> GetExams()
+        public int DeleteExam(int examId) { return 1; }
+        public List<GetExamDataDTO> GetExams()
         {
-            return _context.Exams.Include(e => e.Questions).ToList();
+            var examdata = _context.Exams.Include(e => e.Results.Where(s => s.Eid == e.Eid))
+            .Select(e => new GetExamDataDTO
+            {
+                eid = e.Eid,
+                name = e.Name,
+                description = e.Description,
+                totalMarks = e.TotalMarks ?? 0m,
+                duration = e.Duration ?? 0m,
+                Tids = e.Tids,
+                displayedQuestions = e.DisplayedQuestions ?? 0,
+                AttemptNo = (int)e.Results.Where(r => r.Eid == e.Eid).Select(r => r.Attempts).First()
+
+            }).ToList();
+            if (examdata == null) return new List<GetExamDataDTO> { };
+            else return examdata;
         }
 
         public Exam GetExamById(int examId)
@@ -55,6 +66,7 @@ namespace Infrastructure.Repositories.Implementations
         {
             var user = _context.Users
                    .Include(u => u.ExamUsers)
+                   .ThenInclude(eu => eu.Results)
                    .FirstOrDefault(u => u.UserId == UserId);
 
             return (List<Exam>)user.ExamUsers;
@@ -87,14 +99,47 @@ namespace Infrastructure.Repositories.Implementations
                                 Options = q.Options,
                                 ApprovalStatus = q.ApprovalStatus
                             }
-                        ).ToList()
+                    ).ToList(),
                 }).ToList()
                 .FirstOrDefault();
 
             return Data;
         }
 
-        public int DeleteExam(int examId) { return 1; }
+        public int SubmitExam(SubmittedExamDTO submittedData)
+        {
+
+            var exam = _context.Exams.FirstOrDefault(e => e.Eid == submittedData.EID);
+            if (exam == null)
+            {
+                return -1;
+            }
+
+            exam.TotalMarks = submittedData.TotalMarks;
+            exam.Duration = submittedData.Duration;
+            exam.DisplayedQuestions = submittedData.DisplayedQuestions;
+            exam.Name = submittedData.Name;
+
+            foreach (var responseDto in submittedData.Responses)
+            {
+                var response = new Response
+                {
+                    Eid = submittedData.EID,
+                    Qid = responseDto.Qid,
+                    UserId = submittedData.UserId,
+                    Resp = responseDto.Resp,
+                    RespScore = null
+                };
+
+                _context.Responses.Add(response);
+            }
+
+            int status = _context.SaveChanges();
+            _log.LogInformation("status=" + status);
+            return status;
+
+        }
+
     }
 }
 

@@ -95,14 +95,16 @@ namespace oep
 
 
                 var app = builder.Build();
-
+                //app.UseMiddleware<GlobalExceptionMiddleware>();
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
                     app.UseSwagger();
-                    app.UseSwaggerUI();
+                    app.UseSwaggerUI(options =>
+                    {
+                        options.ConfigObject.TryItOutEnabled = false;
+                    });
                 }
-
 
                 app.UseHttpsRedirection();
                 app.UseAuthentication();

@@ -34,15 +34,15 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Validation> Validations { get; set; }
 
-    //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    //    //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-    //    => optionsBuilder.UseSqlServer("Data Source=LTIN487764;User ID=sa;Password=password-1;Initial Catalog=OEP_DB;Encrypt=false;");
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=LTIN487764;User ID=sa;Password=password-1;Initial Catalog=OEP_DB;Encrypt=false;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Exam>(entity =>
         {
-            entity.HasKey(e => e.Eid).HasName("PK__Exams__C190170B8BB74B59");
+            entity.HasKey(e => e.Eid).HasName("PK__Exams__C190170BDABF6CFC");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
             entity.Property(e => e.ApprovedByUserId).HasColumnName("ApprovedByUserID");
@@ -65,7 +65,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<ExamFeedback>(entity =>
         {
-            entity.HasKey(e => new { e.Eid, e.UserId }).HasName("PK__ExamFeed__10E89BCFD9DB9B49");
+            entity.HasKey(e => new { e.Eid, e.UserId }).HasName("PK__ExamFeed__10E89BCF3455A0E5");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
             entity.Property(e => e.Feedback).IsUnicode(false);
@@ -83,7 +83,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Question>(entity =>
         {
-            entity.HasKey(e => e.Qid).HasName("PK__Question__CAB147CB3E21122A");
+            entity.HasKey(e => e.Qid).HasName("PK__Question__CAB147CBA6E0773D");
 
             entity.Property(e => e.Qid).HasColumnName("QID");
             entity.Property(e => e.Eid).HasColumnName("EID");
@@ -107,7 +107,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<QuestionReport>(entity =>
         {
-            entity.HasKey(e => new { e.Qid, e.UserId }).HasName("PK__Question__1BC9CB0FAB70E3EE");
+            entity.HasKey(e => new { e.Qid, e.UserId }).HasName("PK__Question__1BC9CB0FE183D78E");
 
             entity.Property(e => e.Qid).HasColumnName("QID");
 
@@ -124,7 +124,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Response>(entity =>
         {
-            entity.HasKey(e => new { e.Eid, e.Qid, e.UserId }).HasName("PK__Response__202C8BBB0591E635");
+            entity.HasKey(e => new { e.Eid, e.Qid, e.UserId }).HasName("PK__Response__202C8BBB445F1788");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
             entity.Property(e => e.Qid).HasColumnName("QID");
@@ -150,7 +150,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Result>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.Eid }).HasName("PK__Results__BB91CD3CE62F56A2");
+            entity.HasKey(e => new { e.UserId, e.Eid }).HasName("PK__Results__BB91CD3C694FFCF9");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
             entity.Property(e => e.CreatedAt)
@@ -174,7 +174,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Topic>(entity =>
         {
-            entity.HasKey(e => e.Tid).HasName("PK__Topics__C456D72928721521");
+            entity.HasKey(e => e.Tid).HasName("PK__Topics__C456D729B957C774");
 
             entity.Property(e => e.Tid).HasColumnName("TID");
             entity.Property(e => e.ApprovedByUserId).HasColumnName("ApprovedByUserID");
@@ -187,7 +187,7 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4C7CB1D9F5");
+            entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4C3A0AFC92");
 
             entity.ToTable("User");
 
