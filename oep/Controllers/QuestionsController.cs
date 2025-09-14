@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Infrastructure.DTOs;
 using Infrastructure.Repositories.Implementations;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -25,12 +26,18 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpPost("add-question")]
-        public async Task<IActionResult> AddQuestion([FromBody] Question question, [FromQuery] int examId)
+        public async Task<IActionResult> AddQuestion([FromBody] QuestionDTO question, [FromQuery] int examId)
         {
-            // Fetch the Exam entity using examId (assuming you have a repository/service for this)
-            Exam exam = new Exam { Eid = examId }; // Replace with actual fetch if available
-
-            var result = await _questionRepository.AddQuestion(question, examId);
+          
+            Question quest = new Question
+            {
+                Type = question.type,
+                Question1 = question.question,
+                Marks = question.marks,
+                Options = question.options,
+                CorrectOptions = question.correctOptions
+            };
+            var result = await _questionRepository.AddQuestion(quest, examId);
             return result > 0 ? Ok("Question added successfully") : BadRequest("Failed to add Question");
         }
 
