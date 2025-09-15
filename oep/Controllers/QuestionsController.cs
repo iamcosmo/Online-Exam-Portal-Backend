@@ -29,7 +29,7 @@ namespace OEP.Controllers
         public async Task<IActionResult> AddQuestion([FromBody] QuestionDTO question, [FromQuery] int examId)
         {
           
-            Question quest = new Question
+            Question quest = new()
             {
                 Type = question.type,
                 Question1 = question.question,
@@ -58,11 +58,37 @@ namespace OEP.Controllers
             }
         }
 
-        //[HttpPut("update-exam")]
-        //public IActionResult UpdateExam([FromBody] Exam exam)
-        //{
-        //    var result = _examRepository.UpdateExam(exam);
-        //    return result > 0 ? Ok("Exam updated successfully") : NotFound("Exam not found or no changes made");
-        //}
+        [Authorize(Roles = "Examiner")]
+        [HttpGet("get-question-by-examId/{examId}")]
+        public async Task<IActionResult> GetQuestionByExam(int examId)
+        {
+            var result = await _questionRepository.GetQuestionsByExamId(examId);
+            if (result == null)
+            {
+                return StatusCode(500, "An error occurred while retrieving questions.");
+            }
+            if (result.Count == 0)
+            {
+                return NotFound("No questions found for the specified exam.");
+            }
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Examiner")]
+        [HttpPut("update-question/{qId}")]
+        public async Task<IActionResult> UpdateOneQuestion([FromBody] QuestionDTO question, int qId)
+        {
+            Question quest = new()
+            {
+                Type = question.type,
+                Question1 = question.question,
+                Marks = question.marks,
+                Options = question.options,
+                CorrectOptions = question.correctOptions,
+                ApprovalStatus = question.ApprovalStatus
+            };
+            var result = await _questionRepository.UpdateQuestion(quest, qId);
+            return result > 0 ? Ok("Question updated successfully") : NotFound("Question not found or no changes made");
+        }
     }
 }
