@@ -19,12 +19,6 @@ namespace OEP.Controllers
             _examRepository = repo;
         }
 
-        [HttpGet("/")]
-        public IActionResult Index()
-        {
-            return Ok("Index Page for Exam Controller");
-        }
-
         [Authorize(Roles = "Examiner")]
         [HttpPost("add-exam")]
         public async Task<IActionResult> AddExamAction([FromBody] AddExamDTO dto)
@@ -59,14 +53,13 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Examiner")]
         [HttpPut("update-exam")]
-        public IActionResult UpdateExamAction([FromBody] AddExamDTO dto)
+        public IActionResult UpdateExamAction([FromBody] UpdateExamDTO dto)
         {
             Exam exam = new Exam
             {
 
                 Name = dto.Name,
                 Description = dto.Description,
-                TotalQuestions = dto.TotalQuestions,
                 TotalMarks = dto.TotalMarks,
                 Duration = dto.Duration,
                 Tids = dto.Tids,
@@ -103,6 +96,7 @@ namespace OEP.Controllers
             var exam = _examRepository.GetExams(id);
             return exam != null ? Ok(exam) : NotFound("Exam not found");
         }
+
 
 
         [Authorize(Roles = "Student")]
