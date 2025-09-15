@@ -35,10 +35,27 @@ namespace OEP.Controllers
                 Question1 = question.question,
                 Marks = question.marks,
                 Options = question.options,
-                CorrectOptions = question.correctOptions
+                CorrectOptions = question.correctOptions,
+                ApprovalStatus = question.ApprovalStatus
             };
             var result = await _questionRepository.AddQuestion(quest, examId);
             return result > 0 ? Ok("Question added successfully") : BadRequest("Failed to add Question");
+        }
+
+
+        [Authorize(Roles = "Examiner")]
+        [HttpGet("get-question-by-id/{Id}")]
+        public IActionResult GetQuestionById(int Id)
+        {
+            var result = _questionRepository.GetQuestionById(Id);
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest("Failed to get Question");
+            }
         }
 
         //[HttpPut("update-exam")]
