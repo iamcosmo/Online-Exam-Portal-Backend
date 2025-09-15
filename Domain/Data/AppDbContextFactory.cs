@@ -8,7 +8,7 @@ namespace Domain.Data
         public AppDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            optionsBuilder.UseSqlServer("Server=LTIN617435;Database=OEP_DB;User Id=sa;Password=password-1;Encrypt=False;");
+            optionsBuilder.UseSqlServer("Server=LTIN487764;Database=OEP_DB;User Id=sa;Password=password-1;Encrypt=False;");
             return new AppDbContext(optionsBuilder.Options);
         }
     }
