@@ -1,11 +1,5 @@
 ﻿using Domain.Models;
 using Infrastructure.DTOs;
-using Infrastructure.Repositories.Implementations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.Interfaces
 {
@@ -23,7 +17,5 @@ namespace Infrastructure.Repositories.Interfaces
         public int GetExamAttempts(int userId, int examId);
         public StartExamResponseDTO StartExam(int examId);
         public int SubmitExam(SubmittedExamDTO submittedData);
-        public List<ExamResultsDTO> ViewExamResults(int examid, int userid);
-        public int CreateExamResults(int examid, int userid);
     }
 }
