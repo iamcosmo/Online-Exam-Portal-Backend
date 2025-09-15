@@ -15,6 +15,8 @@ public partial class Response
 
     public decimal? RespScore { get; set; }
 
+    public bool? IsSubmittedFresh { get; set; }
+
     public virtual Exam EidNavigation { get; set; } = null!;
 
     public virtual Question QidNavigation { get; set; } = null!;

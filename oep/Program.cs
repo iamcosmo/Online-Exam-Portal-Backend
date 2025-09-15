@@ -24,6 +24,8 @@ namespace oep
                 builder.Services.AddScoped<TokenService>();
                 builder.Services.AddScoped<IExamRepository, ExamRepository>();
                 builder.Services.AddScoped<IUserRepository, UserRepository>();
+                builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+                builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
                 builder.Services.AddControllers();
@@ -93,14 +95,16 @@ namespace oep
 
 
                 var app = builder.Build();
-
+                //app.UseMiddleware<GlobalExceptionMiddleware>();
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
                     app.UseSwagger();
-                    app.UseSwaggerUI();
+                    app.UseSwaggerUI(options =>
+                    {
+                        options.ConfigObject.TryItOutEnabled = false;
+                    });
                 }
-
 
                 app.UseHttpsRedirection();
                 app.UseAuthentication();
