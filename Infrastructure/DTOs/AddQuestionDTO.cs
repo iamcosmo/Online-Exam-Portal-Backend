@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.DTOs
 {
-    public class QuestionDTO
+    public class AddQuestionDTO
     {
-       
         public string type { get; set; }
 
         public string question { get; set; }
@@ -19,8 +18,7 @@ namespace Infrastructure.DTOs
 
         public string correctOptions { get; set; }
 
-        public int ApprovalStatus { get; set;  }
-
+        public int ApprovalStatus { get; set; }
 
     }
 }

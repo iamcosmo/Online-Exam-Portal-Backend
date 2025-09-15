@@ -40,9 +40,22 @@ namespace Infrastructure.Repositories.Implementations
 
         }
 
-        public async Task<int> UpdateQuestion(Question qid)
+        public async Task<int> UpdateQuestion(Question updatedQuestion, int qid)
         {
-            Question ToBeUpdatedQuestion = _context.Questions.FirstOrDefault(q => q.Qid == qid.Qid);
+            var existingQuestion = await _context.Questions.FirstOrDefaultAsync(q => q.Qid == qid);
+            if (existingQuestion == null)
+                return 0; // Or throw an exception if preferred
+
+            // Update properties
+            existingQuestion.Tid = updatedQuestion.Tid;
+            existingQuestion.Eid = updatedQuestion.Eid;
+            existingQuestion.Type = updatedQuestion.Type;
+            existingQuestion.Question1 = updatedQuestion.Question1;
+            existingQuestion.Marks = updatedQuestion.Marks;
+            existingQuestion.Options = updatedQuestion.Options;
+            existingQuestion.CorrectOptions = updatedQuestion.CorrectOptions;
+            existingQuestion.ApprovalStatus = updatedQuestion.ApprovalStatus;
+
             return await _context.SaveChangesAsync();
         }
     }
