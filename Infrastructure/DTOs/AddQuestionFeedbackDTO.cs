@@ -9,10 +9,8 @@ namespace Infrastructure.DTOs
 {
     public class AddQuestionFeedbackDTO
     {
-        public int qid { get; set; }
 
         public string feedback { get; set; }
 
-        public int userId { get; set; }
     }
 }
