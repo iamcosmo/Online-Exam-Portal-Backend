@@ -3,6 +3,7 @@ using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace OEP.Controllers
 {
@@ -28,6 +29,17 @@ namespace OEP.Controllers
         [HttpPost("add-exam")]
         public async Task<IActionResult> AddExamAction([FromBody] AddExamDTO dto)
         {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims.");
+            }
+
+            var userId = userIdClaim.Value;
+
+            Console.WriteLine("userId= " + userId);
+
             Exam exam = new Exam
             {
 
@@ -37,7 +49,8 @@ namespace OEP.Controllers
                 TotalMarks = dto.TotalMarks,
                 Duration = dto.Duration,
                 Tids = dto?.Tids,
-                DisplayedQuestions = dto.DisplayedQuestions
+                DisplayedQuestions = dto.DisplayedQuestions,
+                UserId = int.Parse(userId)
 
             };
             var result = await _examRepository.AddExam(exam);
