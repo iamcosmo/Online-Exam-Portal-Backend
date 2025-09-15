@@ -2,13 +2,16 @@
 using Domain.Models;
 using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OEP.Controllers
 {
 
     [ApiController]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
+    
     public class AdminController : ControllerBase
     {
         private readonly IAdminRepository _adminRepository;

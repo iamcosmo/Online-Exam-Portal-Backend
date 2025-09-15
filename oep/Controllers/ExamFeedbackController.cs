@@ -1,0 +1,54 @@
+﻿using Domain.Models;
+using Infrastructure.DTOs;
+using Infrastructure.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+
+namespace OEP.Controllers
+{
+
+
+        [ApiController]
+        [Route("api/[controller]")]
+        public class ExamFeedbackController : ControllerBase
+        {
+            private readonly IExamFeedbackRepository _repository;
+
+            public ExamFeedbackController(IExamFeedbackRepository repository)
+            {
+                _repository = repository;
+            }
+
+            // POST /exam-feedback/{ExamID}
+            [HttpPost("{examId}")]
+            [Authorize(Roles = "Student")]
+            public IActionResult SubmitFeedback(int examId, [FromBody] ExamFeedbackDto dto)
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                _repository.AddFeedback(examId, userId, dto);
+                return Ok();
+            }
+
+            // GET /exam-feedbacks/{ExamID}
+            [HttpGet("exam-feedbacks/{examId}")]
+            [Authorize(Roles = "Examiner,Admin")]
+            public ActionResult<IEnumerable<ExamFeedback>> GetAllFeedbacks(int examId)
+            {
+                var feedbacks = _repository.GetAllFeedbacks(examId);
+                return Ok(feedbacks);
+            }
+
+            // GET /exam-feedback/{ExamID}
+            [HttpGet("{examId}")]
+            [Authorize(Roles = "Student")]
+            public ActionResult<IEnumerable<ExamFeedbackDto>> GetStudentFeedback(int examId)
+            {
+                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+                var feedbacks = _repository.GetStudentFeedback(examId, userId);
+                return Ok(feedbacks);
+            }
+        }
+
+    }
+
