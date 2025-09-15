@@ -92,7 +92,6 @@ namespace OEP.Controllers
         }
 
 
-
         [Authorize(Roles = "Student")]
         [HttpGet("get-exams")]
         public IActionResult GetExamsAction()
@@ -134,20 +133,6 @@ namespace OEP.Controllers
             return Ok("Status Returned: " + status);
         }
 
-        [Authorize(Roles = "Student")]
-        [HttpPost("view-exam-results/{examid}")]
-        public IActionResult ViewExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
-        {
-            var attemptedExams = _examRepository.ViewExamResults(examid, userid);
-            return Ok(attemptedExams);
-        }
 
-        [Authorize(Roles = "Student")]
-        [HttpPost("create-results/{examid}")]
-        public IActionResult CreateExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
-        {
-            var status = _examRepository.CreateExamResults(examid, userid);
-            return status > 0 ? Ok("Result created") : StatusCode(500, "Result Could not be created.");
-        }
     }
 }
