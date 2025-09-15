@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
@@ -25,8 +26,16 @@ namespace OEP.Controllers
 
         // POST: api/auth/register
         [HttpPost("register")]
-        public IActionResult Register([FromBody] User user)
+        public IActionResult Register([FromBody] RegisterUserDTO dto)
         {
+            var user = new User
+            {
+               FullName = dto.FullName,
+               Email = dto.Email,
+               Password = dto.Password,
+               Role = dto.Role,
+               PhoneNo = dto.PhoneNo
+            };
             var result = _userRepository.RegisterUser(user);
             return result > 0 ? Ok("User registered successfully") : BadRequest("Registration failed");
         }
@@ -34,9 +43,9 @@ namespace OEP.Controllers
 
         // POST: api/auth/login
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public IActionResult Login([FromBody] LoginDTO dto)
         {
-            var user = _userRepository.Login(request.Email, request.Password);
+            var user = _userRepository.Login(dto.Email, dto.Password);
             if (user == null)
             {
                 return Unauthorized("Invalid credentials");
