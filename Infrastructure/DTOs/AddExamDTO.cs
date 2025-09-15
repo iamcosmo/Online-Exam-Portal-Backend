@@ -13,7 +13,7 @@ namespace Infrastructure.DTOs
         public int TotalQuestions { get; set; }
         public decimal TotalMarks { get; set; }
         public decimal Duration { get; set; }
-        public string Tids { get; set; }
+        public string? Tids { get; set; }
         public int? DisplayedQuestions { get; set; }
     }
 
