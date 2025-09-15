@@ -6,6 +6,10 @@ namespace Domain.Models;
 
 public partial class Exam
 {
+    public Exam()
+    {
+        ApprovalStatus = 0;
+    }
     public int Eid { get; set; }
 
     [ForeignKey("User")]
@@ -23,9 +27,11 @@ public partial class Exam
 
     public string? Name { get; set; }
 
-    public int? ApprovalStatus { get; set; }
+    public int? ApprovalStatus { get; private set; }
 
-    public int? ApprovedByUserId { get; set; }
+    public void setApprovalStatus() { this.ApprovalStatus = this.ApprovalStatus == 0 ? 1 : 0; }
+
+    public int? ApprovedByUserId { get; private set; }
 
     public int? DisplayedQuestions { get; set; }
 

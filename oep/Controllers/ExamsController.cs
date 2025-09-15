@@ -36,7 +36,7 @@ namespace OEP.Controllers
                 TotalQuestions = dto.TotalQuestions,
                 TotalMarks = dto.TotalMarks,
                 Duration = dto.Duration,
-                Tids = dto.Tids,
+                Tids = dto?.Tids,
                 DisplayedQuestions = dto.DisplayedQuestions
 
             };
@@ -87,10 +87,9 @@ namespace OEP.Controllers
         [HttpGet("get-exams/e/{id}")]
         public IActionResult GetExamByIdForExaminerAction(int id)
         {
-            var exam = _examRepository.GetExamById(id);
+            var exam = _examRepository.GetExams(id);
             return exam != null ? Ok(exam) : NotFound("Exam not found");
         }
-
 
 
         [Authorize(Roles = "Student")]
@@ -106,7 +105,7 @@ namespace OEP.Controllers
         [HttpGet("get-exams/{id}")]
         public IActionResult GetExamByIdAction(int id)
         {
-            var exam = _examRepository.GetExamById(id);
+            var exam = _examRepository.GetExams(id);
             return exam != null ? Ok(exam) : NotFound("Exam not found");
         }
 
@@ -126,7 +125,7 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpPost("submit-exam/{examId}")]
+        [HttpPost("submit-exam")]
         public IActionResult SubmitExamAction(SubmittedExamDTO examdto)
         {
             var status = _examRepository.SubmitExam(examdto);
@@ -134,20 +133,6 @@ namespace OEP.Controllers
             return Ok("Status Returned: " + status);
         }
 
-        [Authorize(Roles = "Student")]
-        [HttpPost("view-exam-results/{examid}")]
-        public IActionResult ViewExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
-        {
-            var attemptedExams = _examRepository.ViewExamResults(examid, userid);
-            return Ok(attemptedExams);
-        }
 
-        [Authorize(Roles = "Student")]
-        [HttpPost("create-results/{examid}")]
-        public IActionResult CreateExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
-        {
-            var status = _examRepository.CreateExamResults(examid, userid);
-            return status > 0 ? Ok("Result created") : StatusCode(500, "Result Could not be created.");
-        }
     }
 }

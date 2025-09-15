@@ -1,6 +1,5 @@
 
 using Domain.Data;
-using Domain.Models;
 using Infrastructure.Repositories.Implementations;
 using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services;
@@ -26,6 +25,8 @@ namespace oep
                 builder.Services.AddScoped<IUserRepository, UserRepository>();
                 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
                 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+                builder.Services.AddScoped<ITopicRepository, TopicRepository>();
+                builder.Services.AddScoped<IResultRespository, ResultRepository>();
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
                 builder.Services.AddControllers();
