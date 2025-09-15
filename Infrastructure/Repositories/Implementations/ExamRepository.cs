@@ -7,20 +7,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-
 namespace Infrastructure.Repositories.Implementations
 {
     public class ExamRepository : IExamRepository
     {
         private readonly AppDbContext _context;
-        private readonly ILogger<ExamRepository> _log;
         private readonly IConfiguration _config;
 
-        public ExamRepository(AppDbContext dbContext, ILogger<ExamRepository> logger, IConfiguration configuration)
+        public ExamRepository(AppDbContext dbContext, IConfiguration configuration)
         {
             _context = dbContext;
-            _log = logger;
             _config = configuration;
         }
 
@@ -72,6 +68,7 @@ namespace Infrastructure.Repositories.Implementations
         public List<GetExamDataDTO> GetExams()
         {
             var examdata = _context.Exams.Include(e => e.Results.Where(s => s.Eid == e.Eid))
+                .Where(e => e.Questions != null && e.ApprovalStatus == 1)
             .Select(e => new GetExamDataDTO
             {
                 eid = e.Eid,
@@ -88,14 +85,9 @@ namespace Infrastructure.Repositories.Implementations
             if (examdata == null) return new List<GetExamDataDTO> { };
             else return examdata;
         }
-        public List<Exam> GetExamsForExaminer(int userid)
+        public StudentExamViewDTO GetExams(int examId)
         {
-            var examdata = _context.Exams.Where(e => e.UserId == userid).ToList();
-            return examdata;
-        }
-        public StudentExamViewDTO GetExamById(int examId)
-        {
-            return (StudentExamViewDTO)_context.Exams.Where(e => e.Eid == examId && e.ApprovalStatus == 1)
+            return (StudentExamViewDTO)_context.Exams.Where(e => e.Eid == examId && e.ApprovalStatus == 1 && e.Questions != null)
                 .Select(e => new StudentExamViewDTO
                 {
                     Name = e.Name,
@@ -106,6 +98,12 @@ namespace Infrastructure.Repositories.Implementations
 
                 });
         }
+        public List<Exam> GetExamsForExaminer(int userid)
+        {
+            var examdata = _context.Exams.Where(e => e.UserId == userid).ToList();
+            return examdata;
+        }
+
         public Exam GetExamByIdForExaminer(int examId)
         {
             return _context.Exams.FirstOrDefault(e => e.Eid == examId);
@@ -184,7 +182,6 @@ namespace Infrastructure.Repositories.Implementations
             }
 
             int status = _context.SaveChanges();
-            _log.LogInformation("status=" + status);
             return status;
 
         }

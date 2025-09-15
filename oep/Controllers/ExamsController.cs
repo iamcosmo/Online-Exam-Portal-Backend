@@ -36,7 +36,7 @@ namespace OEP.Controllers
                 TotalQuestions = dto.TotalQuestions,
                 TotalMarks = dto.TotalMarks,
                 Duration = dto.Duration,
-                Tids = dto.Tids,
+                Tids = dto?.Tids,
                 DisplayedQuestions = dto.DisplayedQuestions
 
             };
@@ -87,7 +87,7 @@ namespace OEP.Controllers
         [HttpGet("get-exams/e/{id}")]
         public IActionResult GetExamByIdForExaminerAction(int id)
         {
-            var exam = _examRepository.GetExamById(id);
+            var exam = _examRepository.GetExams(id);
             return exam != null ? Ok(exam) : NotFound("Exam not found");
         }
 
@@ -106,7 +106,7 @@ namespace OEP.Controllers
         [HttpGet("get-exams/{id}")]
         public IActionResult GetExamByIdAction(int id)
         {
-            var exam = _examRepository.GetExamById(id);
+            var exam = _examRepository.GetExams(id);
             return exam != null ? Ok(exam) : NotFound("Exam not found");
         }
 
@@ -126,7 +126,7 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpPost("submit-exam/{examId}")]
+        [HttpPost("submit-exam")]
         public IActionResult SubmitExamAction(SubmittedExamDTO examdto)
         {
             var status = _examRepository.SubmitExam(examdto);
