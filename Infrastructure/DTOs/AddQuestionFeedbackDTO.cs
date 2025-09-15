@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.DTOs
 {
-    public class AddQuestionFeedback
+    public class AddQuestionFeedbackDTO
     {
         public int qid { get; set; }
 
