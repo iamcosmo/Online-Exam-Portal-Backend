@@ -27,6 +27,7 @@ namespace oep
                 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
                 builder.Services.AddScoped<ITopicRepository, TopicRepository>();
                 builder.Services.AddScoped<IResultRespository, ResultRepository>();
+                builder.Services.AddScoped<IQuestionFeedbackRepository, QuestionFeedbackRepository>();
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
                 builder.Services.AddControllers();
