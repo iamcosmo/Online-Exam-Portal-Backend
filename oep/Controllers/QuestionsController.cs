@@ -26,7 +26,7 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Examiner")]
         [HttpPost("add-question")]
-        public async Task<IActionResult> AddQuestion([FromBody] QuestionDTO question, [FromQuery] int examId)
+        public async Task<IActionResult> AddQuestion([FromBody] AddQuestionDTO question, [FromQuery] int examId)
         {
           
             Question quest = new()
@@ -76,19 +76,54 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Examiner")]
         [HttpPut("update-question/{qId}")]
-        public async Task<IActionResult> UpdateOneQuestion([FromBody] QuestionDTO question, int qId)
+        public async Task<IActionResult> UpdateOneQuestion([FromBody] UpdateQuestionDTO question, int qId)
         {
-            Question quest = new()
+            var existingQuestion = _questionRepository.GetQuestionById(qId);
+            if (existingQuestion == null)
             {
-                Type = question.type,
-                Question1 = question.question,
-                Marks = question.marks,
-                Options = question.options,
-                CorrectOptions = question.correctOptions,
-                ApprovalStatus = question.ApprovalStatus
-            };
-            var result = await _questionRepository.UpdateQuestion(quest, qId);
-            return result > 0 ? Ok("Question updated successfully") : NotFound("Question not found or no changes made");
+                return NotFound("Question not found");
+            }
+
+            bool isUpdated = false;
+
+            if (question.type != null && question.type != existingQuestion.Type)
+            {
+                existingQuestion.Type = question.type;
+                isUpdated = true;
+            }
+            if (question.question != null)
+            {
+                existingQuestion.Question1 = question.question;
+                isUpdated = true;
+            }
+            if (question.marks.HasValue && question.marks != existingQuestion.Marks)
+            {
+                existingQuestion.Marks = question.marks;
+                isUpdated = true;
+            }
+            if (question.options != null)
+            {
+                existingQuestion.Options = question.options;
+                isUpdated = true;
+            }
+            if (question.correctOptions != null)
+            {
+                existingQuestion.CorrectOptions = question.correctOptions;
+                isUpdated = true;
+            }
+            if (question.ApprovalStatus.HasValue && question.ApprovalStatus != existingQuestion.ApprovalStatus)
+            {
+                existingQuestion.ApprovalStatus = question.ApprovalStatus;
+                isUpdated = true;
+            }
+
+            if (!isUpdated)
+            {
+                return Ok("No changes made to the question.");
+            }
+
+            var result = await _questionRepository.UpdateQuestion(existingQuestion, qId);
+            return result > 0 ? Ok("Question updated successfully") : StatusCode(500, "Failed to update question");
         }
     }
 }
