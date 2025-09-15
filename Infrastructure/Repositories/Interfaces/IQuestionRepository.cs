@@ -15,7 +15,7 @@ namespace Infrastructure.Repositories.Interfaces
 
         public Question GetQuestionById(int questionId);
 
-        public Task<int> UpdateQuestion(Question qid);
+        public Task<int> UpdateQuestion(Question question, int qid);
 
     }
 }
