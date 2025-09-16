@@ -1,12 +1,13 @@
 ﻿using Domain.Data;
+using Domain.Models;
+using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Domain.Models;
 
 namespace Infrastructure.Repositories.Implementations
 { 
@@ -19,7 +20,33 @@ namespace Infrastructure.Repositories.Implementations
                 _context = context;
             }
 
-            public async Task<bool> ApproveExamAsync(int examId,int status)
+
+        public async Task<bool> RegisterAdminAsync(AdminCreateDto dto)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u =>
+                u.Email == dto.Email && u.Role == "Admin");
+                
+                // && !u.IsActive && !u.IsDeleted);
+
+            if (user == null)
+                return false;
+
+            if (!SuperAdminRepository.ValidateToken(dto.Email, dto.Token))
+                return false;
+
+            user.FullName = dto.Name;
+           user.Password = (dto.Password); // implement your hashing logic
+            user.IsBlocked = true;
+
+            SuperAdminRepository.InvalidateToken(dto.Email);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+
+
+        public async Task<bool> ApproveExamAsync(int examId,int status)
             {
             Console.WriteLine("status: "+status);
                 var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);

@@ -22,12 +22,12 @@ namespace Infrastructure.Repositories.Implementations
                 _context = context;
             }
 
-            public void AddFeedback(int examId, int userId, ExamFeedbackDto dto)
+            public void AddFeedback(int examId, ExamFeedbackDto dto)
             {
                 var feedback = new ExamFeedback
                 {
                     Eid = examId,
-                    UserId = userId,
+                    UserId = dto.Userid,
                     Feedback = dto.Feedback
                 };
 

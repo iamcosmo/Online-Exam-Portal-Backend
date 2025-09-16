@@ -21,6 +21,19 @@ namespace OEP.Controllers
             _adminRepository = adminRepository;
         }
 
+
+        [HttpPost("register")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RegisterAdmin([FromBody] AdminCreateDto dto)
+        {
+            var result = await _adminRepository.RegisterAdminAsync(dto);
+            if (!result)
+                return BadRequest("Invalid or expired token.");
+
+            return Ok("Admin registered successfully.");
+        }
+
+
         // Replace the ApproveOrRejectExam method with the following:
 
         // POST /approve-exam/{eid}/{action}

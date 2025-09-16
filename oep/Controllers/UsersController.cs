@@ -13,14 +13,12 @@ namespace OEP.Controllers
     {
 
         private readonly IUserRepository _userRepository;
-        private readonly TokenService _tokenService;
-        private readonly IExamRepository _examRepository;
+        private readonly IExamRepository _examRepository;   
 
 
-        public UsersController(IUserRepository userRepository, TokenService tokenService, IExamRepository examRepository)
+        public UsersController(IUserRepository userRepository,IExamRepository examRepository)
         {
             _userRepository = userRepository;
-            _tokenService = tokenService;
             _examRepository = examRepository;
         }
 
@@ -85,34 +83,6 @@ namespace OEP.Controllers
             var attempts = _examRepository.GetExamAttempts(userId, examId);
             return Ok(attempts);
         }
-
-
-
-        // POST: api/users/register
-        [HttpPost("register")]
-        public IActionResult Register([FromBody] User user)
-        {
-            var result = _userRepository.RegisterUser(user);
-            return result > 0 ? Ok("User registered successfully") : BadRequest("Registration failed");
-        }
-
-
-        // POST: api/users/login
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest request)
-        {
-            var user = _userRepository.Login(request.Email, request.Password);
-            if (user == null)
-            {
-                return Unauthorized("Invalid credentials");
-            }
-
-            //jwt token creation
-            string token = _tokenService.GenerateJwtToken(user);
-
-            return user != null ? Ok(new { Token = token }) : Unauthorized("Invalid credentials");
-        }
-
 
     }
 }

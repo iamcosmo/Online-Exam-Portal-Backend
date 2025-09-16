@@ -25,8 +25,8 @@ namespace OEP.Controllers
             [Authorize(Roles = "Student")]
             public IActionResult SubmitFeedback(int examId, [FromBody] ExamFeedbackDto dto)
             {
-                var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-                _repository.AddFeedback(examId, userId, dto);
+
+                _repository.AddFeedback(examId, dto);
                 return Ok();
             }
 

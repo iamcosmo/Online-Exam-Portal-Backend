@@ -26,16 +26,19 @@ namespace Infrastructure.Services
 
             var claims = new[]
                 {
-                new Claim(JwtRegisteredClaimNames.Sub, user.FullName),
-                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-                new Claim(ClaimTypes.Role, user.Role)
+                 //new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+                 //new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+                 new Claim(ClaimTypes.NameIdentifier,user.UserId.ToString()),
+                new Claim(ClaimTypes.Role, user.Role),
+
+                   new Claim(ClaimTypes.Name, user.FullName ??user.Email??"")
             };
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(Convert.ToDouble(jwtSettings["ExpiryMinutes"])),
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings["ExpiryMinutes"])),
                 signingCredentials: credentials
             );
 

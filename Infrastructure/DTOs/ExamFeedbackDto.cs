@@ -12,5 +12,9 @@ namespace Infrastructure.DTOs
         {
             get; set;
         }
+        public int Userid
+        {
+            get; set;
+        }
     }
 }

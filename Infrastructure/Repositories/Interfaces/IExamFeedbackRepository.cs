@@ -10,7 +10,7 @@ namespace Infrastructure.Repositories.Interfaces
 {
     public interface IExamFeedbackRepository
     {
-        public void AddFeedback(int examId, int userId, ExamFeedbackDto dto);
+        public void AddFeedback(int examId, ExamFeedbackDto dto);
        public  IEnumerable<ExamFeedback> GetAllFeedbacks(int examId);
        public  IEnumerable<ExamFeedbackDto> GetStudentFeedback(int examId, int userId);
     }
