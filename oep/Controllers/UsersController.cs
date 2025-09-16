@@ -22,13 +22,7 @@ namespace OEP.Controllers
             _examRepository = examRepository;
         }
 
-        [Authorize(Roles ="Admin")]
-        [HttpGet("adminindex")]
-        public IActionResult Index()
-        {
-            return Ok("Admin Controller is Working");
-        }
-
+     
         // GET /users?role=admin
         [Authorize(Roles = "Admin")]
         [HttpGet]
