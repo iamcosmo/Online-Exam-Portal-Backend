@@ -52,21 +52,11 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Examiner")]
-        [HttpPut("update-exam")]
-        public IActionResult UpdateExamAction([FromBody] UpdateExamDTO dto)
+        [HttpPut("update-exam/{examId}")]
+        public IActionResult UpdateExamAction([FromRoute] int examId, [FromBody] UpdateExamDTO dto)
         {
-            Exam exam = new Exam
-            {
 
-                Name = dto.Name,
-                Description = dto.Description,
-                TotalMarks = dto.TotalMarks,
-                Duration = dto.Duration,
-                Tids = dto.Tids,
-                DisplayedQuestions = dto.DisplayedQuestions
-
-            };
-            var result = _examRepository.UpdateExam(exam);
+            var result = _examRepository.UpdateExam(examId, dto);
             return result > 0 ? Ok("Exam updated successfully") : StatusCode(500, "Exam was not updated due to Internal Errors.");
         }
 
@@ -75,9 +65,9 @@ namespace OEP.Controllers
         public IActionResult DeleteExamAction(int examid)
         {
             int status = _examRepository.DeleteExam(examid);
-            if (status > 1) return Ok("All recors related to the exams also deleted.");
+            if (status >= 1) return Ok("Exam Deleted Successfully.");
             else if (status == -1) return NotFound("Exam not found.");
-            else return StatusCode(500);
+            else return StatusCode(500, "Some error Occured,status value =" + status);
         }
 
         [Authorize(Roles = "Examiner")]
