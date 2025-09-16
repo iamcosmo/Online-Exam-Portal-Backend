@@ -14,13 +14,13 @@ namespace OEP.Controllers
     public class AuthController : ControllerBase
     {
 
-        private readonly IUserRepository _userRepository;
+        private readonly IAuthRepository _authRepository;
         private readonly TokenService _tokenService;
 
 
-        public AuthController(IUserRepository userRepository, TokenService tokenService)
+        public AuthController(IAuthRepository userRepository, TokenService tokenService)
         {
-            _userRepository = userRepository;
+            _authRepository = userRepository;
             _tokenService = tokenService;
         }
 
@@ -36,14 +36,14 @@ namespace OEP.Controllers
 
             var user = new User
             {
-               FullName = dto.FullName,
-               Email = dto.Email,
-               Password = dto.Password,
-               Role = dto.Role,
-               PhoneNo = dto.PhoneNo
+                FullName = dto.FullName,
+                Email = dto.Email,
+                Password = dto.Password,
+                Role = dto.Role,
+                PhoneNo = dto.PhoneNo
             };
 
-            var result = _userRepository.RegisterUser(user);
+            var result = _authRepository.RegisterUser(user);
             return result > 0 ? Ok("User registered successfully") : BadRequest("Registration failed");
         }
 
@@ -52,7 +52,7 @@ namespace OEP.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginDTO dto)
         {
-            var user = _userRepository.Login(dto.Email, dto.Password);
+            var user = _authRepository.Login(dto.Email, dto.Password);
             if (user == null)
             {
                 return Unauthorized("Invalid credentials");
@@ -61,7 +61,7 @@ namespace OEP.Controllers
             string token = _tokenService.GenerateJwtToken(user);
             return Ok(new { Token = token });
         }
-        
+
 
     }
 }

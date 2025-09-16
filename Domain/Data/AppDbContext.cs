@@ -52,6 +52,10 @@ public partial class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+        modelBuilder.Entity<Validation>()
+            .HasKey(v => v.Token);
+
         modelBuilder.Entity<Exam>(entity =>
         {
             entity.HasKey(e => e.Eid).HasName("PK__Exams__C190170BDABF6CFC");
@@ -215,11 +219,6 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
-        });
-
-        modelBuilder.Entity<Validation>(entity =>
-        {
-            entity.HasNoKey();
         });
 
         OnModelCreatingPartial(modelBuilder);

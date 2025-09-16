@@ -16,44 +16,45 @@ namespace oep
     {
         public static void Main(string[] args)
         {
-          
-                var builder = WebApplication.CreateBuilder(args);
-                //JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-                // Add services to the container.
-                builder.Services.AddScoped<TokenService>();
-                builder.Services.AddScoped<IExamRepository, ExamRepository>();
-                builder.Services.AddScoped<ISuperAdminRepository, SuperAdminRepository>();
-                builder.Services.AddScoped<IUserRepository, UserRepository>();
-                builder.Services.AddScoped<IAdminRepository, AdminRepository>();
-                builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
-                builder.Services.AddScoped<IExamFeedbackRepository, ExamFeedbackRepository>();
+            var builder = WebApplication.CreateBuilder(args);
+            //JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
-                builder.Services.AddScoped<ITopicRepository, TopicRepository>();
-                builder.Services.AddScoped<IResultRespository, ResultRepository>();
-                builder.Services.AddScoped<IQuestionFeedbackRepository, QuestionFeedbackRepository>();
-                builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-                builder.Services.AddControllers();
+            // Add services to the container.
+            builder.Services.AddScoped<TokenService>();
+            builder.Services.AddScoped<IExamRepository, ExamRepository>();
+            builder.Services.AddScoped<ISuperAdminRepository, SuperAdminRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+            builder.Services.AddScoped<IExamFeedbackRepository, ExamFeedbackRepository>();
 
-                builder.Services.AddEndpointsApiExplorer();
-                builder.Services.AddSwaggerGen(c =>
+            builder.Services.AddScoped<ITopicRepository, TopicRepository>();
+            builder.Services.AddScoped<IResultRespository, ResultRepository>();
+            builder.Services.AddScoped<IQuestionFeedbackRepository, QuestionFeedbackRepository>();
+            builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddControllers();
+
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskManagementAPI", Version = "v1" });
+
+                // Add JWT Authentication
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
-                    c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskManagementAPI", Version = "v1" });
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header,
+                    Description = "Enter 'Bearer' followed by your JWT token"
+                });
 
-                    // Add JWT Authentication
-                    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                    {
-                        Name = "Authorization",
-                        Type = SecuritySchemeType.Http,
-                        Scheme = "Bearer",
-                        BearerFormat = "JWT",
-                        In = ParameterLocation.Header,
-                        Description = "Enter 'Bearer' followed by your JWT token"
-                    });
-
-                    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
                     {
                         new OpenApiSecurityScheme
                         {
@@ -65,64 +66,64 @@ namespace oep
                         },
                         new string[] {}
                     }
-                });
-                });
+            });
+            });
 
-                var JwtKey = builder.Configuration.GetValue<string>("Jwt:Secret");
+            var JwtKey = builder.Configuration.GetValue<string>("Jwt:Secret");
 
-                builder.Services.AddAuthentication(x =>
-                {
-                    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            builder.Services.AddAuthentication(x =>
+            {
+                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 
-                    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                   .AddJwtBearer(x =>
+                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+               .AddJwtBearer(x =>
+               {
+                   x.RequireHttpsMetadata = true;
+                   x.SaveToken = true;
+                   x.TokenValidationParameters = new TokenValidationParameters
                    {
-                       x.RequireHttpsMetadata = true;
-                       x.SaveToken = true;
-                       x.TokenValidationParameters = new TokenValidationParameters
-                       {
-                           ValidateIssuerSigningKey = true,
-                           IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtKey)),
+                       ValidateIssuerSigningKey = true,
+                       IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(JwtKey)),
 
-                           ValidateIssuer = true,
-                           ValidateAudience = true,
-                           ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                           ValidAudience = builder.Configuration["Jwt:Audience"],
-                       };
-                   });
+                       ValidateIssuer = true,
+                       ValidateAudience = true,
+                       ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                       ValidAudience = builder.Configuration["Jwt:Audience"],
+                   };
+               });
 
-                builder.Services.AddAuthorization(options =>
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("StudentOnly", policy => policy.RequireRole("Student"));
+                options.AddPolicy("ExaminerOnly", policy => policy.RequireRole("Examiner"));
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+            });
+
+
+            var app = builder.Build();
+
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI(options =>
                 {
-                    options.AddPolicy("StudentOnly", policy => policy.RequireRole("Student"));
-                    options.AddPolicy("ExaminerOnly", policy => policy.RequireRole("Examiner"));
-                    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+                    options.ConfigObject.TryItOutEnabled = false;
                 });
-
-
-                var app = builder.Build();
-
-                // Configure the HTTP request pipeline.
-                if (app.Environment.IsDevelopment())
-                {
-                    app.UseSwagger();
-                    app.UseSwaggerUI(options =>
-                    {
-                        options.ConfigObject.TryItOutEnabled = false;
-                    });
-                }
-
-                app.UseHttpsRedirection();
-                app.UseAuthentication();
-                app.UseAuthorization();
-
-
-                app.MapControllers();
-
-                app.Run();
             }
-            
+
+            app.UseHttpsRedirection();
+            app.UseAuthentication();
+            app.UseAuthorization();
+
+
+            app.MapControllers();
+
+            app.Run();
         }
 
-    
+    }
+
+
 }
