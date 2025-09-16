@@ -12,10 +12,12 @@ namespace OEP.Controllers
     public class QuestionsController : Controller
     {
         private readonly IQuestionRepository _questionRepository;
+        private readonly IExamRepository _examRepository;
 
-        public QuestionsController(IQuestionRepository repo)
+        public QuestionsController(IQuestionRepository repo, IExamRepository examRepository)
         {
             _questionRepository = repo;
+            _examRepository = examRepository;
         }
 
         [HttpGet("questions-index")]
@@ -28,7 +30,15 @@ namespace OEP.Controllers
         [HttpPost("add-question")]
         public async Task<IActionResult> AddQuestion([FromBody] AddQuestionDTO question, [FromQuery] int examId)
         {
-          
+
+            var exam = _examRepository.GetExamByIdForExaminer(examId);
+
+            var availableQuestionCount = await _questionRepository.GetQuestionsByExamId(examId);
+            if (availableQuestionCount.Count + 1> exam.TotalQuestions)
+            {
+                return BadRequest("Adding this questions would exceed the total number of questions allowed for this exam.");
+            }
+
             Question quest = new()
             {
                 Type = question.type,
@@ -40,6 +50,54 @@ namespace OEP.Controllers
             };
             var result = await _questionRepository.AddQuestion(quest, examId);
             return result > 0 ? Ok("Question added successfully") : BadRequest("Failed to add Question");
+        }
+
+        [Authorize(Roles = "Examiner")]
+        [HttpPost("add-questions-to-exam")]
+
+        public async Task<IActionResult> AddQuestionsToExam([FromBody] List<AddQuestionDTO> questions, [FromQuery] int examId)
+        {
+
+            if(questions == null || questions.Count == 0)
+            {
+                return BadRequest("Question list is empty.");
+            }
+
+            var exam = _examRepository.GetExamByIdForExaminer(examId);
+
+            var availableQuestionCount = await _questionRepository.GetQuestionsByExamId(examId);
+            if (availableQuestionCount.Count + questions.Count > exam.TotalQuestions)
+            {
+                return BadRequest("Adding these questions would exceed the total number of questions allowed for this exam.");
+            }
+
+            if (exam==null)
+            {
+                return BadRequest("Exam Not Found.");
+            }
+
+            if (questions.Any(q => string.IsNullOrWhiteSpace(q.question) || q.marks <= 0))
+            {
+                return BadRequest("One or more questions have invalid data.");
+            }
+
+
+            List<Question> questionList = new();
+            foreach (var question in questions)
+            {
+                Question quest = new()
+                {
+                    Type = question.type,
+                    Question1 = question.question,
+                    Marks = question.marks,
+                    Options = question.options,
+                    CorrectOptions = question.correctOptions,
+                    ApprovalStatus = question.ApprovalStatus
+                };
+                questionList.Add(quest);
+            }
+            var result = await _questionRepository.AddQuestionsToExam(questionList, examId);
+            return result > 0 ? Ok("Questions added successfully") : BadRequest("Failed to add Questions");
         }
 
 
@@ -84,45 +142,16 @@ namespace OEP.Controllers
                 return NotFound("Question not found");
             }
 
-            bool isUpdated = false;
-
-            if (question.type != null && question.type != existingQuestion.Type)
+            var updatedQuestion = new Question
             {
-                existingQuestion.Type = question.type;
-                isUpdated = true;
-            }
-            if (question.question != null)
-            {
-                existingQuestion.Question1 = question.question;
-                isUpdated = true;
-            }
-            if (question.marks.HasValue && question.marks != existingQuestion.Marks)
-            {
-                existingQuestion.Marks = question.marks;
-                isUpdated = true;
-            }
-            if (question.options != null)
-            {
-                existingQuestion.Options = question.options;
-                isUpdated = true;
-            }
-            if (question.correctOptions != null)
-            {
-                existingQuestion.CorrectOptions = question.correctOptions;
-                isUpdated = true;
-            }
-            if (question.ApprovalStatus.HasValue && question.ApprovalStatus != existingQuestion.ApprovalStatus)
-            {
-                existingQuestion.ApprovalStatus = question.ApprovalStatus;
-                isUpdated = true;
-            }
-
-            if (!isUpdated)
-            {
-                return Ok("No changes made to the question.");
-            }
-
-            var result = await _questionRepository.UpdateQuestion(existingQuestion, qId);
+                Type = question.type,
+                Question1 = question.question,
+                Marks = question.marks,
+                Options = question.options,
+                CorrectOptions = question.correctOptions,
+                ApprovalStatus = question.ApprovalStatus
+            };
+            var result = await _questionRepository.UpdateQuestion(updatedQuestion, qId);
             return result > 0 ? Ok("Question updated successfully") : StatusCode(500, "Failed to update question");
         }
     }

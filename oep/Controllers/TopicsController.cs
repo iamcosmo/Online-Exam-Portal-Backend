@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,7 @@ namespace OEP.Controllers
             _topicRepo = topic;
         }
 
-        [HttpPost("get-topic")]
+        [HttpGet("get-topic")]
         public IActionResult GetTopicsAction()
         {
 
@@ -26,7 +27,7 @@ namespace OEP.Controllers
         }
 
 
-        [HttpPost("get-topic/{topicId}")]
+        [HttpGet("get-topic/{topicId}")]
         public IActionResult GetTopicsAction([FromRoute] int topicId)
         {
 
@@ -43,16 +44,16 @@ namespace OEP.Controllers
             var CreatedTopic = _topicRepo.CreateTopic(TopicName);
             if (CreatedTopic == null) return StatusCode(500, "Could not add Topic");
 
-            return Ok(new { Message = "Topic Created", CreatedTopic = CreatedTopic });
+            return Ok(new { Message = "Topic Created", CreatedTopicStatus = CreatedTopic });
         }
 
-        [HttpPost("update-topic")]
-        public IActionResult UpdateTopicAction(Topic topic)
+        [HttpPost("update-topic/{Tid}")]
+        public IActionResult UpdateTopicAction([FromBody] UpdateTopicDTO updateTopicdto, [FromRoute] int Tid)
         {
-            var UpdatedTopic = _topicRepo.UpdateTopic(topic);
+            var UpdatedTopic = _topicRepo.UpdateTopic(updateTopicdto.Name, Tid);
             if (UpdatedTopic == null) return StatusCode(500, "Could not update Topic");
 
-            return Ok(new { Message = "Topic Updated", UpdatedTopic = UpdatedTopic });
+            return Ok(new { Message = "Topic Updated", UpdatedTopicStatus = UpdatedTopic });
         }
 
         [HttpPost("delete-topic/{topicId}")]
@@ -61,7 +62,7 @@ namespace OEP.Controllers
             var DeletedTopic = _topicRepo.DeleteTopic(topicId);
             if (DeletedTopic == null) return StatusCode(500, "Could not delete Topic");
 
-            return Ok(new { Message = "Topic Deleted", DeletedTopic = DeletedTopic });
+            return Ok(new { Message = "Topic Deleted", DeletedTopicStatus = DeletedTopic });
         }
 
 

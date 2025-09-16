@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Domain.Data;
 
@@ -34,8 +35,20 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<Validation> Validations { get; set; }
 
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Data Source=LTIN617435;User ID=sa;Password=password-1;Initial Catalog=OEP_DB;Encrypt=false;");
+    {
+        if (!optionsBuilder.IsConfigured)
+        {
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .Build();
+
+            var connectionString = configuration.GetConnectionString("DefaultConnection");
+            optionsBuilder.UseSqlServer(connectionString);
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -3,6 +3,7 @@ using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace OEP.Controllers
 {
@@ -18,16 +19,21 @@ namespace OEP.Controllers
             _examRepository = repo;
         }
 
-        [HttpGet("/")]
-        public IActionResult Index()
-        {
-            return Ok("Index Page for Exam Controller");
-        }
-
         [Authorize(Roles = "Examiner")]
         [HttpPost("add-exam")]
         public async Task<IActionResult> AddExamAction([FromBody] AddExamDTO dto)
         {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims.");
+            }
+
+            var userId = userIdClaim.Value;
+
+            Console.WriteLine("userId= " + userId);
+
             Exam exam = new Exam
             {
 
@@ -37,7 +43,8 @@ namespace OEP.Controllers
                 TotalMarks = dto.TotalMarks,
                 Duration = dto.Duration,
                 Tids = dto?.Tids,
-                DisplayedQuestions = dto.DisplayedQuestions
+                DisplayedQuestions = dto.DisplayedQuestions,
+                UserId = int.Parse(userId)
 
             };
             var result = await _examRepository.AddExam(exam);
@@ -45,22 +52,11 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Examiner")]
-        [HttpPut("update-exam")]
-        public IActionResult UpdateExamAction([FromBody] AddExamDTO dto)
+        [HttpPut("update-exam/{examId}")]
+        public IActionResult UpdateExamAction([FromRoute] int examId, [FromBody] UpdateExamDTO dto)
         {
-            Exam exam = new Exam
-            {
 
-                Name = dto.Name,
-                Description = dto.Description,
-                TotalQuestions = dto.TotalQuestions,
-                TotalMarks = dto.TotalMarks,
-                Duration = dto.Duration,
-                Tids = dto.Tids,
-                DisplayedQuestions = dto.DisplayedQuestions
-
-            };
-            var result = _examRepository.UpdateExam(exam);
+            var result = _examRepository.UpdateExam(examId, dto);
             return result > 0 ? Ok("Exam updated successfully") : StatusCode(500, "Exam was not updated due to Internal Errors.");
         }
 
@@ -69,9 +65,9 @@ namespace OEP.Controllers
         public IActionResult DeleteExamAction(int examid)
         {
             int status = _examRepository.DeleteExam(examid);
-            if (status > 1) return Ok("All recors related to the exams also deleted.");
+            if (status >= 1) return Ok("Exam Deleted Successfully.");
             else if (status == -1) return NotFound("Exam not found.");
-            else return StatusCode(500);
+            else return StatusCode(500, "Some error Occured,status value =" + status);
         }
 
         [Authorize(Roles = "Examiner")]
@@ -90,6 +86,7 @@ namespace OEP.Controllers
             var exam = _examRepository.GetExams(id);
             return exam != null ? Ok(exam) : NotFound("Exam not found");
         }
+
 
 
         [Authorize(Roles = "Student")]

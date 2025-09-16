@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 namespace oep
@@ -15,18 +16,22 @@ namespace oep
     {
         public static void Main(string[] args)
         {
-            try
-            {
+          
                 var builder = WebApplication.CreateBuilder(args);
+                //JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
                 // Add services to the container.
                 builder.Services.AddScoped<TokenService>();
                 builder.Services.AddScoped<IExamRepository, ExamRepository>();
+                builder.Services.AddScoped<ISuperAdminRepository, SuperAdminRepository>();
                 builder.Services.AddScoped<IUserRepository, UserRepository>();
                 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
                 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+                builder.Services.AddScoped<IExamFeedbackRepository, ExamFeedbackRepository>();
+
                 builder.Services.AddScoped<ITopicRepository, TopicRepository>();
                 builder.Services.AddScoped<IResultRespository, ResultRepository>();
+                builder.Services.AddScoped<IQuestionFeedbackRepository, QuestionFeedbackRepository>();
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
                 builder.Services.AddControllers();
@@ -96,7 +101,7 @@ namespace oep
 
 
                 var app = builder.Build();
-                //app.UseMiddleware<GlobalExceptionMiddleware>();
+
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
@@ -116,8 +121,8 @@ namespace oep
 
                 app.Run();
             }
-            catch (Exception e) { Console.WriteLine(e); }
+            
         }
 
-    }
+    
 }
