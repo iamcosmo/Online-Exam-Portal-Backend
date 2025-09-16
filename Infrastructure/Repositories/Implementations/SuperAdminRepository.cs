@@ -21,24 +21,30 @@ namespace Infrastructure.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<string> GenerateAdminTokenAsync(string email)
+        public async Task<string> GenerateTokenAsync()
         {
-            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            if (existingUser == null)
-            {
-                var user = new User
-                {
-                    Email = email,
-                    Role = "Admin",
-                    //IsBlocked = false,
-                    //IsDeleted = false
-                };
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
-            }
-
+            //var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            //if (existingUser == null)
+            //{
+            //    var user = new User
+            //    {
+            //        Email = email,
+            //        Role = "Admin",
+            //        //IsBlocked = false,
+            //        //IsDeleted = false
+            //    };
+            //    _context.Users.Add(user);
+            //    await _context.SaveChangesAsync();
+            //}
+            //var validation=new Validation
             var token = Guid.NewGuid().ToString();
-            _tokenStore[email] = token;
+            var validation = new Validation
+            { 
+                Token = token,
+               
+            };
+            _context.Validations.Add(validation);
+            _context.SaveChanges();
             return token;
         }
 
@@ -75,14 +81,21 @@ namespace Infrastructure.Repositories.Implementations
             return true;
         }
 
-        public static bool ValidateToken(string email, string token)
+        // Replace the static method with an instance method to access _context
+        public bool ValidateToken(string token)
         {
-            return _tokenStore.TryGetValue(email, out var storedToken) && storedToken == token;
+            return _context.Validations.Any(v => v.Token == token);
         }
 
-        public static void InvalidateToken(string email)
+        // Replace the static RemoveToken method with an instance method and fix the argument type
+        public void RemoveToken(string token)
         {
-            _tokenStore.Remove(email);
+            var validation = _context.Validations.FirstOrDefault(v => v.Token == token);
+            if (validation != null)
+            {
+                _context.Validations.Remove(validation);
+                _context.SaveChanges();
+            }
         }
     }
 

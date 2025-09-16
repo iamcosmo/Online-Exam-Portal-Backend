@@ -15,7 +15,7 @@ namespace Infrastructure.Repositories.Interfaces
         /// </summary>
         /// <param// n//ame="email">Email of the admin to invite</param>
         /// <returns>Generated token string</returns>
-        Task<string> GenerateAdminTokenAsync(string email);
+        Task<string> GenerateAdminTokenAsync();
 
         /// <summary>
         /// Returns a list of all users with Role = "Admin"
@@ -36,6 +36,7 @@ namespace Infrastructure.Repositories.Interfaces
         /// <param //name="userId">User ID of the admin</param>
         /// <returns>True if successful, false if not found or not an admin</returns>
         Task<bool> UnblockAdminAsync(int userId);
+
     }
     //public interface ISuperAdminRepository
     //{
