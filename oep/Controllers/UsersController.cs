@@ -1,8 +1,10 @@
 ﻿using Domain.Models;
+using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OEP.Controllers
@@ -11,10 +13,8 @@ namespace OEP.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-
         private readonly IUserRepository _userRepository;
         private readonly IExamRepository _examRepository;   
-
 
         public UsersController(IUserRepository userRepository,IExamRepository examRepository)
         {
@@ -22,7 +22,7 @@ namespace OEP.Controllers
             _examRepository = examRepository;
         }
 
-
+        [Authorize(Roles ="Admin")]
         [HttpGet("adminindex")]
         public IActionResult Index()
         {
@@ -30,7 +30,7 @@ namespace OEP.Controllers
         }
 
         // GET /users?role=admin
-
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public IActionResult GetUsers([FromQuery] string? role = null)
         {
@@ -42,7 +42,7 @@ namespace OEP.Controllers
         }
 
         // GET /users/{id}
-
+        [Authorize(Roles = "Admin, Examiner")]
         [HttpGet("{id}")]
         public IActionResult GetUserById(int id)
         {
@@ -53,9 +53,16 @@ namespace OEP.Controllers
         }
 
         // PATCH /users/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPatch("{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] User user)
+        public IActionResult UpdateUser(int id, [FromBody] UpdateUserDTO dto)
         {
+            var user = new User
+            {
+                FullName = dto.FullName,
+                Dob = dto.Dob,
+                PhoneNo = dto.PhoneNo
+            };
             if (id != user.UserId)
                 return BadRequest("User ID mismatch");
 
@@ -64,6 +71,7 @@ namespace OEP.Controllers
         }
 
         // DELETE /users/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public IActionResult DeleteUser(int id)
         {
@@ -72,6 +80,7 @@ namespace OEP.Controllers
         }
 
         // GET /users/{id}/exams-attempted
+        [Authorize(Roles = "Student")]
         [HttpGet("{id}/exams-attempted")]
         public IActionResult GetExamsAttempted(int id)
         {
@@ -80,6 +89,7 @@ namespace OEP.Controllers
         }
 
         // GET /users/{userId}/{examId}/attempts
+        [Authorize(Roles = "Student")]
         [HttpGet("{userId}/{examId}/attempts")]
         public IActionResult GetExamAttempts(int userId, int examId)
         {
