@@ -27,7 +27,7 @@ public partial class Exam
 
     public string? Name { get; set; }
 
-    public int? ApprovalStatus { get; private set; }
+    public int? ApprovalStatus { get; set; }
 
     public void setApprovalStatus() { this.ApprovalStatus = this.ApprovalStatus == 0 ? 1 : 0; }
 

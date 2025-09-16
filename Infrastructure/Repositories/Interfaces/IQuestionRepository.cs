@@ -20,5 +20,7 @@ namespace Infrastructure.Repositories.Interfaces
 
         public Task<int> UpdateQuestion(UpdateQuestionDTO question, int qid);
 
+        public Task<int> DeleteQuestion(int questionId);
+
     }
 }
