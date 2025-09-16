@@ -1,6 +1,8 @@
 ﻿using Domain.Data;
 using Domain.Models;
+using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Infrastructure.Repositories.Implementations
 {
@@ -28,9 +30,15 @@ namespace Infrastructure.Repositories.Implementations
             var CreatedTopic = _context.Topics.Add(topic);
             return _context.SaveChanges();
         }
-        public int UpdateTopic(Topic topic)
+        public int UpdateTopic(string TopicName, int Tid)
         {
-            var CreatedTopic = _context.Topics.Update(topic);
+            var topicToUpdate = _context.Topics.Find(Tid);
+            if (topicToUpdate == null)
+            {
+                return 0;
+            }
+
+            topicToUpdate.Subject = TopicName;
             return _context.SaveChanges();
         }
         public int DeleteTopic(int topicId)

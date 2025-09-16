@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -46,10 +47,10 @@ namespace OEP.Controllers
             return Ok(new { Message = "Topic Created", CreatedTopic = CreatedTopic });
         }
 
-        [HttpPost("update-topic")]
-        public IActionResult UpdateTopicAction(Topic topic)
+        [HttpPost("update-topic/{Tid}")]
+        public IActionResult UpdateTopicAction([FromBody] UpdateTopicDTO updateTopicdto, [FromRoute] int Tid)
         {
-            var UpdatedTopic = _topicRepo.UpdateTopic(topic);
+            var UpdatedTopic = _topicRepo.UpdateTopic(updateTopicdto.Name, Tid);
             if (UpdatedTopic == null) return StatusCode(500, "Could not update Topic");
 
             return Ok(new { Message = "Topic Updated", UpdatedTopic = UpdatedTopic });

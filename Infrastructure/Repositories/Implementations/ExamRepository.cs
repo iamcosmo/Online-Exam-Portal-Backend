@@ -121,6 +121,7 @@ namespace Infrastructure.Repositories.Implementations
         public int GetExamAttempts(int userId, int examId)
         {
             var result = _context.Results.FirstOrDefault(r => r.UserId == userId && r.Eid == examId);
+            if (result == null) return 0;
             return (int)result.Attempts;
         }
 
