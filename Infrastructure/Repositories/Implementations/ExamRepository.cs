@@ -27,42 +27,58 @@ namespace Infrastructure.Repositories.Implementations
             return await _context.SaveChangesAsync();
 
         }
-        public int UpdateExam(Exam exam)
+        public int UpdateExam(int examId, UpdateExamDTO dto)
         {
-            Exam ToBeUpdatedExam = _context.Exams.FirstOrDefault(e => e.Eid == exam.Eid);
-            if (ToBeUpdatedExam.TotalMarks != exam.TotalMarks)
+
+            Exam ToBeUpdatedExam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
+            if (dto.TotalMarks != 0 && ToBeUpdatedExam.TotalMarks != dto.TotalMarks)
             {
-                ToBeUpdatedExam.TotalMarks = exam.TotalMarks;
+                ToBeUpdatedExam.TotalMarks = dto.TotalMarks;
             }
-            else if (ToBeUpdatedExam.TotalQuestions != exam.TotalQuestions)
+
+            if (dto.Description != null)
             {
-                ToBeUpdatedExam.TotalQuestions = exam.TotalQuestions;
+                ToBeUpdatedExam.Description = dto.Description;
+            }
+            if (dto.Duration != null)
+            {
+                ToBeUpdatedExam.Duration = dto.Duration;
+            }
+            if (dto.Tids != null)
+            {
+                ToBeUpdatedExam.Tids = dto.Tids;
+            }
+            if (dto.DisplayedQuestions != null)
+            {
+                ToBeUpdatedExam.DisplayedQuestions = dto.DisplayedQuestions;
             }
             return _context.SaveChanges();
         }
         public int DeleteExam(int examId)
         {
 
-            var responses = _context.Responses.Where(r => r.Eid == examId);
-            var results = _context.Results.Where(r => r.Eid == examId);
-            var questions = _context.Questions.Where(q => q.Eid == examId);
-            var exam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
-
-            if (exam == null) return 0;
-
-            _context.Responses.RemoveRange(responses);
-            _context.Results.RemoveRange(results);
-            _context.Questions.RemoveRange(questions);
-            _context.Exams.Remove(exam);
-
-            return _context.SaveChanges();
-
-            /*
-                ALTER TABLE Question
-                ADD CONSTRAINT FK_Question_Exam
-                FOREIGN KEY (Eid) REFERENCES Exams(EID)
-                ON DELETE CASCADE;
-            */
+            try
+            {
+                var exam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
+                if (exam != null && exam.ApprovalStatus == 1)
+                {
+                    exam.setApprovalStatus();
+                    return _context.SaveChanges();
+                }
+                else if (exam == null)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return -99;
+            }
 
         }
         public List<GetExamDataDTO> GetExams()
@@ -96,7 +112,8 @@ namespace Infrastructure.Repositories.Implementations
                     Duration = e.Duration,
                     Tids = e.Tids
 
-                });
+                })
+                .FirstOrDefault();
         }
         public List<Exam> GetExamsForExaminer(int userid)
         {
