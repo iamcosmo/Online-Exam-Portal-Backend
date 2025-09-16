@@ -5,6 +5,7 @@ using Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 
 namespace OEP.Controllers
 {
@@ -28,6 +29,11 @@ namespace OEP.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterUserDTO dto)
         {
+            if (dto.Role == "Admin")
+            {
+                return Unauthorized("Only student and examiner are allowed to register.");
+            }
+
             var user = new User
             {
                FullName = dto.FullName,
@@ -36,6 +42,7 @@ namespace OEP.Controllers
                Role = dto.Role,
                PhoneNo = dto.PhoneNo
             };
+
             var result = _userRepository.RegisterUser(user);
             return result > 0 ? Ok("User registered successfully") : BadRequest("Registration failed");
         }
