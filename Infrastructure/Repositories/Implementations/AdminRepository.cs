@@ -21,28 +21,28 @@ namespace Infrastructure.Repositories.Implementations
         }
 
 
-        public async Task<bool> RegisterAdminAsync(AdminCreateDto dto)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u =>
-                u.Email == dto.Email && u.Role == "Admin");
+        //public async Task<bool> RegisterAdminAsync(AdminCreateDto dto)
+        //{
+        //    var user = await _context.Users.FirstOrDefaultAsync(u =>
+        //        u.Email == dto.Email && u.Role == "Admin");
 
-            // && !u.IsActive && !u.IsDeleted);
+        //    // && !u.IsActive && !u.IsDeleted);
 
-            if (user == null)
-                return false;
+        //    if (user == null)
+        //        return false;
 
-            if (!SuperAdminRepository.ValidateToken(dto.Email, dto.Token))
-                return false;
+        //    if (!SuperAdminRepository.ValidateToken(dto.Token))
+        //        return false;
 
-            user.FullName = dto.Name;
-            user.Password = (dto.Password); // implement your hashing logic
-            user.IsBlocked = true;
+        //    user.FullName = dto.Name;
+        //    user.Password = (dto.Password); // implement your hashing logic
+        //    user.IsBlocked = true;
 
-            SuperAdminRepository.InvalidateToken(dto.Email);
-            await _context.SaveChangesAsync();
+        //    SuperAdminRepository.InvalidateToken(dto.Email);
+        //    await _context.SaveChangesAsync();
 
-            return true;
-        }
+        //    return true;
+        //}
 
 
 
