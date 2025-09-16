@@ -4,6 +4,7 @@ using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OEP.Controllers
@@ -25,6 +26,7 @@ namespace OEP.Controllers
 
 
         // POST: api/auth/register
+        [Authorize(Roles = "Student")]
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterUserDTO dto)
         {
