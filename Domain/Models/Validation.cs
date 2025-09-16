@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Models;
 
 public partial class Validation
 {
-    public string? Token { get; set; }
+    [Key]
+    public string Token { get; set; }
 }

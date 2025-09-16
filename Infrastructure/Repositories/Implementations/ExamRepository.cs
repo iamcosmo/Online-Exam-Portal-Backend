@@ -31,9 +31,9 @@ namespace Infrastructure.Repositories.Implementations
         {
 
             Exam ToBeUpdatedExam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
-            if (dto.TotalMarks != 0 && ToBeUpdatedExam.TotalMarks != dto.TotalMarks)
+            if (dto.TotalQuestions != 0 && ToBeUpdatedExam.TotalMarks != dto.TotalQuestions)
             {
-                ToBeUpdatedExam.TotalMarks = dto.TotalMarks;
+                ToBeUpdatedExam.TotalMarks = dto.TotalQuestions;
             }
 
             if (dto.Description != null)
