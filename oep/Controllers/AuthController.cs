@@ -29,9 +29,9 @@ namespace OEP.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterUserDTO dto)
         {
-            if (dto.Role == "Admin")
+            if (dto.Role == "Admin" || dto.Role == "Examiner")
             {
-                return Unauthorized("Only student and examiner are allowed to register.");
+                return Unauthorized("Only student are allowed to register.");
             }
 
             var user = new User
