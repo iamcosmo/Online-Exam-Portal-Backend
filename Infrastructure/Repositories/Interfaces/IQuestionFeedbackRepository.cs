@@ -1,0 +1,20 @@
+﻿using Domain.Models;
+using Infrastructure.DTOs;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Infrastructure.Repositories.Interfaces
+{
+    public interface IQuestionFeedbackRepository
+    {
+
+        public int AddQuestionFeedbackDTO(QuestionReport qFeedback);
+
+        public Task<string> GetFeedbackByQuestionId(int qid);
+
+        public Task<int> UpdateQuestionFeedback(QuestionReport qFeedback, int qid);
+    }
+}
