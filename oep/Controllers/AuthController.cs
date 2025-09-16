@@ -3,9 +3,13 @@ using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace OEP.Controllers
 {
@@ -13,7 +17,6 @@ namespace OEP.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-
         private readonly IAuthRepository _authRepository;
         private readonly TokenService _tokenService;
 
@@ -26,27 +29,31 @@ namespace OEP.Controllers
 
 
         // POST: api/auth/register
-        [HttpPost("register")]
-        public IActionResult Register([FromBody] RegisterUserDTO dto)
+        [HttpPost("student/register")]
+        public IActionResult RegisterStudentAction([FromBody] RegisterUserDTO dto)
         {
-            if (dto.Role == "Admin" || dto.Role == "Examiner")
-            {
-                return Unauthorized("Only student are allowed to register.");
-            }
-
-            var user = new User
-            {
-                FullName = dto.FullName,
-                Email = dto.Email,
-                Password = dto.Password,
-                Role = dto.Role,
-                PhoneNo = dto.PhoneNo
-            };
-
-            var result = _authRepository.RegisterUser(user);
+            var result = _authRepository.RegisterStudent(dto);
             return result > 0 ? Ok("User registered successfully") : BadRequest("Registration failed");
         }
 
+        [HttpPost("internal/register")]
+        public IActionResult RegisterAction([FromBody] RegistrationInputDTO inputdto)
+        {
+            string tokenEncrypted = inputdto.Token;
+            if (!_authRepository.ValidateToken(tokenEncrypted))
+            {
+                BadRequest("Input Details are incorrect.");
+            }
+            // Use the injected service to get the role
+            string? userRole = _tokenService.GetRoleFromToken(tokenEncrypted);
+
+            // Your existing logic
+            string role = !string.IsNullOrEmpty(userRole) ? userRole : "Examiner";
+
+            var result = _authRepository.RegisterAdminOrExaminer(inputdto, role);
+
+            return result > 0 ? Ok("User registered successfully") : BadRequest("Registration failed");
+        }
 
         // POST: api/auth/login
         [HttpPost("login")]

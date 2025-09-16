@@ -33,6 +33,7 @@ namespace oep
             builder.Services.AddScoped<IResultRespository, ResultRepository>();
             builder.Services.AddScoped<IQuestionFeedbackRepository, QuestionFeedbackRepository>();
             builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+            builder.Services.AddScoped<IJwtDecoderService, TokenService>();
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             builder.Services.AddControllers();

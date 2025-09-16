@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Infrastructure.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,10 @@ namespace Infrastructure.Repositories.Interfaces
 {
     public interface IAuthRepository
     {
-        int RegisterUser(User user);
+        int RegisterStudent(RegisterUserDTO dto);
+        int RegisterAdminOrExaminer(RegistrationInputDTO examinerDTO, string role);
         User? Login(string email, string password);
+        bool ValidateToken(string token);
+
     }
 }
