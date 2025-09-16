@@ -47,6 +47,23 @@ namespace OEP.Controllers
             return result > 0 ? Ok("Feedback added successfully") : BadRequest("Failed to add feedback");
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpGet("get-question-feedback/{qId}")]
+        public async Task<IActionResult> GetQuestionFeedback(int qId)
+        {
+            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized("User ID not found in token claims.");
+            }
+
+            var result = await _questionFeedbackRepository.GetFeedbackByQuestionId(qId);
+            return Ok(result);
+        }
+
+
+
 
 
     }
