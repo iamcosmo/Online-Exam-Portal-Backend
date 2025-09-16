@@ -17,9 +17,9 @@ namespace OEP.Controllers
         }
 
         [HttpPost("generate-token")]
-        public async Task<IActionResult> GenerateToken([FromQuery] string email)
+        public async Task<IActionResult> GenerateToken()
         {
-            var token = await _superAdminRepo.GenerateAdminTokenAsync(email);
+            var token = await _superAdminRepo.GenerateTokenAsync();
             return Ok(new { Token = token });
         }
 

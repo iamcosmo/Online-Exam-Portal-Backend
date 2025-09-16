@@ -11,7 +11,7 @@ namespace Infrastructure.Repositories.Interfaces
 
     public interface IAdminRepository
     {
-        Task<bool> RegisterAdminAsync(AdminCreateDto dto);
+        //Task<bool> RegisterAdminAsync(AdminCreateDto dto);
 
         Task<bool> ApproveExamAsync(int examId, int status);
         //Task<bool> ReviewReportedQuestionAsync(int questionId);
