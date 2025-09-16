@@ -11,7 +11,7 @@ namespace OEP.Controllers
     [ApiController]
     [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
-    
+
     public class AdminController : ControllerBase
     {
         private readonly IAdminRepository _adminRepository;
@@ -81,7 +81,7 @@ namespace OEP.Controllers
             }
 
         }
-      
+
 
 
 
@@ -102,7 +102,7 @@ namespace OEP.Controllers
         //Task<List<QuestionReport>> GetAllReportedQuestionsAsync();
         //Task<QuestionReport?> GetReportedQuestionByIdAsync(int qid);
         //Task<bool> UpdateReportedQuestionStatusAsync
-      [HttpGet("review-questions/{qid}")]
+        [HttpGet("review-questions/{qid}")]
         public async Task<IActionResult> GetReportedQuestionById(int qid)
         {
             var question = await _adminRepository.GetAllReportedQuestionsAsync();
@@ -147,10 +147,28 @@ namespace OEP.Controllers
 
         // GET /exam-feedback-review/{eid}
         [HttpGet("exam-feedback-review/{eid}")]
-        public async Task<IActionResult> GetExamFeedbacks(int eid)
+        public async Task<IActionResult> GetExamFeedbacks([FromRoute] int eid)
         {
             var feedbacks = await _adminRepository.GetExamFeedbacksAsync(eid);
             return feedbacks != null ? Ok(feedbacks) : NotFound("No feedbacks found.");
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpGet("topic-list")]
+        public async Task<IActionResult> TopicsToBeApprovedAction()
+        {
+            var topics = await _adminRepository.TopicsToBeApprovedAsync();
+
+            if (topics == null || !topics.Any())
+                return NotFound();
+            return Ok(new { Topics = topics, msg = "done" });
+        }
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("approve-topic")]
+        public async Task<IActionResult> ApproveOrRejectTopicAction(int topicId)
+        {
+            var status = await _adminRepository.ApproveOrRejectTopic(topicId);
+
+            return Ok(new { TopicUpdateStatus = status });
         }
     }
 
