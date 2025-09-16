@@ -21,11 +21,11 @@ public partial class User
 
     public string? Role { get; set; }
 
-    public bool? IsBlocked { get; set; }
+    public bool? IsBlocked { get; set; } = false;
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; private set; }
 
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; private set; }
 
     public virtual ICollection<Exam> ExamApprovedByUsers { get; set; } = new List<Exam>();
 

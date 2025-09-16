@@ -11,11 +11,13 @@ namespace Infrastructure.Repositories.Interfaces
     {
         public Task<int> AddQuestion(Question question, int eid);
 
+        public Task<int> AddQuestionsToExam(List<Question> questions, int eid);
+
         public Task<List<Question>> GetQuestionsByExamId(int examId);
 
         public Question GetQuestionById(int questionId);
 
-        public Task<int> UpdateQuestion(Question qid);
+        public Task<int> UpdateQuestion(Question question, int qid);
 
     }
 }

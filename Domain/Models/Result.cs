@@ -13,9 +13,9 @@ public partial class Result
 
     public decimal? Score { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
+    public DateTime? CreatedAt { get; private set; }
 
-    public DateTime? UpdatedAt { get; set; }
+    public DateTime? UpdatedAt { get; private set; }
 
     public virtual Exam EidNavigation { get; set; } = null!;
 

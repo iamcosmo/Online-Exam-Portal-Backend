@@ -12,10 +12,12 @@ namespace OEP.Controllers
     public class QuestionsController : Controller
     {
         private readonly IQuestionRepository _questionRepository;
+        private readonly IExamRepository _examRepository;
 
-        public QuestionsController(IQuestionRepository repo)
+        public QuestionsController(IQuestionRepository repo, IExamRepository examRepository)
         {
             _questionRepository = repo;
+            _examRepository = examRepository;
         }
 
         [HttpGet("questions-index")]
@@ -26,26 +28,131 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Examiner")]
         [HttpPost("add-question")]
-        public async Task<IActionResult> AddQuestion([FromBody] QuestionDTO question, [FromQuery] int examId)
+        public async Task<IActionResult> AddQuestion([FromBody] AddQuestionDTO question, [FromQuery] int examId)
         {
-          
-            Question quest = new Question
+
+            var exam = _examRepository.GetExamByIdForExaminer(examId);
+
+            var availableQuestionCount = await _questionRepository.GetQuestionsByExamId(examId);
+            if (availableQuestionCount.Count + 1> exam.TotalQuestions)
+            {
+                return BadRequest("Adding this questions would exceed the total number of questions allowed for this exam.");
+            }
+
+            Question quest = new()
             {
                 Type = question.type,
                 Question1 = question.question,
                 Marks = question.marks,
                 Options = question.options,
-                CorrectOptions = question.correctOptions
+                CorrectOptions = question.correctOptions,
+                ApprovalStatus = question.ApprovalStatus
             };
             var result = await _questionRepository.AddQuestion(quest, examId);
             return result > 0 ? Ok("Question added successfully") : BadRequest("Failed to add Question");
         }
 
-        //[HttpPut("update-exam")]
-        //public IActionResult UpdateExam([FromBody] Exam exam)
-        //{
-        //    var result = _examRepository.UpdateExam(exam);
-        //    return result > 0 ? Ok("Exam updated successfully") : NotFound("Exam not found or no changes made");
-        //}
+        [Authorize(Roles = "Examiner")]
+        [HttpPost("add-questions-to-exam")]
+
+        public async Task<IActionResult> AddQuestionsToExam([FromBody] List<AddQuestionDTO> questions, [FromQuery] int examId)
+        {
+
+            if(questions == null || questions.Count == 0)
+            {
+                return BadRequest("Question list is empty.");
+            }
+
+            var exam = _examRepository.GetExamByIdForExaminer(examId);
+
+            var availableQuestionCount = await _questionRepository.GetQuestionsByExamId(examId);
+            if (availableQuestionCount.Count + questions.Count > exam.TotalQuestions)
+            {
+                return BadRequest("Adding these questions would exceed the total number of questions allowed for this exam.");
+            }
+
+            if (exam==null)
+            {
+                return BadRequest("Exam Not Found.");
+            }
+
+            if (questions.Any(q => string.IsNullOrWhiteSpace(q.question) || q.marks <= 0))
+            {
+                return BadRequest("One or more questions have invalid data.");
+            }
+
+
+            List<Question> questionList = new();
+            foreach (var question in questions)
+            {
+                Question quest = new()
+                {
+                    Type = question.type,
+                    Question1 = question.question,
+                    Marks = question.marks,
+                    Options = question.options,
+                    CorrectOptions = question.correctOptions,
+                    ApprovalStatus = question.ApprovalStatus
+                };
+                questionList.Add(quest);
+            }
+            var result = await _questionRepository.AddQuestionsToExam(questionList, examId);
+            return result > 0 ? Ok("Questions added successfully") : BadRequest("Failed to add Questions");
+        }
+
+
+        [Authorize(Roles = "Examiner")]
+        [HttpGet("get-question-by-id/{Id}")]
+        public IActionResult GetQuestionById(int Id)
+        {
+            var result = _questionRepository.GetQuestionById(Id);
+            if (result != null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest("Failed to get Question");
+            }
+        }
+
+        [Authorize(Roles = "Examiner")]
+        [HttpGet("get-question-by-examId/{examId}")]
+        public async Task<IActionResult> GetQuestionByExam(int examId)
+        {
+            var result = await _questionRepository.GetQuestionsByExamId(examId);
+            if (result == null)
+            {
+                return StatusCode(500, "An error occurred while retrieving questions.");
+            }
+            if (result.Count == 0)
+            {
+                return NotFound("No questions found for the specified exam.");
+            }
+            return Ok(result);
+        }
+
+        [Authorize(Roles = "Examiner")]
+        [HttpPut("update-question/{qId}")]
+        public async Task<IActionResult> UpdateOneQuestion([FromBody] UpdateQuestionDTO question, int qId)
+        {
+            var existingQuestion = _questionRepository.GetQuestionById(qId);
+            if (existingQuestion == null)
+            {
+                return NotFound("Question not found");
+            }
+
+            var updatedQuestion = new Question
+            {
+                Type = question.type,
+                Question1 = question.question,
+                Marks = question.marks,
+                Options = question.options,
+                CorrectOptions = question.correctOptions,
+                ApprovalStatus = question.ApprovalStatus
+            };
+            var result = await _questionRepository.UpdateQuestion(updatedQuestion, qId);
+            return result > 0 ? Ok("Question updated successfully") : StatusCode(500, "Failed to update question");
+        }
     }
 }

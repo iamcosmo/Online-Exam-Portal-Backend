@@ -22,6 +22,7 @@ namespace OEP.Controllers
             _examRepository = examRepository;
         }
 
+
         [HttpGet("adminindex")]
         public IActionResult Index()
         {
@@ -29,6 +30,7 @@ namespace OEP.Controllers
         }
 
         // GET /users?role=admin
+
         [HttpGet]
         public IActionResult GetUsers([FromQuery] string? role = null)
         {
@@ -40,6 +42,7 @@ namespace OEP.Controllers
         }
 
         // GET /users/{id}
+
         [HttpGet("{id}")]
         public IActionResult GetUserById(int id)
         {

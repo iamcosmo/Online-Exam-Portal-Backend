@@ -7,20 +7,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Data;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-
 namespace Infrastructure.Repositories.Implementations
 {
     public class ExamRepository : IExamRepository
     {
         private readonly AppDbContext _context;
-        private readonly ILogger<ExamRepository> _log;
         private readonly IConfiguration _config;
 
-        public ExamRepository(AppDbContext dbContext, ILogger<ExamRepository> logger, IConfiguration configuration)
+        public ExamRepository(AppDbContext dbContext, IConfiguration configuration)
         {
             _context = dbContext;
-            _log = logger;
             _config = configuration;
         }
 
@@ -31,47 +27,64 @@ namespace Infrastructure.Repositories.Implementations
             return await _context.SaveChangesAsync();
 
         }
-        public int UpdateExam(Exam exam)
+        public int UpdateExam(int examId, UpdateExamDTO dto)
         {
-            Exam ToBeUpdatedExam = _context.Exams.FirstOrDefault(e => e.Eid == exam.Eid);
-            if (ToBeUpdatedExam.TotalMarks != exam.TotalMarks)
+
+            Exam ToBeUpdatedExam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
+            if (dto.TotalMarks != 0 && ToBeUpdatedExam.TotalMarks != dto.TotalMarks)
             {
-                ToBeUpdatedExam.TotalMarks = exam.TotalMarks;
+                ToBeUpdatedExam.TotalMarks = dto.TotalMarks;
             }
-            else if (ToBeUpdatedExam.TotalQuestions != exam.TotalQuestions)
+
+            if (dto.Description != null)
             {
-                ToBeUpdatedExam.TotalQuestions = exam.TotalQuestions;
+                ToBeUpdatedExam.Description = dto.Description;
+            }
+            if (dto.Duration != null)
+            {
+                ToBeUpdatedExam.Duration = dto.Duration;
+            }
+            if (dto.Tids != null)
+            {
+                ToBeUpdatedExam.Tids = dto.Tids;
+            }
+            if (dto.DisplayedQuestions != null)
+            {
+                ToBeUpdatedExam.DisplayedQuestions = dto.DisplayedQuestions;
             }
             return _context.SaveChanges();
         }
         public int DeleteExam(int examId)
         {
 
-            var responses = _context.Responses.Where(r => r.Eid == examId);
-            var results = _context.Results.Where(r => r.Eid == examId);
-            var questions = _context.Questions.Where(q => q.Eid == examId);
-            var exam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
-
-            if (exam == null) return 0;
-
-            _context.Responses.RemoveRange(responses);
-            _context.Results.RemoveRange(results);
-            _context.Questions.RemoveRange(questions);
-            _context.Exams.Remove(exam);
-
-            return _context.SaveChanges();
-
-            /*
-                ALTER TABLE Question
-                ADD CONSTRAINT FK_Question_Exam
-                FOREIGN KEY (Eid) REFERENCES Exams(EID)
-                ON DELETE CASCADE;
-            */
+            try
+            {
+                var exam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
+                if (exam != null && exam.ApprovalStatus == 1)
+                {
+                    exam.setApprovalStatus();
+                    return _context.SaveChanges();
+                }
+                else if (exam == null)
+                {
+                    return -1;
+                }
+                else
+                {
+                    return 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return -99;
+            }
 
         }
         public List<GetExamDataDTO> GetExams()
         {
             var examdata = _context.Exams.Include(e => e.Results.Where(s => s.Eid == e.Eid))
+                .Where(e => e.Questions != null && e.ApprovalStatus == 1)
             .Select(e => new GetExamDataDTO
             {
                 eid = e.Eid,
@@ -88,14 +101,9 @@ namespace Infrastructure.Repositories.Implementations
             if (examdata == null) return new List<GetExamDataDTO> { };
             else return examdata;
         }
-        public List<Exam> GetExamsForExaminer(int userid)
+        public StudentExamViewDTO GetExams(int examId)
         {
-            var examdata = _context.Exams.Where(e => e.UserId == userid).ToList();
-            return examdata;
-        }
-        public StudentExamViewDTO GetExamById(int examId)
-        {
-            return (StudentExamViewDTO)_context.Exams.Where(e => e.Eid == examId && e.ApprovalStatus == 1)
+            return (StudentExamViewDTO)_context.Exams.Where(e => e.Eid == examId && e.ApprovalStatus == 1 && e.Questions != null)
                 .Select(e => new StudentExamViewDTO
                 {
                     Name = e.Name,
@@ -104,8 +112,15 @@ namespace Infrastructure.Repositories.Implementations
                     Duration = e.Duration,
                     Tids = e.Tids
 
-                });
+                })
+                .FirstOrDefault();
         }
+        public List<Exam> GetExamsForExaminer(int userid)
+        {
+            var examdata = _context.Exams.Where(e => e.UserId == userid).ToList();
+            return examdata;
+        }
+
         public Exam GetExamByIdForExaminer(int examId)
         {
             return _context.Exams.FirstOrDefault(e => e.Eid == examId);
@@ -123,6 +138,7 @@ namespace Infrastructure.Repositories.Implementations
         public int GetExamAttempts(int userId, int examId)
         {
             var result = _context.Results.FirstOrDefault(r => r.UserId == userId && r.Eid == examId);
+            if (result == null) return 0;
             return (int)result.Attempts;
         }
 
@@ -184,40 +200,10 @@ namespace Infrastructure.Repositories.Implementations
             }
 
             int status = _context.SaveChanges();
-            _log.LogInformation("status=" + status);
             return status;
 
         }
-        public List<ExamResultsDTO> ViewExamResults(int examid, int userid)
-        {
-            List<ExamResultsDTO> results = _context.Results.Where(r => r.Eid == examid && r.UserId == userid).Select(r => new ExamResultsDTO
-            {
-                UserId = r.UserId,
-                Eid = r.Eid,
-                Attempts = r.Attempts,
-                Score = r.Score
-            }).ToList();
 
-            return results;
-        }
-        //Using ADO.NET
-        public int CreateExamResults(int examid, int userid)
-        {
-            string connectionString = _config.GetConnectionString("DefaultConnection");
-            using (var connection = new SqlConnection(connectionString))
-            {
-                using (var command = new SqlCommand("CreateExamResult", connection))
-                {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@ExamId", examid);
-                    command.Parameters.AddWithValue("@UserId", userid);
-
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    return rowsAffected > 0 ? 1 : 0;
-                }
-            }
-        }
     }
 }
 

@@ -1,0 +1,33 @@
+﻿using Infrastructure.Repositories.Implementations;
+using Infrastructure.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
+namespace OEP.Controllers
+{
+    [Authorize(Roles = "Student")]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class ResultsController : Controller
+    {
+        private readonly IResultRespository _resultRepo;
+        public ResultsController(IResultRespository repo)
+        {
+            _resultRepo = repo;
+        }
+
+        [HttpPost("view-exam-results/{examid}")]
+        public IActionResult ViewExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
+        {
+            var attemptedExams = _resultRepo.ViewExamResults(examid, userid);
+            return Ok(attemptedExams);
+        }
+
+        [HttpPost("create-results/{examid}")]
+        public IActionResult CreateExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
+        {
+            var status = _resultRepo.CreateExamResults(examid, userid);
+            return status > 0 ? Ok("Result created") : StatusCode(500, "Result Could not be created.");
+        }
+    }
+}

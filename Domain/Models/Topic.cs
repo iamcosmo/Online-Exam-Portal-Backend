@@ -5,11 +5,12 @@ namespace Domain.Models;
 
 public partial class Topic
 {
+    public Topic() { ApprovalStatus = 0; }
     public int Tid { get; set; }
 
     public string? Subject { get; set; }
 
-    public int? ApprovalStatus { get; set; }
+    public int? ApprovalStatus { get; private set; }
 
     public int? ApprovedByUserId { get; set; }
 

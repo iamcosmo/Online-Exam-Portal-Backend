@@ -1,6 +1,5 @@
 
 using Domain.Data;
-using Domain.Models;
 using Infrastructure.Repositories.Implementations;
 using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services;
@@ -30,6 +29,9 @@ namespace oep
                 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
                 builder.Services.AddScoped<IExamFeedbackRepository, ExamFeedbackRepository>();
 
+                builder.Services.AddScoped<ITopicRepository, TopicRepository>();
+                builder.Services.AddScoped<IResultRespository, ResultRepository>();
+                builder.Services.AddScoped<IQuestionFeedbackRepository, QuestionFeedbackRepository>();
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
                 builder.Services.AddControllers();
@@ -99,7 +101,7 @@ namespace oep
 
 
                 var app = builder.Build();
-                //app.UseMiddleware<GlobalExceptionMiddleware>();
+
                 // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
