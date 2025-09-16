@@ -9,20 +9,23 @@ using System.Threading.Tasks;
 namespace Infrastructure.Repositories.Interfaces
 {
 
-        public interface IAdminRepository
-        {
+    public interface IAdminRepository
+    {
         Task<bool> RegisterAdminAsync(AdminCreateDto dto);
 
-      Task<bool> ApproveExamAsync(int examId,int status);
-            //Task<bool> ReviewReportedQuestionAsync(int questionId);
-            Task<bool> BlockUserAsync(int userId);
-            Task<IEnumerable<ExamFeedback>> GetExamFeedbacksAsync(int examId);
+        Task<bool> ApproveExamAsync(int examId, int status);
+        //Task<bool> ReviewReportedQuestionAsync(int questionId);
+        Task<bool> BlockUserAsync(int userId);
+        Task<IEnumerable<ExamFeedback>> GetExamFeedbacksAsync(int examId);
 
-             //Task<List<Question>> GetAllReportedQuestionsAsync();
+        //Task<List<Question>> GetAllReportedQuestionsAsync();
 
-           Task<List<QuestionReport>> GetAllReportedQuestionsAsync();
-           Task<QuestionReport?> GetReportedQuestionByIdAsync(int qid);
-          Task<bool> UpdateReportedQuestionStatusAsync(int qid, int status);
+        Task<List<QuestionReport>> GetAllReportedQuestionsAsync();
+        Task<QuestionReport?> GetReportedQuestionByIdAsync(int qid);
+        Task<bool> UpdateReportedQuestionStatusAsync(int qid, int status);
+        Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync();
+
+        Task<int> ApproveOrRejectTopic(int topicId);
 
     }
 

@@ -25,8 +25,8 @@ namespace Infrastructure.Repositories.Implementations
         {
             var user = await _context.Users.FirstOrDefaultAsync(u =>
                 u.Email == dto.Email && u.Role == "Admin");
-                
-                // && !u.IsActive && !u.IsDeleted);
+
+            // && !u.IsActive && !u.IsDeleted);
 
             if (user == null)
                 return false;
@@ -35,7 +35,7 @@ namespace Infrastructure.Repositories.Implementations
                 return false;
 
             user.FullName = dto.Name;
-           user.Password = (dto.Password); // implement your hashing logic
+            user.Password = (dto.Password); // implement your hashing logic
             user.IsBlocked = true;
 
             SuperAdminRepository.InvalidateToken(dto.Email);
@@ -46,11 +46,11 @@ namespace Infrastructure.Repositories.Implementations
 
 
 
-        public async Task<bool> ApproveExamAsync(int examId,int status)
-            {
-            Console.WriteLine("status: "+status);
-                var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
-                if (exam == null) return false;
+        public async Task<bool> ApproveExamAsync(int examId, int status)
+        {
+            Console.WriteLine("status: " + status);
+            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
+            if (exam == null) return false;
 
             exam.setApprovalStatus();
             await _context.SaveChangesAsync();
@@ -110,6 +110,19 @@ namespace Infrastructure.Repositories.Implementations
             question.ApprovalStatus = status;
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync()
+        {
+            return await _context.Topics.Select(t => new ApproveTopicsDTO { Id = t.Tid, TopicName = t.Subject }).ToListAsync();
+        }
+
+        public async Task<int> ApproveOrRejectTopic(int topicId)
+        {
+            Topic? topic = await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId);
+
+            if (topic != null) { topic.SetApprovalStatus(1); await _context.SaveChangesAsync(); }
+            return topic != null ? 1 : 0;
         }
     }
 
