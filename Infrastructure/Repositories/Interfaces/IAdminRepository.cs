@@ -1,16 +1,19 @@
-﻿using System;
+﻿using Domain.Models;
+using Infrastructure.DTOs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Domain.Models;
 
 namespace Infrastructure.Repositories.Interfaces
 {
 
         public interface IAdminRepository
         {
-            Task<bool> ApproveExamAsync(int examId,int status);
+        Task<bool> RegisterAdminAsync(AdminCreateDto dto);
+
+      Task<bool> ApproveExamAsync(int examId,int status);
             //Task<bool> ReviewReportedQuestionAsync(int questionId);
             Task<bool> BlockUserAsync(int userId);
             Task<IEnumerable<ExamFeedback>> GetExamFeedbacksAsync(int examId);

@@ -2,13 +2,16 @@
 using Domain.Models;
 using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace OEP.Controllers
 {
 
     [ApiController]
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
+    
     public class AdminController : ControllerBase
     {
         private readonly IAdminRepository _adminRepository;
@@ -17,6 +20,19 @@ namespace OEP.Controllers
         {
             _adminRepository = adminRepository;
         }
+
+
+        [HttpPost("register")]
+        [AllowAnonymous]
+        public async Task<IActionResult> RegisterAdmin([FromBody] AdminCreateDto dto)
+        {
+            var result = await _adminRepository.RegisterAdminAsync(dto);
+            if (!result)
+                return BadRequest("Invalid or expired token.");
+
+            return Ok("Admin registered successfully.");
+        }
+
 
         // Replace the ApproveOrRejectExam method with the following:
 
