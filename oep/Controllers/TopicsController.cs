@@ -17,7 +17,7 @@ namespace OEP.Controllers
             _topicRepo = topic;
         }
 
-        [HttpPost("get-topic")]
+        [HttpGet("get-topic")]
         public IActionResult GetTopicsAction()
         {
 
@@ -27,7 +27,7 @@ namespace OEP.Controllers
         }
 
 
-        [HttpPost("get-topic/{topicId}")]
+        [HttpGet("get-topic/{topicId}")]
         public IActionResult GetTopicsAction([FromRoute] int topicId)
         {
 
@@ -44,7 +44,7 @@ namespace OEP.Controllers
             var CreatedTopic = _topicRepo.CreateTopic(TopicName);
             if (CreatedTopic == null) return StatusCode(500, "Could not add Topic");
 
-            return Ok(new { Message = "Topic Created", CreatedTopic = CreatedTopic });
+            return Ok(new { Message = "Topic Created", CreatedTopicStatus = CreatedTopic });
         }
 
         [HttpPost("update-topic/{Tid}")]
@@ -53,7 +53,7 @@ namespace OEP.Controllers
             var UpdatedTopic = _topicRepo.UpdateTopic(updateTopicdto.Name, Tid);
             if (UpdatedTopic == null) return StatusCode(500, "Could not update Topic");
 
-            return Ok(new { Message = "Topic Updated", UpdatedTopic = UpdatedTopic });
+            return Ok(new { Message = "Topic Updated", UpdatedTopicStatus = UpdatedTopic });
         }
 
         [HttpPost("delete-topic/{topicId}")]
@@ -62,7 +62,7 @@ namespace OEP.Controllers
             var DeletedTopic = _topicRepo.DeleteTopic(topicId);
             if (DeletedTopic == null) return StatusCode(500, "Could not delete Topic");
 
-            return Ok(new { Message = "Topic Deleted", DeletedTopic = DeletedTopic });
+            return Ok(new { Message = "Topic Deleted", DeletedTopicStatus = DeletedTopic });
         }
 
 
