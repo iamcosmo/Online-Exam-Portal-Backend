@@ -12,6 +12,8 @@ public partial class Topic
 
     public int? ApprovalStatus { get; private set; }
 
+    public void SetApprovalStatus(int val) { this.ApprovalStatus = val; }
+
     public int? ApprovedByUserId { get; set; }
 
     public virtual User? ApprovedByUser { get; set; }
