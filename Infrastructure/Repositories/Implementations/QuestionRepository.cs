@@ -7,11 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Infrastructure.DTOs.QuestionsDTO;
 
 namespace Infrastructure.Repositories.Implementations
 {
     public class QuestionRepository : IQuestionRepository
     {
+
         private readonly AppDbContext _context;
 
         public QuestionRepository(AppDbContext dbContext)
@@ -19,22 +21,44 @@ namespace Infrastructure.Repositories.Implementations
             _context = dbContext;
         }
 
-        public async Task<int> AddQuestion(Question question, int eid)
+        public async Task<int> AddQuestion(AddQuestionDTO question, int eid)
         {
-            question.Eid = eid;
+            Question quest = new()
+            {
+                Type = question.type,
+                Question1 = question.question,
+                Marks = question.marks,
+                Options = question.options,
+                CorrectOptions = question.correctOptions,
+                ApprovalStatus = question.ApprovalStatus
+            };
 
-            await _context.Questions.AddAsync(question);
+            quest.Eid = eid;
+
+            await _context.Questions.AddAsync(quest);
             return await _context.SaveChangesAsync();
 
         }
 
-        public async Task<int> AddQuestionsToExam(List<Question> questions, int eid)
+        public async Task<int> AddQuestionsToExam(List<AddQuestionDTO> questions, int eid)
         {
+            List<Question> questionList = new();
             foreach (var question in questions)
             {
-                question.Eid = eid;
+                Question quest = new()
+                {
+                    Eid= eid,
+                    Type = question.type,
+                    Question1 = question.question,
+                    Marks = question.marks,
+                    Options = question.options,
+                    CorrectOptions = question.correctOptions,
+                    ApprovalStatus = question.ApprovalStatus
+                };
+                questionList.Add(quest);
             }
-            await _context.Questions.AddRangeAsync(questions);
+            
+            await _context.Questions.AddRangeAsync(questionList);
             return await _context.SaveChangesAsync();
         }
 
@@ -50,8 +74,19 @@ namespace Infrastructure.Repositories.Implementations
 
         }
 
-        public async Task<int> UpdateQuestion(Question updatedQuestion, int qid)
+        public async Task<int> UpdateQuestion(UpdateQuestionDTO question, int qid)
         {
+
+            var updatedQuestion = new Question
+            {
+                Type = question.type,
+                Question1 = question.question,
+                Marks = question.marks,
+                Options = question.options,
+                CorrectOptions = question.correctOptions,
+                ApprovalStatus = question.ApprovalStatus
+            };
+
             var existingQuestion = await _context.Questions.FirstOrDefaultAsync(q => q.Qid == qid);
             if (existingQuestion == null)
                 return 0;

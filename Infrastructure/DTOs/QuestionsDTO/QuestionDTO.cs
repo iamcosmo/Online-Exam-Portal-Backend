@@ -4,10 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.DTOs
+namespace Infrastructure.DTOs.QuestionsDTO
 {
-    public class AddQuestionDTO
+    public class QuestionDTO
     {
+        public int eid { get; set; }
+
         public string type { get; set; }
 
         public string question { get; set; }
@@ -18,7 +20,6 @@ namespace Infrastructure.DTOs
 
         public string correctOptions { get; set; }
 
-        public int ApprovalStatus { get; set; }
 
     }
 }
