@@ -1,6 +1,5 @@
 ﻿using Domain.Data;
 using Domain.Models;
-using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -10,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Infrastructure.Services;
+using Infrastructure.DTOs.adminDTOs;
 
 namespace Infrastructure.Repositories.Implementations
 {

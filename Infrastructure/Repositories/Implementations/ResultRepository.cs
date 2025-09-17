@@ -1,5 +1,5 @@
 ﻿using Domain.Data;
-using Infrastructure.DTOs;
+using Infrastructure.DTOs.ExamDTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;

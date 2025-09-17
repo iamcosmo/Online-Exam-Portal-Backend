@@ -1,5 +1,5 @@
 ﻿using Domain.Models;
-using Infrastructure.DTOs;
+using Infrastructure.DTOs.ExamDTOs;
 
 namespace Infrastructure.Repositories.Interfaces
 {

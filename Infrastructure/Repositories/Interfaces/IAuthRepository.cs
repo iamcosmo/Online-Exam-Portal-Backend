@@ -1,5 +1,5 @@
 ﻿using Domain.Models;
-using Infrastructure.DTOs;
+using Infrastructure.DTOs.AuthDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
