@@ -1,5 +1,6 @@
 ﻿using Domain.Data;
 using Domain.Models;
+using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -34,15 +35,24 @@ namespace Infrastructure.Repositories.Implementations
             return _context.Users.Where(u => u.Role == role).ToList();
         }
 
-        public int UpdateUser(User user)
+        public int UpdateUser(int id,UpdateUserDTO dto)
         {
-            var existingUser = _context.Users.FirstOrDefault(u => u.UserId == user.UserId);
+            var existingUser = _context.Users.FirstOrDefault(u => u.UserId == dto.Id);
             if (existingUser == null)
                 return 0;
 
-            _context.Entry(existingUser).CurrentValues.SetValues(user);
+            if (!string.IsNullOrEmpty(dto.FullName))
+                existingUser.FullName = dto.FullName;
+
+            if (dto.Dob != null)
+                existingUser.Dob = dto.Dob;
+
+            if (!string.IsNullOrEmpty(dto.PhoneNo))
+                existingUser.PhoneNo = dto.PhoneNo;
+
             return _context.SaveChanges();
         }
+
 
         public int DeleteUser(int id)
         {
