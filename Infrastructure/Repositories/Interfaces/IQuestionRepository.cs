@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Infrastructure.DTOs.QuestionsDTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,17 @@ namespace Infrastructure.Repositories.Interfaces
 {
     public interface IQuestionRepository
     {
-        public Task<int> AddQuestion(Question question, int eid);
+        public Task<int> AddQuestion(AddQuestionDTO question, int eid);
 
-        public Task<int> AddQuestionsToExam(List<Question> questions, int eid);
+        public Task<int> AddQuestionsToExam(List<AddQuestionDTO> questions, int eid);
 
         public Task<List<Question>> GetQuestionsByExamId(int examId);
 
         public Question GetQuestionById(int questionId);
 
-        public Task<int> UpdateQuestion(Question question, int qid);
+        public Task<int> UpdateQuestion(UpdateQuestionDTO question, int qid);
+
+        public Task<int> DeleteQuestion(int questionId);
 
     }
 }
