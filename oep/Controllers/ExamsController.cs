@@ -23,29 +23,7 @@ namespace OEP.Controllers
         [HttpPost("add-exam")]
         public async Task<IActionResult> AddExamAction([FromBody] AddExamDTO dto)
         {
-            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
-
-            if (userIdClaim == null)
-            {
-                return Unauthorized("User ID not found in token claims.");
-            }
-
-            var userId = userIdClaim.Value;
-
-            Exam exam = new Exam
-            {
-
-                Name = dto.Name,
-                Description = dto.Description,
-                TotalQuestions = dto.TotalQuestions,
-                TotalMarks = dto.TotalMarks,
-                Duration = dto.Duration,
-                Tids = dto?.Tids,
-                DisplayedQuestions = dto.DisplayedQuestions,
-                UserId = int.Parse(userId)
-
-            };
-            var result = await _examRepository.AddExam(exam);
+            var result = await _examRepository.AddExam(dto);
             return result > 0 ? Ok("Exam added successfully") : BadRequest("Failed to add exam");
         }
 

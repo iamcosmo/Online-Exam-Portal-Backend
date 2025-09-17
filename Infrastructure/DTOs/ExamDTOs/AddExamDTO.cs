@@ -9,6 +9,7 @@ namespace Infrastructure.DTOs.ExamDTOs
     public class AddExamDTO
     {
         public string Name { get; set; }
+        public int userId { get; set; }
         public string? Description { get; set; }
         public int TotalQuestions { get; set; }
         public decimal? TotalMarks { get; set; }

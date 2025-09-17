@@ -9,7 +9,7 @@ namespace Infrastructure.DTOs.ExamDTOs
     public class ReceivedResponseDTO
     {
         public int Qid { get; set; }
-        public string? Resp { get; set; }
+        public List<string?> Resp { get; set; }
 
     }
 }
