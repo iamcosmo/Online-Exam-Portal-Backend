@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.DTOs
+namespace Infrastructure.DTOs.ExamDTOs
 {
     public class ReceivedResponseDTO
     {
         public int Qid { get; set; }
-        public string? Resp { get; set; }
+        public List<string?> Resp { get; set; }
 
     }
 }

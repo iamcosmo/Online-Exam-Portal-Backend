@@ -19,6 +19,8 @@ public partial class Question
 
     public string? Options { get; set; }
 
+    // JSON string like {"1":"Option A", "2":"Option B"}
+
     public string? CorrectOptions { get; set; }
 
     public int? ApprovalStatus { get; set; }

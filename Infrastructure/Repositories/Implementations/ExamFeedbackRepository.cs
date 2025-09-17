@@ -1,6 +1,5 @@
 ﻿using Domain.Data;
 using Domain.Models;
-using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Infrastructure.DTOs.ExamDTOs;
 
 namespace Infrastructure.Repositories.Implementations
 {

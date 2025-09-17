@@ -1,21 +1,22 @@
 ﻿using Domain.Data;
 using Domain.Models;
+using Infrastructure.DTOs;
+using Infrastructure.DTOs.QuestionsDTO;
 using Infrastructure.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Infrastructure.DTOs.QuestionsDTO;
-using Infrastructure.DTOs;
 
 namespace Infrastructure.Repositories.Implementations
 {
     public class QuestionRepository : IQuestionRepository
     {
 
-        private readonly AppDbContext _context;   
+        private readonly AppDbContext _context;
 
         public QuestionRepository(AppDbContext dbContext)
         {
@@ -24,13 +25,15 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<int> AddQuestion(AddQuestionDTO question, int eid)
         {
+
+
             Question quest = new()
             {
                 Type = question.type,
                 Question1 = question.question,
                 Marks = question.marks,
                 Options = question.options,
-                CorrectOptions = question.correctOptions,
+                CorrectOptions = JsonConvert.SerializeObject(question.correctOptions),
                 ApprovalStatus = question.ApprovalStatus
             };
 
@@ -48,17 +51,17 @@ namespace Infrastructure.Repositories.Implementations
             {
                 Question quest = new()
                 {
-                    Eid= eid,
+                    Eid = eid,
                     Type = question.type,
                     Question1 = question.question,
                     Marks = question.marks,
                     Options = question.options,
-                    CorrectOptions = question.correctOptions,
+                    CorrectOptions = JsonConvert.SerializeObject(question.correctOptions),
                     ApprovalStatus = question.ApprovalStatus
                 };
                 questionList.Add(quest);
             }
-            
+
             await _context.Questions.AddRangeAsync(questionList);
             return await _context.SaveChangesAsync();
         }
@@ -84,7 +87,7 @@ namespace Infrastructure.Repositories.Implementations
                 Question1 = question.question,
                 Marks = question.marks,
                 Options = question.options,
-                CorrectOptions = question.correctOptions,
+                CorrectOptions = JsonConvert.SerializeObject(question.correctOptions),
                 ApprovalStatus = question.ApprovalStatus
             };
 
@@ -128,12 +131,12 @@ namespace Infrastructure.Repositories.Implementations
                 if (exam != null && exam.ApprovalStatus == 1)
                 {
                     exam.ApprovalStatus = 0;
-                    if (question.Marks.HasValue && exam.TotalMarks.HasValue)                    
-                        exam.TotalMarks -= question.Marks.Value;          
+                    if (question.Marks.HasValue && exam.TotalMarks.HasValue)
+                        exam.TotalMarks -= question.Marks.Value;
                 }
 
-              
-            }         
+
+            }
 
             // Delete related QuestionReports
             var questionReports = await _context.QuestionReports.Where(qr => qr.Qid == qid).ToListAsync();

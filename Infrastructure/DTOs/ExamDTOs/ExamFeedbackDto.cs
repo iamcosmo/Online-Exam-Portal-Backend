@@ -4,11 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastructure.DTOs
+namespace Infrastructure.DTOs.ExamDTOs
 {
-    public class BlockUserDTO
+    public class ExamFeedbackDto
     {
-        public int uid
+        public string? Feedback
+        {
+            get; set;
+        }
+        public int Userid
         {
             get; set;
         }

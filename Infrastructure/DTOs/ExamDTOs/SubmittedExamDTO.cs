@@ -1,4 +1,4 @@
-﻿namespace Infrastructure.DTOs
+﻿namespace Infrastructure.DTOs.ExamDTOs
 {
     public class SubmittedExamDTO
     {
