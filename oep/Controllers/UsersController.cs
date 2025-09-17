@@ -14,15 +14,15 @@ namespace OEP.Controllers
     public class UsersController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
-        private readonly IExamRepository _examRepository;   
+        private readonly IExamRepository _examRepository;
 
-        public UsersController(IUserRepository userRepository,IExamRepository examRepository)
+        public UsersController(IUserRepository userRepository, IExamRepository examRepository)
         {
             _userRepository = userRepository;
             _examRepository = examRepository;
         }
 
-     
+
         // GET /users?role=admin
         [Authorize(Roles = "Admin")]
         [HttpGet]

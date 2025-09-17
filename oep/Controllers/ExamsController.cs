@@ -32,8 +32,6 @@ namespace OEP.Controllers
 
             var userId = userIdClaim.Value;
 
-            Console.WriteLine("userId= " + userId);
-
             Exam exam = new Exam
             {
 

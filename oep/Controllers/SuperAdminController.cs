@@ -17,10 +17,10 @@ namespace OEP.Controllers
         }
 
         [HttpPost("generate-token")]
-        public async Task<IActionResult> GenerateToken()
+        public async Task<IActionResult> GenerateToken([FromBody] GenerateTokenDTO tokenDTO)
         {
-            var token = await _superAdminRepo.GenerateTokenAsync();
-            return Ok(new { Token = token });
+            var tok = await _superAdminRepo.GenerateTokenAsync(tokenDTO.role, tokenDTO.email);
+            return Ok(new { Token = tok });
         }
 
         [HttpGet("admins")]

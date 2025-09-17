@@ -8,44 +8,33 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Infrastructure.Services;
 
 namespace Infrastructure.Repositories.Implementations
 {
     public class SuperAdminRepository : ISuperAdminRepository
     {
         private readonly AppDbContext _context;
-        private static readonly Dictionary<string, string> _tokenStore = new(); // email -> token
+        private readonly TokenService tokenService;
 
-        public SuperAdminRepository(AppDbContext context)
+        public SuperAdminRepository(AppDbContext context, TokenService token)
         {
             _context = context;
+            tokenService = token;
         }
 
-        public async Task<string> GenerateTokenAsync()
+        public async Task<string> GenerateTokenAsync(string role, string email)
         {
-            //var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
-            //if (existingUser == null)
-            //{
-            //    var user = new User
-            //    {
-            //        Email = email,
-            //        Role = "Admin",
-            //        //IsBlocked = false,
-            //        //IsDeleted = false
-            //    };
-            //    _context.Users.Add(user);
-            //    await _context.SaveChangesAsync();
-            //}
-            //var validation=new Validation
-            var token = Guid.NewGuid().ToString();
+            var JwtToken = tokenService.GenerateJwtTokenForRegistration(role, email);
             var validation = new Validation
-            { 
-                Token = token,
-               
+            {
+                Token = JwtToken,
             };
+
             _context.Validations.Add(validation);
             _context.SaveChanges();
-            return token;
+            return JwtToken;
         }
 
         public async Task<IEnumerable<AdminListDto>> GetAllAdminsAsync()

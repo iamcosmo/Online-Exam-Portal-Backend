@@ -15,7 +15,7 @@ namespace Infrastructure.Repositories.Interfaces
         /// </summary>
         /// <param// n//ame="email">Email of the admin to invite</param>
         /// <returns>Generated token string</returns>
-        Task<string> GenerateTokenAsync();
+        Task<string> GenerateTokenAsync(string role, string email);
 
         /// <summary>
         /// Returns a list of all users with Role = "Admin"
@@ -26,7 +26,7 @@ namespace Infrastructure.Repositories.Interfaces
         /// <summary>
         /// Blocks an admin by setting IsActive = false
         /// </summary>
-        
+
         /// <returns>True if successful, false if not found or not an admin</returns>
         Task<bool> BlockAdminAsync(int userId);
 
