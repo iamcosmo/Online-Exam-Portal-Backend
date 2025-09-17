@@ -26,17 +26,14 @@ namespace OEP.Controllers
         // GET /users?role=admin
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult GetUsers([FromQuery] string? role = null)
+        public IActionResult GetUsers([FromQuery] string role)
         {
-            var users = string.IsNullOrEmpty(role)
-                ? _userRepository.GetAllUsers()
-                : _userRepository.GetUsersByRole(role);
-
+            var users = _userRepository.GetUsersByRole(role);
             return Ok(users);
         }
 
         // GET /users/{id}
-        [Authorize(Roles = "Admin, Examiner")]
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public IActionResult GetUserById(int id)
         {
@@ -51,16 +48,7 @@ namespace OEP.Controllers
         [HttpPatch("{id}")]
         public IActionResult UpdateUser(int id, [FromBody] UpdateUserDTO dto)
         {
-            var user = new User
-            {
-                FullName = dto.FullName,
-                Dob = dto.Dob,
-                PhoneNo = dto.PhoneNo
-            };
-            if (id != user.UserId)
-                return BadRequest("User ID mismatch");
-
-            var result = _userRepository.UpdateUser(user);
+            var result = _userRepository.UpdateUser(id, dto);
             return result > 0 ? Ok("User updated successfully") : NotFound("User not found");
         }
 
