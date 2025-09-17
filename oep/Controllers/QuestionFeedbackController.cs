@@ -24,7 +24,7 @@ namespace OEP.Controllers
             return Ok("QuestionFeedback Index Page");
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Student")]
         [HttpPost("add-question-feedback")]
         public IActionResult AddQuestionFeedback([FromBody] AddQuestionFeedbackDTO qFeedback, [FromQuery] int qId)
         {
@@ -47,7 +47,7 @@ namespace OEP.Controllers
             return result > 0 ? Ok("Feedback added successfully") : BadRequest("Failed to add feedback");
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Examiner")]
         [HttpGet("get-question-feedback/{qId}")]
         public async Task<IActionResult> GetQuestionFeedback(int qId)
         {
