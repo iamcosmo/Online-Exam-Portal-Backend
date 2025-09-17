@@ -1,6 +1,6 @@
 ﻿using Domain.Data;
 using Domain.Models;
-using Infrastructure.DTOs;
+using Infrastructure.DTOs.adminDTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;

@@ -1,7 +1,7 @@
 ﻿using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Web.Http.ModelBinding;
-using Infrastructure.DTOs;
+using Infrastructure.DTOs.adminDTOs;
 
 namespace OEP.Controllers
 {

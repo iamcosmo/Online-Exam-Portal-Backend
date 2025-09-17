@@ -1,4 +1,4 @@
-﻿using Infrastructure.DTOs;
+﻿using Infrastructure.DTOs.ExamDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

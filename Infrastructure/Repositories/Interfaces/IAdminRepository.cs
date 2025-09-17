@@ -1,5 +1,5 @@
 ﻿using Domain.Models;
-using Infrastructure.DTOs;
+using Infrastructure.DTOs.adminDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

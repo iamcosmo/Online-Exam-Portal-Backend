@@ -1,11 +1,12 @@
 ﻿using Domain.Data;
 using Domain.Models;
-using Infrastructure.DTOs;
+using Infrastructure.DTOs.ExamDTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Data;
 namespace Infrastructure.Repositories.Implementations
 {
@@ -21,8 +22,22 @@ namespace Infrastructure.Repositories.Implementations
         }
 
         //CRUD
-        public async Task<int> AddExam(Exam exam)
+        public async Task<int> AddExam(AddExamDTO dto)
         {
+            Exam exam = new Exam
+            {
+
+                Name = dto.Name,
+                Description = dto.Description,
+                TotalQuestions = dto.TotalQuestions,
+                TotalMarks = dto.TotalMarks,
+                Duration = dto.Duration,
+                Tids = dto?.Tids,
+                DisplayedQuestions = dto.DisplayedQuestions,
+                UserId = dto.userId
+
+            };
+
             await _context.Exams.AddAsync(exam);
             return await _context.SaveChangesAsync();
 
@@ -31,9 +46,9 @@ namespace Infrastructure.Repositories.Implementations
         {
 
             Exam ToBeUpdatedExam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
-            if (dto.TotalQuestions != 0 && ToBeUpdatedExam.TotalMarks != dto.TotalQuestions)
+            if (dto.TotalQuestions != 0 && ToBeUpdatedExam.TotalQuestions != dto.TotalQuestions)
             {
-                ToBeUpdatedExam.TotalMarks = dto.TotalQuestions;
+                ToBeUpdatedExam.TotalQuestions = (int)dto.TotalQuestions;
             }
 
             if (dto.Description != null)
@@ -83,7 +98,8 @@ namespace Infrastructure.Repositories.Implementations
         }
         public List<GetExamDataDTO> GetExams()
         {
-            var examdata = _context.Exams.Include(e => e.Results.Where(s => s.Eid == e.Eid))
+            var examdata = _context.Exams
+                .Include(e => e.Results.Where(s => s.Eid == e.Eid))
                 .Where(e => e.Questions != null && e.ApprovalStatus == 1)
             .Select(e => new GetExamDataDTO
             {
@@ -179,24 +195,35 @@ namespace Infrastructure.Repositories.Implementations
                 return -1;
             }
 
-            exam.TotalMarks = submittedData.TotalMarks;
-            exam.Duration = submittedData.Duration;
-            exam.DisplayedQuestions = submittedData.DisplayedQuestions;
-            exam.Name = submittedData.Name;
-
             foreach (var responseDto in submittedData.Responses)
             {
-                var response = new Response
-                {
-                    Eid = submittedData.EID,
-                    Qid = responseDto.Qid,
-                    UserId = submittedData.UserId,
-                    Resp = responseDto.Resp,
-                    RespScore = null,
-                    IsSubmittedFresh = true
-                };
 
-                _context.Responses.Add(response);
+                var existingResponse = _context.Responses
+                        .FirstOrDefault(r => r.UserId == submittedData.UserId && r.Eid == submittedData.EID && r.Qid == responseDto.Qid);
+
+                if (existingResponse == null)
+                {
+                    var newResponse = new Response
+                    {
+                        Eid = submittedData.EID,
+                        Qid = responseDto.Qid,
+                        UserId = submittedData.UserId,
+                        Resp = JsonConvert.SerializeObject(responseDto.Resp),
+                        RespScore = null,
+                        IsSubmittedFresh = true
+                    };
+
+                    _context.Responses.Add(newResponse);
+                }
+                else
+                {
+                    existingResponse.Resp = JsonConvert.SerializeObject(responseDto.Resp);
+                    existingResponse.IsSubmittedFresh = true;
+                    existingResponse.RespScore = null;
+
+                }
+
+
             }
 
             int status = _context.SaveChanges();

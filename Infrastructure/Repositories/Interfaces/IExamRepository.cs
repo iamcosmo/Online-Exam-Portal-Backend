@@ -1,11 +1,11 @@
 ﻿using Domain.Models;
-using Infrastructure.DTOs;
+using Infrastructure.DTOs.ExamDTOs;
 
 namespace Infrastructure.Repositories.Interfaces
 {
     public interface IExamRepository
     {
-        public Task<int> AddExam(Exam exam);
+        public Task<int> AddExam(AddExamDTO dto);
         public int UpdateExam(int examId, UpdateExamDTO dto);
         public List<GetExamDataDTO> GetExams();
         public StudentExamViewDTO GetExams(int examId);
