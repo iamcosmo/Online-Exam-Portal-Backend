@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Infrastructure.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Infrastructure.Repositories.Interfaces
         List<User> GetAllUsers();
         User? GetUserById(int id);
         List<User> GetUsersByRole(string role);
-        int UpdateUser(User user);
+        int UpdateUser(int id, UpdateUserDTO dto);
         int DeleteUser(int id);
 
     }
