@@ -1,6 +1,7 @@
 ﻿using Domain.Data;
 using Domain.Models;
 using Infrastructure.DTOs;
+using Infrastructure.DTOs.UserDTOs;
 using Infrastructure.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
