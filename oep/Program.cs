@@ -1,5 +1,6 @@
 
 using Domain.Data;
+using Domain.Models;
 using Infrastructure.Repositories.Implementations;
 using Infrastructure.Repositories.Interfaces;
 using Infrastructure.Services;
@@ -21,6 +22,11 @@ namespace oep
             //JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
             // Add services to the container.
+            builder.Services.Configure<EmailSettings>(
+            builder.Configuration.GetSection("EmailSettings"));
+
+            builder.Services.AddTransient<EmailService>();
+
             builder.Services.AddScoped<TokenService>();
             builder.Services.AddScoped<IExamRepository, ExamRepository>();
             builder.Services.AddScoped<ISuperAdminRepository, SuperAdminRepository>();
