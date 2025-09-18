@@ -12,7 +12,7 @@ namespace Infrastructure.Repositories.Interfaces
     {
         public Task<int> AddQuestion(AddQuestionDTO question, int eid);
 
-        public Task<int> AddQuestionsToExam(List<AddQuestionDTO> questions, int eid);
+        public Task<int> AddBatchQuestionsToExam(AddQuestionsByBatchDTO questions, int eid);
 
         public Task<List<Question>> GetQuestionsByExamId(int examId);
 

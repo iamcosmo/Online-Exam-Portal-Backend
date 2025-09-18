@@ -25,7 +25,10 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<int> AddQuestion(AddQuestionDTO question, int eid)
         {
-
+           
+            bool topicExistsAndApproved = await _context.Topics.AnyAsync(t => t.Tid == question.Tid && t.ApprovalStatus == 1);
+            if (!topicExistsAndApproved)
+                return 0;
 
             Question quest = new()
             {
@@ -33,6 +36,7 @@ namespace Infrastructure.Repositories.Implementations
                 Question1 = question.question,
                 Marks = question.marks,
                 Options = question.options,
+                Tid = question.Tid,
                 CorrectOptions = JsonConvert.SerializeObject(question.correctOptions),
                 ApprovalStatus = question.ApprovalStatus
             };
@@ -41,22 +45,22 @@ namespace Infrastructure.Repositories.Implementations
 
             await _context.Questions.AddAsync(quest);
             return await _context.SaveChangesAsync();
-
         }
 
-        public async Task<int> AddQuestionsToExam(List<AddQuestionDTO> questions, int eid)
+        public async Task<int> AddBatchQuestionsToExam(AddQuestionsByBatchDTO questions, int eid)
         {
             List<Question> questionList = new();
-            foreach (var question in questions)
+            foreach (var question in questions.Questions)
             {
                 Question quest = new()
                 {
                     Eid = eid,
-                    Type = question.type,
-                    Question1 = question.question,
-                    Marks = question.marks,
-                    Options = question.options,
-                    CorrectOptions = JsonConvert.SerializeObject(question.correctOptions),
+                    Tid = questions.Tid,
+                    Type = question.Type,
+                    Question1 = question.Question,
+                    Marks = question.Marks,
+                    Options = question.Options,
+                    CorrectOptions = JsonConvert.SerializeObject(question.CorrectOptions),
                     ApprovalStatus = question.ApprovalStatus
                 };
                 questionList.Add(quest);
