@@ -7,7 +7,7 @@ public partial class Question
 {
     public int Qid { get; set; }
 
-    public int? Tid { get; set; }
+    public int Tid { get; set; }
 
     public int? Eid { get; set; }
 

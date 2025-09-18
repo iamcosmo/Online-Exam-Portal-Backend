@@ -3,6 +3,7 @@ using Domain.Models;
 using Infrastructure.DTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Infrastructure.Repositories.Implementations
 {
@@ -20,6 +21,25 @@ namespace Infrastructure.Repositories.Implementations
         public Topic GetTopics(int topicId)
         {
             return (Topic)_context.Topics.Where(t => t.Tid == topicId);
+        }
+
+        public List<Topic> GetTopicsForQuestions(int examId)
+        {
+            var exam = _context.Exams.FirstOrDefault(e => e.Eid == examId && e.SubmittedForApproval == false);
+            if (exam == null)
+            {
+                return new List<Topic> { };
+            }
+
+            var topicIds = JsonConvert.DeserializeObject<List<int>>(exam.Tids);
+
+            // Fetch topics from the database
+            var topics = _context.Topics
+                .Where(t => topicIds.Contains(t.Tid))
+                .ToList();
+
+            return topics;
+
         }
         public int CreateTopic(string TopicName)
         {

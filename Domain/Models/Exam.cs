@@ -15,7 +15,7 @@ public partial class Exam
     [ForeignKey("User")]
     public int? UserId { get; set; }
 
-    public string? Tids { get; set; }
+    public string Tids { get; set; }
 
     public int? TotalQuestions { get; set; }
 

@@ -31,9 +31,10 @@ namespace Infrastructure.Repositories.Implementations
                 Description = dto.Description,
                 TotalQuestions = dto.TotalQuestions,
                 Duration = dto.Duration,
-                Tids = dto?.Tids,
+                Tids = JsonConvert.SerializeObject(dto.Tids),
                 DisplayedQuestions = dto.DisplayedQuestions,
-                UserId = dto.userId
+                UserId = dto.userId,
+                SubmittedForApproval = false
 
             };
 
@@ -100,6 +101,33 @@ namespace Infrastructure.Repositories.Implementations
             }
 
         }
+        public List<Exam> GetExamsForExaminer(int userid)
+        {
+            var examdata = _context.Exams.Where(e => e.UserId == userid).ToList();
+            return examdata;
+        }
+        public Exam GetExamByIdForExaminer(int examId)
+        {
+            return _context.Exams.FirstOrDefault(e => e.Eid == examId);
+        }
+        public List<Exam> GetExamsAttemptedByUser(int UserId)
+        {
+            var user = _context.Users
+                   .Include(u => u.ExamUsers)
+                   .ThenInclude(eu => eu.Results)
+                   .FirstOrDefault(u => u.UserId == UserId);
+
+            return (List<Exam>)user.ExamUsers;
+
+        }
+        public int GetExamAttempts(int userId, int examId)
+        {
+            var result = _context.Results.FirstOrDefault(r => r.UserId == userId && r.Eid == examId);
+            if (result == null) return 0;
+            return (int)result.Attempts;
+        }
+
+        //Student functions
         public List<GetExamDataDTO> GetExams()
         {
             var examdata = _context.Exams
@@ -135,34 +163,6 @@ namespace Infrastructure.Repositories.Implementations
                 })
                 .FirstOrDefault();
         }
-        public List<Exam> GetExamsForExaminer(int userid)
-        {
-            var examdata = _context.Exams.Where(e => e.UserId == userid).ToList();
-            return examdata;
-        }
-
-        public Exam GetExamByIdForExaminer(int examId)
-        {
-            return _context.Exams.FirstOrDefault(e => e.Eid == examId);
-        }
-        public List<Exam> GetExamsAttemptedByUser(int UserId)
-        {
-            var user = _context.Users
-                   .Include(u => u.ExamUsers)
-                   .ThenInclude(eu => eu.Results)
-                   .FirstOrDefault(u => u.UserId == UserId);
-
-            return (List<Exam>)user.ExamUsers;
-
-        }
-        public int GetExamAttempts(int userId, int examId)
-        {
-            var result = _context.Results.FirstOrDefault(r => r.UserId == userId && r.Eid == examId);
-            if (result == null) return 0;
-            return (int)result.Attempts;
-        }
-
-        //Student functions
         public StartExamResponseDTO StartExam(int examId)
         {
             var Data = _context.Exams.Include(e => e.Questions)
