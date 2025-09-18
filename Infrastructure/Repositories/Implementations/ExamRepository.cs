@@ -30,7 +30,6 @@ namespace Infrastructure.Repositories.Implementations
                 Name = dto.Name,
                 Description = dto.Description,
                 TotalQuestions = dto.TotalQuestions,
-                TotalMarks = dto.TotalMarks,
                 Duration = dto.Duration,
                 Tids = dto?.Tids,
                 DisplayedQuestions = dto.DisplayedQuestions,
@@ -46,11 +45,16 @@ namespace Infrastructure.Repositories.Implementations
         {
 
             Exam ToBeUpdatedExam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
-            if (dto.TotalQuestions != 0 && ToBeUpdatedExam.TotalQuestions != dto.TotalQuestions)
+
+            if (ToBeUpdatedExam == null)
+            {
+                return 0;
+            }
+
+            if (dto.TotalQuestions != null && ToBeUpdatedExam.TotalQuestions != dto.TotalQuestions)
             {
                 ToBeUpdatedExam.TotalQuestions = (int)dto.TotalQuestions;
             }
-
             if (dto.Description != null)
             {
                 ToBeUpdatedExam.Description = dto.Description;
@@ -61,7 +65,7 @@ namespace Infrastructure.Repositories.Implementations
             }
             if (dto.Tids != null)
             {
-                ToBeUpdatedExam.Tids = dto.Tids;
+                ToBeUpdatedExam.Tids = JsonConvert.SerializeObject(dto.Tids);
             }
             if (dto.DisplayedQuestions != null)
             {
