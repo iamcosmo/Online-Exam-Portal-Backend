@@ -27,17 +27,21 @@ namespace Infrastructure.Repositories.Implementations
             return _context.SaveChanges();
             
         }
-        public async Task<string> GetFeedbackByQuestionId(int qid)
+        public async Task<List<GetQuestionFeedback>> GetFeedbackByQuestionId(int qid)
         {
-            var questionReport = await _context.QuestionReports
-            .FirstOrDefaultAsync(QuestionReport => QuestionReport.Qid == qid);
+            List<QuestionReport> questionReports = await _context.QuestionReports
+                    .Where(QuestionReport => QuestionReport.Qid == qid)
+                    .ToListAsync();
 
-            if (questionReport != null)
+            List<GetQuestionFeedback> feedbacks = questionReports.Select(r => new GetQuestionFeedback
             {
-                return questionReport.Feedback; 
-            }
+                qId = r.Qid,
+                feedback = r.Feedback ?? string.Empty,
+                userId = r.UserId
+            }).ToList();
 
-            return "No feedback found for this question.";
+            // Fix: Return an empty list if no feedbacks found, not a string
+            return feedbacks;
         }
 
         public async Task<List<GetQuestionFeedback>> GetAllFeedbacks()
@@ -53,15 +57,16 @@ namespace Infrastructure.Repositories.Implementations
 
             return feedbacks;
         }
-        public async Task<int> UpdateQuestionFeedback(QuestionReport qFeedback, int qid)
+        public async Task<int> UpdateQuestionFeedback(string updatedFeedback, int qid, int uId)
         {
             
-            var existingReport = await _context.QuestionReports.FirstOrDefaultAsync(qr => qr.Qid == qid);
+            var existingReport = await _context.QuestionReports
+                .FirstOrDefaultAsync(qr => qr.Qid == qid && qr.UserId == uId);
 
             
             if (existingReport != null)
             {
-                existingReport.Feedback = qFeedback.Feedback;
+                existingReport.Feedback = updatedFeedback;
                
                 return await _context.SaveChangesAsync();
             }

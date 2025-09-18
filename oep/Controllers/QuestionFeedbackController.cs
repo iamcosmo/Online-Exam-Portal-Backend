@@ -48,7 +48,7 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Admin,Examiner")]
-        [HttpGet("get-question-feedback/{qId}")]
+        [HttpGet("get-question-feedback-by-QID/{qId}")]
         public async Task<IActionResult> GetQuestionFeedback(int qId)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
@@ -70,6 +70,17 @@ namespace OEP.Controllers
             var result = await _questionFeedbackRepository.GetAllFeedbacks();
             return Ok(result);
         }
+
+        [Authorize(Roles = "Student")]
+        [HttpGet("update-question-feedback/{qId}")]
+        public async Task<IActionResult> UpdateYourFeedback([FromBody] int uerId)
+        {
+
+            var result = await _questionFeedbackRepository.GetAllFeedbacks();
+            return Ok(result);
+        }
+
+
 
     }
 }

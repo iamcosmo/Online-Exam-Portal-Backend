@@ -14,10 +14,10 @@ namespace Infrastructure.Repositories.Interfaces
 
         public int AddQuestionFeedbackDTO(QuestionReport qFeedback);
 
-        public Task<string> GetFeedbackByQuestionId(int qid);
+        public Task<List<GetQuestionFeedback>> GetFeedbackByQuestionId(int qid);
 
         public Task<List<GetQuestionFeedback>> GetAllFeedbacks();
 
-        public Task<int> UpdateQuestionFeedback(QuestionReport qFeedback, int qid);
+        public Task<int> UpdateQuestionFeedback(string updatedFeedback, int qid, int uId);
     }
 }
