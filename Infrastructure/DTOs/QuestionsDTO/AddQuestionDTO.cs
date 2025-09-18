@@ -16,6 +16,8 @@ namespace Infrastructure.DTOs.QuestionsDTO
 
         public string options { get; set; }
 
+        public int Tid { get; set; }
+
         public List<string> correctOptions { get; set; }
 
         public int ApprovalStatus { get; set; }

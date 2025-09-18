@@ -25,7 +25,10 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<int> AddQuestion(AddQuestionDTO question, int eid)
         {
-
+           
+            bool topicExistsAndApproved = await _context.Topics.AnyAsync(t => t.Tid == question.Tid && t.ApprovalStatus == 1);
+            if (!topicExistsAndApproved)
+                return 0;
 
             Question quest = new()
             {
@@ -33,6 +36,7 @@ namespace Infrastructure.Repositories.Implementations
                 Question1 = question.question,
                 Marks = question.marks,
                 Options = question.options,
+                Tid = question.Tid,
                 CorrectOptions = JsonConvert.SerializeObject(question.correctOptions),
                 ApprovalStatus = question.ApprovalStatus
             };
@@ -41,7 +45,6 @@ namespace Infrastructure.Repositories.Implementations
 
             await _context.Questions.AddAsync(quest);
             return await _context.SaveChangesAsync();
-
         }
 
         public async Task<int> AddQuestionsToExam(List<AddQuestionDTO> questions, int eid)

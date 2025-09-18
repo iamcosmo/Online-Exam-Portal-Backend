@@ -30,13 +30,13 @@ namespace OEP.Controllers
         [HttpPost("add-question")]
         public async Task<IActionResult> AddQuestion([FromBody] AddQuestionDTO question, [FromQuery] int examId)
         {
-            var exam = _examRepository.GetExamByIdForExaminer(examId);
+            Exam exam = _examRepository.GetExamByIdForExaminer(examId);
+            if (exam == null)
+                return BadRequest("Exam Not Found.");
 
             var availableQuestionCount = await _questionRepository.GetQuestionsByExamId(examId);
             if (availableQuestionCount.Count + 1 > exam.TotalQuestions)
-            {
                 return BadRequest("Adding this questions would exceed the total number of questions allowed for this exam.");
-            }
 
             var result = await _questionRepository.AddQuestion(question, examId);
             return result > 0 ? Ok("Question added successfully") : BadRequest("Failed to add Question");
