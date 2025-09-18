@@ -44,7 +44,7 @@ namespace OEP.Controllers
             };
 
             var result = _questionFeedbackRepository.AddQuestionFeedbackDTO(feedback);
-            return result > 0 ? Ok("Feedback added successfully") : BadRequest("Failed to add feedback");
+            return Ok(result);
         }
 
         [Authorize(Roles = "Admin,Examiner")]
@@ -71,11 +71,19 @@ namespace OEP.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,Examiner,Student")]
+        [HttpGet("get-all-question-feedbacks-by-userId/{userId}")]
+        public async Task<IActionResult> GetAllFeedbacksByUserId(int userId)
+        {
+            var result = await _questionFeedbackRepository.GetAllFeedbacks(userId);
+            return Ok(result);
+        }
+
         [Authorize(Roles = "Student")]
         [HttpGet("update-question-feedback/{qId}")]
-        public async Task<IActionResult> UpdateYourFeedback([FromBody] int uerId, [FromBody] string newFeedback, int qId)
+        public async Task<IActionResult> UpdateYourFeedback([FromBody] UpdateQuestionFeedbackDTO uFeedback, int qId)
         {
-            var result = await _questionFeedbackRepository.UpdateQuestionFeedback(newFeedback, qId, uerId);
+            var result = await _questionFeedbackRepository.UpdateQuestionFeedback(uFeedback.feedback, qId, uFeedback.userId);
             if (result > 0)            
                 return Ok("Feedback Updated Successfully");            
             else            
