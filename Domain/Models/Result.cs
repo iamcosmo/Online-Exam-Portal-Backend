@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Domain.Models;
 
 public partial class Result
 {
+    [Key]
+    public int Rid { get; set; }
     public int UserId { get; set; }
 
     public int Eid { get; set; }
