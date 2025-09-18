@@ -24,7 +24,19 @@ namespace OEP.Controllers
         }
 
 
-       
+        [HttpPost("approve-exam-list")]
+        public async Task<IActionResult> ToBeApprovedExamListAction()
+        {
+            var examList = await _adminRepository.ExamsToBeApprovedList();
+            if (examList == null)
+            {
+                return Ok("No Exams to be Approved.");
+            }
+            else
+            {
+                return Ok(new { ExamList = examList });
+            }
+        }
 
 
         // Replace the ApproveOrRejectExam method with the following:
