@@ -12,7 +12,7 @@ namespace Infrastructure.Repositories.Interfaces
     public interface IQuestionFeedbackRepository
     {
 
-        public int AddQuestionFeedbackDTO(QuestionReport qFeedback);
+        public string AddQuestionFeedbackDTO(QuestionReport qFeedback);
 
         public Task<List<GetQuestionFeedback>> GetFeedbackByQuestionId(int qid);
 

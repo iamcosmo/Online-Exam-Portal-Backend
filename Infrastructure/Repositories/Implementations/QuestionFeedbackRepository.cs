@@ -21,11 +21,16 @@ namespace Infrastructure.Repositories.Implementations
         {
             _context = dbContext;
         }
-        public int AddQuestionFeedbackDTO(QuestionReport qFeedback)
+        public string AddQuestionFeedbackDTO(QuestionReport qFeedback)
         {
+            bool exists = _context.QuestionReports
+                .Any(qr => qr.Qid == qFeedback.Qid && qr.UserId == qFeedback.UserId);
+
+            if (exists)          
+                return "You have alreayd Reported this!";            
+
             _context.QuestionReports.Add(qFeedback);
-            return _context.SaveChanges();
-            
+            return _context.SaveChanges()>0?"Reported Successfully!!":"There was an error Reporting this Question!";
         }
         public async Task<List<GetQuestionFeedback>> GetFeedbackByQuestionId(int qid)
         {

@@ -44,7 +44,7 @@ namespace OEP.Controllers
             };
 
             var result = _questionFeedbackRepository.AddQuestionFeedbackDTO(feedback);
-            return result > 0 ? Ok("Feedback added successfully") : BadRequest("Failed to add feedback");
+            return Ok(result);
         }
 
         [Authorize(Roles = "Admin,Examiner")]
