@@ -73,11 +73,13 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpGet("update-question-feedback/{qId}")]
-        public async Task<IActionResult> UpdateYourFeedback([FromBody] int uerId)
+        public async Task<IActionResult> UpdateYourFeedback([FromBody] int uerId, [FromBody] string newFeedback, int qId)
         {
-
-            var result = await _questionFeedbackRepository.GetAllFeedbacks();
-            return Ok(result);
+            var result = await _questionFeedbackRepository.UpdateQuestionFeedback(newFeedback, qId, uerId);
+            if (result > 0)            
+                return Ok("Feedback Updated Successfully");            
+            else            
+                return Ok("No such Feedback Found!");            
         }
 
 
