@@ -21,11 +21,16 @@ namespace Infrastructure.Repositories.Implementations
         {
             _context = dbContext;
         }
-        public int AddQuestionFeedbackDTO(QuestionReport qFeedback)
+        public string AddQuestionFeedbackDTO(QuestionReport qFeedback)
         {
+            bool exists = _context.QuestionReports
+                .Any(qr => qr.Qid == qFeedback.Qid && qr.UserId == qFeedback.UserId);
+
+            if (exists)          
+                return "You have alreayd Reported this!";            
+
             _context.QuestionReports.Add(qFeedback);
-            return _context.SaveChanges();
-            
+            return _context.SaveChanges()>0?"Reported Successfully!!":"There was an error Reporting this Question!";
         }
         public async Task<List<GetQuestionFeedback>> GetFeedbackByQuestionId(int qid)
         {
@@ -47,6 +52,22 @@ namespace Infrastructure.Repositories.Implementations
         public async Task<List<GetQuestionFeedback>> GetAllFeedbacks()
         {
             List<QuestionReport> reports = await _context.QuestionReports.ToListAsync();
+
+            List<GetQuestionFeedback> feedbacks = reports.Select(r => new GetQuestionFeedback
+            {
+                qId = r.Qid,
+                feedback = r.Feedback ?? string.Empty,
+                userId = r.UserId
+            }).ToList();
+
+            return feedbacks;
+        }
+
+        public async Task<List<GetQuestionFeedback>> GetAllFeedbacks(int userId)
+        {
+            List<QuestionReport> reports = await _context.QuestionReports
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
 
             List<GetQuestionFeedback> feedbacks = reports.Select(r => new GetQuestionFeedback
             {
