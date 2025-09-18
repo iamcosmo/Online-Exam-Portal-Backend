@@ -13,6 +13,7 @@ namespace Infrastructure.Repositories.Interfaces
     {
         public List<Topic> GetTopics();
         public Topic GetTopics(int topicId);
+        public List<Topic> GetTopicsForQuestions(int examId);
         public int CreateTopic(string TopicName);
         public int UpdateTopic(string TopicName, int Tid);
         public int DeleteTopic(int topicId);

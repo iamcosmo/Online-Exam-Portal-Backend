@@ -36,6 +36,13 @@ namespace OEP.Controllers
             return Ok(topic);
         }
 
+        [HttpPost("get-exam-topics/{examId}")]
+        public IActionResult GetExamTopicsAction([FromRoute] int examId)
+        {
+            var topics = _topicRepo.GetTopicsForQuestions(examId);
+            return topics != null ? Ok(topics) : StatusCode(500, "Server not able to fetch related topics or no topics added.");
+
+        }
 
         [HttpPost("add-topic")]
         public IActionResult CreateTopicAction(string TopicName)
