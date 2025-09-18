@@ -53,15 +53,16 @@ namespace Infrastructure.Repositories.Implementations
 
             return feedbacks;
         }
-        public async Task<int> UpdateQuestionFeedback(QuestionReport qFeedback, int qid)
+        public async Task<int> UpdateQuestionFeedback(string updatedFeedback, int qid, int uId)
         {
             
-            var existingReport = await _context.QuestionReports.FirstOrDefaultAsync(qr => qr.Qid == qid);
+            var existingReport = await _context.QuestionReports
+                .FirstOrDefaultAsync(qr => qr.Qid == qid && qr.UserId == uId);
 
             
             if (existingReport != null)
             {
-                existingReport.Feedback = qFeedback.Feedback;
+                existingReport.Feedback = updatedFeedback;
                
                 return await _context.SaveChangesAsync();
             }

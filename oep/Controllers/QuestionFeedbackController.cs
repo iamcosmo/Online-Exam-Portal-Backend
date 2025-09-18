@@ -71,5 +71,16 @@ namespace OEP.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Student")]
+        [HttpGet("update-question-feedback/{qId}")]
+        public async Task<IActionResult> UpdateYourFeedback([FromBody] int uerId)
+        {
+
+            var result = await _questionFeedbackRepository.GetAllFeedbacks();
+            return Ok(result);
+        }
+
+
+
     }
 }

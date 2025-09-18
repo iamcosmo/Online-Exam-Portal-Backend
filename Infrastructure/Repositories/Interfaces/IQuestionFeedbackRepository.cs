@@ -18,6 +18,6 @@ namespace Infrastructure.Repositories.Interfaces
 
         public Task<List<GetQuestionFeedback>> GetAllFeedbacks();
 
-        public Task<int> UpdateQuestionFeedback(QuestionReport qFeedback, int qid);
+        public Task<int> UpdateQuestionFeedback(string updatedFeedback, int qid, int uId);
     }
 }
