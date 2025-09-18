@@ -1,6 +1,7 @@
 ﻿using Domain.Data;
 using Domain.Models;
 using Infrastructure.DTOs;
+using Infrastructure.DTOs.QuestionFeedbackDTO;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -37,6 +38,20 @@ namespace Infrastructure.Repositories.Implementations
             }
 
             return "No feedback found for this question.";
+        }
+
+        public async Task<List<GetQuestionFeedback>> GetAllFeedbacks()
+        {
+            List<QuestionReport> reports = await _context.QuestionReports.ToListAsync();
+
+            List<GetQuestionFeedback> feedbacks = reports.Select(r => new GetQuestionFeedback
+            {
+                qId = r.Qid,
+                feedback = r.Feedback ?? string.Empty,
+                userId = r.UserId
+            }).ToList();
+
+            return feedbacks;
         }
         public async Task<int> UpdateQuestionFeedback(QuestionReport qFeedback, int qid)
         {
