@@ -48,7 +48,7 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Admin,Examiner")]
-        [HttpGet("get-question-feedback/{qId}")]
+        [HttpGet("get-question-feedback-by-QID/{qId}")]
         public async Task<IActionResult> GetQuestionFeedback(int qId)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);

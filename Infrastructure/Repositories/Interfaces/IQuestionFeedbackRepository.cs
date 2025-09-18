@@ -14,7 +14,7 @@ namespace Infrastructure.Repositories.Interfaces
 
         public int AddQuestionFeedbackDTO(QuestionReport qFeedback);
 
-        public Task<string> GetFeedbackByQuestionId(int qid);
+        public Task<List<GetQuestionFeedback>> GetFeedbackByQuestionId(int qid);
 
         public Task<List<GetQuestionFeedback>> GetAllFeedbacks();
 
