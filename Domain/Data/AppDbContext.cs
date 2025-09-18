@@ -166,7 +166,8 @@ public partial class AppDbContext : DbContext
 
         modelBuilder.Entity<Result>(entity =>
         {
-            entity.HasKey(e => new { e.UserId, e.Eid }).HasName("PK__Results__BB91CD3C694FFCF9");
+            entity.HasKey(e => e.Rid).HasName("PK_Result");
+            entity.Property(e => e.Rid).ValueGeneratedOnAdd();
 
             entity.Property(e => e.Eid).HasColumnName("EID");
             entity.Property(e => e.CreatedAt)
