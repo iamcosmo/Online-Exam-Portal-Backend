@@ -26,6 +26,7 @@ public partial class Exam
     public string? Description { get; set; }
 
     public string? Name { get; set; }
+    public bool? SubmittedForApproval { get; set; } = false;
 
     public int? ApprovalStatus { get; set; }
 
