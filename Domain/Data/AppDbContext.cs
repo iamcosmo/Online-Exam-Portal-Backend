@@ -77,6 +77,11 @@ public partial class AppDbContext : DbContext
             entity.HasOne(d => d.User).WithMany(p => p.ExamUsers)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK__Exams__UserId__3F466844");
+
+            entity.Property(e => e.SubmittedForApproval)
+                  .HasColumnName("SubmittedForApproval")
+                  .HasDefaultValue(false);
+
         });
 
         modelBuilder.Entity<ExamFeedback>(entity =>
