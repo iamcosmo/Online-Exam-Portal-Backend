@@ -81,7 +81,7 @@ namespace Infrastructure.Repositories.Implementations
                 var exam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
                 if (exam != null && exam.ApprovalStatus == 1)
                 {
-                    exam.setApprovalStatus();
+                    exam.setApprovalStatus(0);
                     return _context.SaveChanges();
                 }
                 else if (exam == null)

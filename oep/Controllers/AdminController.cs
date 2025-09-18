@@ -47,38 +47,17 @@ namespace OEP.Controllers
         public async Task<IActionResult> ApproveOrRejectExam([FromBody] ExamApprovalStatusDTO dto)
         {
 
-            //Console.WriteLine("eidvalue= " + eid + " action= " + action);
-
-            //int status;
-
-            if (dto == null || string.IsNullOrWhiteSpace(dto.action))
+            if (dto == null || string.IsNullOrWhiteSpace(dto.action) || (dto.action != "approve" && dto.action != "reject"))
             {
                 return BadRequest("Invalid request data.");
             }
+            dto.action = dto.action.ToLower();
 
+            int result = await _adminRepository.ApproveExamAsync(dto);
 
-            int status;
-            string actionLower = dto.action.ToLower();
-
-            if (actionLower == "approve")
+            if (result >= 1)
             {
-                status = 1;
-            }
-            else if (actionLower == "reject")
-            {
-                status = 0;
-            }
-            else
-            {
-                return BadRequest("Invalid action. Use 'approve' or 'reject'.");
-            }
-
-
-            bool result = await _adminRepository.ApproveExamAsync(dto.eid, status);
-
-            if (result)
-            {
-                return Ok($"Exam with ID {dto.eid} has been {(status == 1 ? "approved" : "rejected")}.");
+                return Ok($"Exam with ID {dto.eid} has been {(dto.action == "approve" ? "approved" : "rejected")}.");
             }
             else
             {
@@ -91,9 +70,9 @@ namespace OEP.Controllers
 
 
         [HttpGet("reported-questions")]
-        public async Task<IActionResult> GetAllReportedQuestions()
+        public IActionResult GetAllReportedQuestions()
         {
-            var questions = await _adminRepository.GetAllReportedQuestionsAsync();
+            var questions = _adminRepository.GetAllReportedQuestionsAsync();
 
             if (questions == null || !questions.Any())
             {
@@ -108,9 +87,9 @@ namespace OEP.Controllers
         //Task<QuestionReport?> GetReportedQuestionByIdAsync(int qid);
         //Task<bool> UpdateReportedQuestionStatusAsync
         [HttpGet("review-questions/{qid}")]
-        public async Task<IActionResult> GetReportedQuestionById(int qid)
+        public IActionResult GetReportedQuestionById(int qid)
         {
-            var question = await _adminRepository.GetAllReportedQuestionsAsync();
+            var question = _adminRepository.GetReportedQuestionByIdAsync(qid);
             if (question == null)
                 return Ok("No reported questions found.");
             return Ok(question);
@@ -142,11 +121,19 @@ namespace OEP.Controllers
 
         // POST /block-users/{uid}
         [HttpPost("block-users")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+
         public async Task<IActionResult> BlockUser([FromBody] BlockUserDTO dto)
         {
-            var result = await _adminRepository.BlockUserAsync(dto.uid);
+            int result = await _adminRepository.BlockUserAsync(dto.uid);
+            if (result == -1)
+            {
+                return Unauthorized("You are not allowed to Block Admins.");
+            }
 
-            return result ? Ok($"User with ID {dto.uid} blocked.") : BadRequest("Blocking failed.");
+            return result >= 1 ? Ok($"User with ID {dto.uid} blocked.") : BadRequest("Blocking failed.");
         }
 
 
@@ -157,16 +144,18 @@ namespace OEP.Controllers
             var feedbacks = await _adminRepository.GetExamFeedbacksAsync(eid);
             return feedbacks != null ? Ok(feedbacks) : NotFound("No feedbacks found.");
         }
+
+
         [Authorize(Roles = "Admin")]
         [HttpGet("topic-list")]
         public async Task<IActionResult> TopicsToBeApprovedAction()
         {
             var topics = await _adminRepository.TopicsToBeApprovedAsync();
-
             if (topics == null || !topics.Any())
                 return NotFound();
             return Ok(new { Topics = topics, msg = "done" });
         }
+
         [Authorize(Roles = "Admin")]
         [HttpPatch("approve-topic")]
         public async Task<IActionResult> ApproveOrRejectTopicAction(int topicId)

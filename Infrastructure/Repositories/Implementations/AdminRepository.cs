@@ -1,6 +1,7 @@
 ﻿using Domain.Data;
 using Domain.Models;
 using Infrastructure.DTOs.adminDTOs;
+using Infrastructure.DTOs.ExamDTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -52,15 +53,16 @@ namespace Infrastructure.Repositories.Implementations
             return ExamList;
 
         }
-        public async Task<bool> ApproveExamAsync(int examId, int status)
+        public async Task<int> ApproveExamAsync(ExamApprovalStatusDTO dto)
         {
-            Console.WriteLine("status: " + status);
-            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
-            if (exam == null) return false;
 
-            exam.setApprovalStatus();
-            await _context.SaveChangesAsync();
-            return true;
+            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == dto.eid);
+            if (exam == null) return 0;
+
+            if (dto.action == "approve") { exam.setApprovalStatus(1); }
+            else if (dto.action == "reject") { exam.setApprovalStatus(0); }
+            exam.ApprovedByUserId = dto.userId;
+            return await _context.SaveChangesAsync();
 
         }
 
@@ -74,38 +76,35 @@ namespace Infrastructure.Repositories.Implementations
         //    return true;
         //}
 
-        public async Task<bool> BlockUserAsync(int userId)
+        public async Task<int> BlockUserAsync(int userId)
         {
             var user = await _context.Users.FindAsync(userId);
-            if (user == null) return false;
+            if (user == null) return 0;
+
+            if (user.Role == "Admin") { return -1; }
 
             user.IsBlocked = true;
             await _context.SaveChangesAsync();
-            return true;
+            return 1;
         }
 
-        public async Task<IEnumerable<ExamFeedback>> GetExamFeedbacksAsync(int examId)
+        public async Task<IEnumerable<ExamFeedbackViewDTO>> GetExamFeedbacksAsync(int examId)
         {
             return await _context.ExamFeedbacks
                 .Where(f => f.Eid == examId)
+                .Select(ef => new ExamFeedbackViewDTO { Eid = ef.Eid, Feedback = ef.Feedback, StudentId = ef.UserId })
                 .ToListAsync();
         }
 
 
-        public async Task<List<QuestionReport>> GetAllReportedQuestionsAsync()
+        public List<QuestionReport> GetAllReportedQuestionsAsync()
         {
-            return await _context.QuestionReports
-                .Include(r => r.QidNavigation)
-                .Include(r => r.User)
-                .ToListAsync();
+            return _context.QuestionReports.ToList();
         }
 
-        public async Task<QuestionReport?> GetReportedQuestionByIdAsync(int qid)
+        public QuestionReport? GetReportedQuestionByIdAsync(int qid)
         {
-            return await _context.QuestionReports
-                .Include(r => r.QidNavigation)
-                .Include(r => r.User)
-                .FirstOrDefaultAsync(r => r.Qid == qid);
+            return _context.QuestionReports.FirstOrDefault(r => r.Qid == qid);
         }
 
         public async Task<bool> UpdateReportedQuestionStatusAsync(int qid, int status)

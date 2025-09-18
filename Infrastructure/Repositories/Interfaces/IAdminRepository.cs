@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Infrastructure.DTOs.adminDTOs;
+using Infrastructure.DTOs.ExamDTOs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,16 +15,19 @@ namespace Infrastructure.Repositories.Interfaces
         //Task<bool> RegisterAdminAsync(AdminCreateDto dto);
 
         Task<List<Exam>> ExamsToBeApprovedList();
-        Task<bool> ApproveExamAsync(int examId, int status);
+        Task<int> ApproveExamAsync(ExamApprovalStatusDTO dto);
         //Task<bool> ReviewReportedQuestionAsync(int questionId);
-        Task<bool> BlockUserAsync(int userId);
-        Task<IEnumerable<ExamFeedback>> GetExamFeedbacksAsync(int examId);
+
+        List<QuestionReport> GetAllReportedQuestionsAsync();
+        QuestionReport? GetReportedQuestionByIdAsync(int qid);
+        Task<bool> UpdateReportedQuestionStatusAsync(int qid, int status);
+
+        Task<int> BlockUserAsync(int userId);
+        Task<IEnumerable<ExamFeedbackViewDTO>> GetExamFeedbacksAsync(int examId);
 
         //Task<List<Question>> GetAllReportedQuestionsAsync();
 
-        Task<List<QuestionReport>> GetAllReportedQuestionsAsync();
-        Task<QuestionReport?> GetReportedQuestionByIdAsync(int qid);
-        Task<bool> UpdateReportedQuestionStatusAsync(int qid, int status);
+
         Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync();
 
         Task<int> ApproveOrRejectTopic(int topicId);
