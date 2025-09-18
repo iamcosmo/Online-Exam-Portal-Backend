@@ -46,7 +46,7 @@ namespace OEP.Controllers
         // PATCH /users/{id}
         [Authorize(Roles = "Admin")]
         [HttpPatch("{id}")]
-        public IActionResult UpdateUser(int id, [FromBody] UpdateUserDTO dto)
+        public IActionResult UpdateUserAction(int id, [FromBody] UpdateUserDTO dto)
         {
             var result = _userRepository.UpdateUser(id, dto);
             return result > 0 ? Ok("User updated successfully") : NotFound("User not found");

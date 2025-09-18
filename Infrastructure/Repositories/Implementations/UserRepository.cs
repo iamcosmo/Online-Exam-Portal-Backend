@@ -1,6 +1,5 @@
 ﻿using Domain.Data;
 using Domain.Models;
-using Infrastructure.DTOs;
 using Infrastructure.DTOs.UserDTOs;
 using Infrastructure.Repositories.Interfaces;
 using System;
@@ -36,7 +35,7 @@ namespace Infrastructure.Repositories.Implementations
             return _context.Users.Where(u => u.Role == role).ToList();
         }
 
-        public int UpdateUser(int id,UpdateUserDTO dto)
+        public int UpdateUser(int id, UpdateUserDTO dto)
         {
             var existingUser = _context.Users.FirstOrDefault(u => u.UserId == dto.Id);
             if (existingUser == null)
