@@ -13,6 +13,7 @@ namespace Infrastructure.Repositories.Interfaces
     {
         //Task<bool> RegisterAdminAsync(AdminCreateDto dto);
 
+        Task<List<Exam>> ExamsToBeApprovedList();
         Task<bool> ApproveExamAsync(int examId, int status);
         //Task<bool> ReviewReportedQuestionAsync(int questionId);
         Task<bool> BlockUserAsync(int userId);

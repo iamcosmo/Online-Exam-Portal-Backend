@@ -45,7 +45,13 @@ namespace Infrastructure.Repositories.Implementations
         //}
 
 
+        public async Task<List<Exam>> ExamsToBeApprovedList()
+        {
+            List<Exam> ExamList = new List<Exam> { };
+            ExamList = await _context.Exams.Where(e => e.ApprovalStatus == 0).ToListAsync();
+            return ExamList;
 
+        }
         public async Task<bool> ApproveExamAsync(int examId, int status)
         {
             Console.WriteLine("status: " + status);
