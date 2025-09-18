@@ -11,5 +11,6 @@ namespace Infrastructure.DTOs.ExamDTOs
     {
         public int eid { get; set; }
         public string action { get; set; }
+        public int userId { get; set; }
     }
 }

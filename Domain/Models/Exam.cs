@@ -29,9 +29,9 @@ public partial class Exam
 
     public int? ApprovalStatus { get; set; }
 
-    public void setApprovalStatus() { this.ApprovalStatus = this.ApprovalStatus == 0 ? 1 : 0; }
+    public void setApprovalStatus(int val) { this.ApprovalStatus = val; }
 
-    public int? ApprovedByUserId { get; private set; }
+    public int? ApprovedByUserId { get; set; }
 
     public int? DisplayedQuestions { get; set; }
 
