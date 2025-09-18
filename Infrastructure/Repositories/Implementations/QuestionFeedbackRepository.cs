@@ -57,6 +57,22 @@ namespace Infrastructure.Repositories.Implementations
 
             return feedbacks;
         }
+
+        public async Task<List<GetQuestionFeedback>> GetAllFeedbacks(int userId)
+        {
+            List<QuestionReport> reports = await _context.QuestionReports
+                .Where(r => r.UserId == userId)
+                .ToListAsync();
+
+            List<GetQuestionFeedback> feedbacks = reports.Select(r => new GetQuestionFeedback
+            {
+                qId = r.Qid,
+                feedback = r.Feedback ?? string.Empty,
+                userId = r.UserId
+            }).ToList();
+
+            return feedbacks;
+        }
         public async Task<int> UpdateQuestionFeedback(string updatedFeedback, int qid, int uId)
         {
             
