@@ -48,7 +48,7 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Admin,Examiner")]
-        [HttpGet("get-question-feedback-by-QID/{qId}")]
+        [HttpGet("get-question-feedback-by-QID(e-a)/{qId}")]
         public async Task<IActionResult> GetQuestionFeedback(int qId)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
@@ -63,7 +63,7 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Admin,Examiner")]
-        [HttpGet("get-all-question-feedbacks")]
+        [HttpGet("get-all-question-feedbacks(e-a)")]
         public async Task<IActionResult> GetAllFeedbacks()
         {
             
