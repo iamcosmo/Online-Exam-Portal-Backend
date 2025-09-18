@@ -10,6 +10,7 @@ namespace Infrastructure.Repositories.Interfaces
         public List<GetExamDataDTO> GetExams();
         public StudentExamViewDTO GetExams(int examId);
         public List<Exam> GetExamsForExaminer(int userid);
+        public int SubmitExamForApproval(int examId);
 
         public Exam GetExamByIdForExaminer(int examId);
         public int DeleteExam(int examId);

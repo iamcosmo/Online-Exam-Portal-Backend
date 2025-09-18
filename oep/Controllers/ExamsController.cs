@@ -63,6 +63,16 @@ namespace OEP.Controllers
             return exam != null ? Ok(exam) : NotFound("Exam not found");
         }
 
+        [Authorize(Roles = "Examiner")]
+        [HttpPatch("/approval-exam/{examId}")]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+        public IActionResult SubmitExamForApprovalAction(int examId)
+        {
+            var result = _examRepository.SubmitExamForApproval(examId);
+            return result > 0 ? Ok("Exam submitted for approval") : StatusCode(500, "Internal Server Error while submitting for approval.");
+        }
+
 
 
         [Authorize(Roles = "Student")]

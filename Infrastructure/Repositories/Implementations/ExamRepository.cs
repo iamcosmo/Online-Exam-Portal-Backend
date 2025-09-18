@@ -235,6 +235,13 @@ namespace Infrastructure.Repositories.Implementations
 
         }
 
+        public int SubmitExamForApproval(int examId)
+        {
+            var exam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
+            exam.SubmittedForApproval = true;
+            return _context.SaveChanges();
+        }
+
     }
 }
 
