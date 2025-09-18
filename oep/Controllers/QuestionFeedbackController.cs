@@ -62,9 +62,14 @@ namespace OEP.Controllers
             return Ok(result);
         }
 
-
-
-
+        [Authorize(Roles = "Admin,Examiner")]
+        [HttpGet("get-all-question-feedbacks")]
+        public async Task<IActionResult> GetAllFeedbacks()
+        {
+            
+            var result = await _questionFeedbackRepository.GetAllFeedbacks();
+            return Ok(result);
+        }
 
     }
 }
