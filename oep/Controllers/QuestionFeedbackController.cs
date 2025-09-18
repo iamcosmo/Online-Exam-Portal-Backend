@@ -48,7 +48,7 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Admin,Examiner")]
-        [HttpGet("get-question-feedback-by-QID/{qId}")]
+        [HttpGet("get-question-feedback-by-QID(e-a)/{qId}")]
         public async Task<IActionResult> GetQuestionFeedback(int qId)
         {
             var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
@@ -63,7 +63,7 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Admin,Examiner")]
-        [HttpGet("get-all-question-feedbacks")]
+        [HttpGet("get-all-question-feedbacks(e-a)")]
         public async Task<IActionResult> GetAllFeedbacks()
         {
             
@@ -73,11 +73,13 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpGet("update-question-feedback/{qId}")]
-        public async Task<IActionResult> UpdateYourFeedback([FromBody] int uerId)
+        public async Task<IActionResult> UpdateYourFeedback([FromBody] int uerId, [FromBody] string newFeedback, int qId)
         {
-
-            var result = await _questionFeedbackRepository.GetAllFeedbacks();
-            return Ok(result);
+            var result = await _questionFeedbackRepository.UpdateQuestionFeedback(newFeedback, qId, uerId);
+            if (result > 0)            
+                return Ok("Feedback Updated Successfully");            
+            else            
+                return Ok("No such Feedback Found!");            
         }
 
 
