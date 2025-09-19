@@ -34,6 +34,13 @@ namespace OEP.Controllers
             if (exam == null)
                 return BadRequest("Exam Not Found.");
 
+            var tids_exams = exam.Tids ?? "[]";
+
+            // Check if Tid is valid if Tids are present
+            var tidsList = System.Text.Json.JsonSerializer.Deserialize<List<int>>(tids_exams);
+            if (tidsList != null && tidsList.Count > 0 && !tidsList.Contains(question.Tid))
+                return BadRequest("The provided Tid is not available for this exam.");
+
             var availableQuestionCount = await _questionRepository.GetQuestionsByExamId(examId);
             if (availableQuestionCount.Count + 1 > exam.TotalQuestions)
                 return BadRequest("Adding this questions would exceed the total number of questions allowed for this exam.");
