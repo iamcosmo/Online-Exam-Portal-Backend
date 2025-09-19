@@ -57,10 +57,10 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Examiner")]
-        [HttpGet("get-exams/e/{id}")]
-        public async Task<IActionResult> GetExamByIdForExaminerAction(int id)
+        [HttpGet("get-exams/e/{examId}")]
+        public async Task<IActionResult> GetExamByIdForExaminerAction([FromRoute] int examId)
         {
-            var exam = await _examRepository.GetExamByIdForExaminer(id);
+            var exam = await _examRepository.GetExamByIdForExaminer(examId);
             return exam != null ? Ok(exam) : NotFound("Exam not found");
         }
 
