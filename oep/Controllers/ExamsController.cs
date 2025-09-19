@@ -60,7 +60,7 @@ namespace OEP.Controllers
         [HttpGet("get-exams/e/{id}")]
         public async Task<IActionResult> GetExamByIdForExaminerAction(int id)
         {
-            var exam = await _examRepository.GetExams(id);
+            var exam = await _examRepository.GetExamByIdForExaminer(id);
             return exam != null ? Ok(exam) : NotFound("Exam not found");
         }
 
