@@ -17,16 +17,16 @@ namespace OEP.Controllers
         }
 
         [HttpPost("view-exam-results/{examid}")]
-        public IActionResult ViewExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
+        public async Task<IActionResult> ViewExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
         {
-            var attemptedExams = _resultRepo.ViewExamResults(examid, userid);
+            var attemptedExams = await _resultRepo.ViewExamResults(examid, userid);
             return Ok(attemptedExams);
         }
 
         [HttpPost("create-results/{examid}")]
-        public IActionResult CreateExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
+        public async Task<IActionResult> CreateExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
         {
-            var status = _resultRepo.CreateExamResults(examid, userid);
+            var status = await _resultRepo.CreateExamResults(examid, userid);
             return status > 0 ? Ok("Result created") : StatusCode(500, "Result Could not be created.");
         }
     }
