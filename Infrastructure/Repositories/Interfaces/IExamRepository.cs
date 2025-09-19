@@ -6,17 +6,17 @@ namespace Infrastructure.Repositories.Interfaces
     public interface IExamRepository
     {
         public Task<int> AddExam(AddExamDTO dto);
-        public int UpdateExam(int examId, UpdateExamDTO dto);
-        public List<GetExamDataDTO> GetExams();
-        public StudentExamViewDTO GetExams(int examId);
-        public List<Exam> GetExamsForExaminer(int userid);
-        public int SubmitExamForApproval(int examId);
+        public Task<int> UpdateExam(int examId, UpdateExamDTO dto);
+        public Task<List<GetExamDataDTO>> GetExams();
+        public Task<StudentExamViewDTO> GetExams(int examId);
+        public Task<List<Exam>> GetExamsForExaminer(int userid);
+        public Task<int> SubmitExamForApproval(int examId);
 
-        public Exam GetExamByIdForExaminer(int examId);
-        public int DeleteExam(int examId);
-        public List<Exam> GetExamsAttemptedByUser(int UserId);
-        public int GetExamAttempts(int userId, int examId);
-        public StartExamResponseDTO StartExam(int examId);
-        public int SubmitExam(SubmittedExamDTO submittedData);
+        public Task<Exam> GetExamByIdForExaminer(int examId);
+        public Task<int> DeleteExam(int examId);
+        public Task<List<Exam>> GetExamsAttemptedByUser(int UserId);
+        public Task<int> GetExamAttempts(int userId, int examId);
+        public Task<StartExamResponseDTO> StartExam(int examId);
+        public Task<int> SubmitExam(SubmittedExamDTO submittedData);
     }
 }
