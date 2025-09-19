@@ -34,7 +34,7 @@ namespace Infrastructure.Services
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(jwtSettings["ExpiryMinutes"])),
+                expires: DateTime.Now.AddDays(Convert.ToDouble(jwtSettings["ExpiryDays"])),//AddMinutes(Convert.ToDouble(jwtSettings["ExpiryMinutes"])),
                 signingCredentials: credentials
             );
 
