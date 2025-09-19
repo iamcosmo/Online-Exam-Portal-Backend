@@ -38,6 +38,8 @@ public partial class Exam
 
     public string? AdminRemarks { get; set; }
 
+    public int? ReviewerId { get; set; }
+
     public virtual User? ApprovedByUser { get; set; }
 
     public virtual ICollection<ExamFeedback> ExamFeedbacks { get; set; } = new List<ExamFeedback>();
@@ -49,4 +51,6 @@ public partial class Exam
     public virtual ICollection<Result> Results { get; set; } = new List<Result>();
 
     public virtual User? User { get; set; }
+
+    public virtual User? Reviewer { get; set; }
 }

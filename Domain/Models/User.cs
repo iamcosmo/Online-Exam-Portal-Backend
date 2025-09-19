@@ -40,4 +40,6 @@ public partial class User
     public virtual ICollection<Result> Results { get; set; } = new List<Result>();
 
     public virtual ICollection<Topic> Topics { get; set; } = new List<Topic>();
+
+    public virtual ICollection<Exam> ExamReviewers { get; set; } = new List<Exam>();
 }
