@@ -42,10 +42,10 @@ namespace Infrastructure.Repositories.Implementations
             return await _context.SaveChangesAsync();
 
         }
-        public int UpdateExam(int examId, UpdateExamDTO dto)
+        public async Task<int> UpdateExam(int examId, UpdateExamDTO dto)
         {
 
-            Exam ToBeUpdatedExam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
+            Exam ToBeUpdatedExam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
 
             if (ToBeUpdatedExam == null)
             {
@@ -72,9 +72,9 @@ namespace Infrastructure.Repositories.Implementations
             {
                 ToBeUpdatedExam.DisplayedQuestions = dto.DisplayedQuestions;
             }
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
-        public int DeleteExam(int examId)
+        public async Task<int> DeleteExam(int examId)
         {
 
             try
@@ -101,36 +101,36 @@ namespace Infrastructure.Repositories.Implementations
             }
 
         }
-        public List<Exam> GetExamsForExaminer(int userid)
+        public async Task<List<Exam>> GetExamsForExaminer(int userid)
         {
-            var examdata = _context.Exams.Where(e => e.UserId == userid).ToList();
+            var examdata = await _context.Exams.Where(e => e.UserId == userid).ToListAsync();
             return examdata;
         }
-        public Exam GetExamByIdForExaminer(int examId)
+        public async Task<Exam> GetExamByIdForExaminer(int examId)
         {
-            return _context.Exams.FirstOrDefault(e => e.Eid == examId);
+            return await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
         }
-        public List<Exam> GetExamsAttemptedByUser(int UserId)
+        public async Task<List<Exam>> GetExamsAttemptedByUser(int UserId)
         {
-            var user = _context.Users
+            var user = await _context.Users
                    .Include(u => u.ExamUsers)
                    .ThenInclude(eu => eu.Results)
-                   .FirstOrDefault(u => u.UserId == UserId);
+                   .FirstOrDefaultAsync(u => u.UserId == UserId);
 
             return (List<Exam>)user.ExamUsers;
 
         }
-        public int GetExamAttempts(int userId, int examId)
+        public async Task<int> GetExamAttempts(int userId, int examId)
         {
-            var result = _context.Results.FirstOrDefault(r => r.UserId == userId && r.Eid == examId);
+            var result = await _context.Results.FirstOrDefaultAsync(r => r.UserId == userId && r.Eid == examId);
             if (result == null) return 0;
             return (int)result.Attempts;
         }
 
         //Student functions
-        public List<GetExamDataDTO> GetExams()
+        public async Task<List<GetExamDataDTO>> GetExams()
         {
-            var examdata = _context.Exams
+            var examdata = await _context.Exams
                 .Include(e => e.Results.Where(s => s.Eid == e.Eid))
                 .Where(e => e.Questions != null && e.ApprovalStatus == 1)
             .Select(e => new GetExamDataDTO
@@ -145,13 +145,13 @@ namespace Infrastructure.Repositories.Implementations
                 AttemptNo = e.Results
                                 .Where(r => r.Eid == e.Eid && r.UserId == e.UserId)
                                 .Max(r => (int?)r.Attempts) ?? 0
-            }).ToList();
+            }).ToListAsync();
             if (examdata == null) return new List<GetExamDataDTO> { };
             else return examdata;
         }
-        public StudentExamViewDTO GetExams(int examId)
+        public async Task<StudentExamViewDTO> GetExams(int examId)
         {
-            return (StudentExamViewDTO)_context.Exams.Where(e => e.Eid == examId && e.ApprovalStatus == 1 && e.Questions != null)
+            return (StudentExamViewDTO)await _context.Exams.Where(e => e.Eid == examId && e.ApprovalStatus == 1 && e.Questions != null)
                 .Select(e => new StudentExamViewDTO
                 {
                     Name = e.Name,
@@ -161,11 +161,11 @@ namespace Infrastructure.Repositories.Implementations
                     Tids = e.Tids
 
                 })
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
-        public StartExamResponseDTO StartExam(int examId)
+        public async Task<StartExamResponseDTO> StartExam(int examId)
         {
-            var Data = _context.Exams.Include(e => e.Questions)
+            var list = await _context.Exams.Include(e => e.Questions)
                 .Where(e => e.Eid == examId)
                 .Select(e => new StartExamResponseDTO
                 {
@@ -185,15 +185,15 @@ namespace Infrastructure.Repositories.Implementations
                                 ApprovalStatus = q.ApprovalStatus
                             }
                     ).ToList(),
-                }).ToList()
-                .FirstOrDefault();
+                }).ToListAsync();
+            var Data = list.FirstOrDefault();
 
             return Data;
         }
-        public int SubmitExam(SubmittedExamDTO submittedData)
+        public async Task<int> SubmitExam(SubmittedExamDTO submittedData)
         {
 
-            var exam = _context.Exams.FirstOrDefault(e => e.Eid == submittedData.EID);
+            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == submittedData.EID);
             if (exam == null)
             {
                 return -1;
@@ -202,8 +202,8 @@ namespace Infrastructure.Repositories.Implementations
             foreach (var responseDto in submittedData.Responses)
             {
 
-                var existingResponse = _context.Responses
-                        .FirstOrDefault(r => r.UserId == submittedData.UserId && r.Eid == submittedData.EID && r.Qid == responseDto.Qid);
+                var existingResponse = await _context.Responses
+                        .FirstOrDefaultAsync(r => r.UserId == submittedData.UserId && r.Eid == submittedData.EID && r.Qid == responseDto.Qid);
 
                 if (existingResponse == null)
                 {
@@ -217,7 +217,7 @@ namespace Infrastructure.Repositories.Implementations
                         IsSubmittedFresh = true
                     };
 
-                    _context.Responses.Add(newResponse);
+                    await _context.Responses.AddAsync(newResponse);
                 }
                 else
                 {
@@ -230,16 +230,16 @@ namespace Infrastructure.Repositories.Implementations
 
             }
 
-            int status = _context.SaveChanges();
+            int status = await _context.SaveChangesAsync();
             return status;
 
         }
 
-        public int SubmitExamForApproval(int examId)
+        public async Task<int> SubmitExamForApproval(int examId)
         {
-            var exam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
+            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
             exam.SubmittedForApproval = true;
-            return _context.SaveChanges();
+            return await _context.SaveChangesAsync();
         }
 
     }

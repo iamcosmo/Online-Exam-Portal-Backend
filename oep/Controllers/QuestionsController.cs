@@ -30,7 +30,7 @@ namespace OEP.Controllers
         [HttpPost("add-question")]
         public async Task<IActionResult> AddQuestion([FromBody] AddQuestionDTO question, [FromQuery] int examId)
         {
-            Exam exam = _examRepository.GetExamByIdForExaminer(examId);
+            Exam exam = await _examRepository.GetExamByIdForExaminer(examId);
             if (exam == null)
                 return BadRequest("Exam Not Found.");
 
@@ -57,7 +57,7 @@ namespace OEP.Controllers
             if (questions == null || questions.Questions.Count == 0)
                 return BadRequest("Question list is empty.");
 
-            var exam = _examRepository.GetExamByIdForExaminer(examId);
+            var exam = await _examRepository.GetExamByIdForExaminer(examId);
 
             if (exam == null)
                 return BadRequest("Exam Not Found.");

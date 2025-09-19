@@ -9,7 +9,7 @@ namespace Infrastructure.Repositories.Interfaces
 {
     public interface IResultRespository
     {
-        public List<ExamResultsDTO> ViewExamResults(int examid, int userid);
-        public int CreateExamResults(int examid, int userid);
+        public Task<List<ExamResultsDTO>> ViewExamResults(int examid, int userid);
+        public Task<int> CreateExamResults(int examid, int userid);
     }
 }
