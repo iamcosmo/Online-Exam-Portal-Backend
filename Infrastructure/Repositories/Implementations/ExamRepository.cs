@@ -2,10 +2,8 @@
 using Domain.Models;
 using Infrastructure.DTOs.ExamDTOs;
 using Infrastructure.Repositories.Interfaces;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Data;
 namespace Infrastructure.Repositories.Implementations
@@ -116,6 +114,7 @@ namespace Infrastructure.Repositories.Implementations
                                     ExamName = e.Name,
                                     TotalQuestions = e.TotalQuestions,
                                     ApprovalStatusOfExam = e.ApprovalStatus,
+                                    Tids = e.Tids,
                                     Questions = e.Questions.Select(q => new QuestionDTO
                                     {
                                         Qid = q.Qid,
@@ -184,10 +183,28 @@ namespace Infrastructure.Repositories.Implementations
                 })
                 .FirstOrDefaultAsync();
         }
-        public async Task<StartExamResponseDTO> StartExam(int examId)
+        public async Task<StartExamResponseDTO> StartExam(int examId, int userId)
         {
+
+            var hasUnprocessedAttempt = await _context.Responses
+                   .AnyAsync(r => r.Eid == examId && r.UserId == userId && r.IsSubmittedFresh == true);
+
+            if (hasUnprocessedAttempt)
+            {
+                Console.WriteLine("Processing the Previous Attempt.");
+                var result = await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC CreateExamResult @p0, @p1",
+                    parameters: new object[] { examId, userId });
+            }
+
+            var allAttempts = await _context.Results.Where(r => r.UserId == userId && r.Eid == examId).MaxAsync(r => (int?)r.Attempts) ?? 0;
+            if (allAttempts == 3)
+            {
+                return new StartExamResponseDTO();
+            }
+
             var list = await _context.Exams.Include(e => e.Questions)
-                .Where(e => e.Eid == examId)
+                .Where(e => e.Eid == examId && e.ApprovalStatus == 1)
                 .Select(e => new StartExamResponseDTO
                 {
                     EID = e.Eid,

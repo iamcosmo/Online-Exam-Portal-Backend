@@ -95,12 +95,14 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpPost("start-exam/{examId}")]
-        public async Task<IActionResult> StartExamAction(int examId)
+        public async Task<IActionResult> StartExamAction(int examId, [FromQuery] int userId)
         {
             try
             {
-                var StartExamData = await _examRepository.StartExam(examId);
-                return Ok(new { ExamData = StartExamData, Success = true });
+                var StartExamData = await _examRepository.StartExam(examId, userId);
+                if (StartExamData != null) return Ok(new { ExamData = StartExamData, Success = true });
+                else return NotFound("This Exam is not available or Attempt Limit Reached.");
+
             }
             catch (Exception e)
             {
@@ -114,7 +116,14 @@ namespace OEP.Controllers
         {
             var status = await _examRepository.SubmitExam(examdto);
 
-            return Ok("Status Returned: " + status);
+            if (status > 0)
+            {
+                return Ok("Exam Submitted");
+            }
+            else
+            {
+                return StatusCode(500, "Some Internal Server Error while submitting the exam.");
+            }
         }
 
 

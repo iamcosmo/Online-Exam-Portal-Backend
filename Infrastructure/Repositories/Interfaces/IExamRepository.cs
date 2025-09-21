@@ -16,7 +16,7 @@ namespace Infrastructure.Repositories.Interfaces
         public Task<int> DeleteExam(int examId);
         public Task<List<Exam>> GetExamsAttemptedByUser(int UserId);
         public Task<int> GetExamAttempts(int userId, int examId);
-        public Task<StartExamResponseDTO> StartExam(int examId);
+        public Task<StartExamResponseDTO> StartExam(int examId, int userId);
         public Task<int> SubmitExam(SubmittedExamDTO submittedData);
     }
 }
