@@ -1,4 +1,5 @@
 ﻿using Domain.Models;
+using Infrastructure.DTOs.ExamDTOs;
 using Infrastructure.DTOs.QuestionsDTO;
 using Infrastructure.Repositories.Implementations;
 using Infrastructure.Repositories.Interfaces;
@@ -30,7 +31,7 @@ namespace OEP.Controllers
         [HttpPost("add-question")]
         public async Task<IActionResult> AddQuestion([FromBody] AddQuestionDTO question, [FromQuery] int examId)
         {
-            Exam exam = await _examRepository.GetExamByIdForExaminer(examId);
+            ExamWithQuestionsDTO exam = await _examRepository.GetExamByIdForExaminer(examId);
             if (exam == null)
                 return BadRequest("Exam Not Found.");
 

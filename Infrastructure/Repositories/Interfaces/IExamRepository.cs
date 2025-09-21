@@ -12,7 +12,7 @@ namespace Infrastructure.Repositories.Interfaces
         public Task<List<Exam>> GetExamsForExaminer(int userid);
         public Task<int> SubmitExamForApproval(int examId);
 
-        public Task<Exam> GetExamByIdForExaminer(int examId);
+        public Task<ExamWithQuestionsDTO> GetExamByIdForExaminer(int examId);
         public Task<int> DeleteExam(int examId);
         public Task<List<Exam>> GetExamsAttemptedByUser(int UserId);
         public Task<int> GetExamAttempts(int userId, int examId);
