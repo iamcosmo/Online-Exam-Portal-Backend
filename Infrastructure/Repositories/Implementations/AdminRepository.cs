@@ -61,7 +61,7 @@ namespace Infrastructure.Repositories.Implementations
 
             if (dto.action == "approve") { exam.setApprovalStatus(1); }
             else if (dto.action == "reject") { exam.setApprovalStatus(0); }
-            exam.ApprovedByUserId = dto.userId;
+            //exam.ApprovedByUserId = dto.userId;
             exam.SubmittedForApproval = false;
             return await _context.SaveChangesAsync();
 

@@ -61,7 +61,7 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.Eid).HasName("PK__Exams__C190170BDABF6CFC");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
-            entity.Property(e => e.ApprovedByUserId).HasColumnName("ApprovedByUserID");
+          
             entity.Property(e => e.Description).IsUnicode(false);
             entity.Property(e => e.Duration).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Name)
@@ -70,10 +70,7 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Tids).HasColumnName("TIDs");
             entity.Property(e => e.TotalMarks).HasColumnType("decimal(10, 2)");
 
-            entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.ExamApprovedByUsers)
-                .HasForeignKey(d => d.ApprovedByUserId)
-                .HasConstraintName("FK__Exams__ApprovedB__3E52440B");
-
+           
             entity.HasOne(d => d.User).WithMany(p => p.ExamUsers)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK__Exams__UserId__3F466844");
