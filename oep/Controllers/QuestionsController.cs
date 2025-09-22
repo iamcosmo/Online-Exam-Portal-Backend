@@ -21,19 +21,21 @@ namespace OEP.Controllers
             _examRepository = examRepository;
         }
 
-        [HttpGet("questions-index")]
-        public IActionResult Index()
-        {
-            return Ok("Index Page for Exam Controller");
-        }
+        //[HttpGet("questions-index")]
+        //public IActionResult Index()
+        //{
+        //    return Ok("Index Page for Exam Controller");
+        //}
 
         [Authorize(Roles = "Examiner")]
         [HttpPost("add-question")]
-        public async Task<IActionResult> AddQuestion([FromBody] AddQuestionDTO question, [FromQuery] int examId)
+        public async Task<IActionResult> AddQuestion([FromBody] AddQuestionDTO question, [FromQuery] int examId, [FromQuery] int userId)
         {
             ExamWithQuestionsDTO exam = await _examRepository.GetExamByIdForExaminer(examId);
             if (exam == null)
                 return BadRequest("Exam Not Found.");
+            if (exam.UserId != userId)
+                return Unauthorized("You are not authorized to modify this Exam!!");
 
             var tids_exams = exam.Tids ?? "[]";
 
@@ -53,23 +55,24 @@ namespace OEP.Controllers
         [Authorize(Roles = "Examiner")]
         [HttpPost("add-questions-by-tid-batch")]
 
-        public async Task<IActionResult> AddQuestionsByTidBatchToExam([FromBody] AddQuestionsByBatchDTO questions, [FromQuery] int examId)
+        public async Task<IActionResult> AddQuestionsByTidBatchToExam([FromBody] AddQuestionsByBatchDTO questions, [FromQuery] int examId, [FromQuery] int userId)
         {
-            if (questions == null || questions.Questions.Count == 0)
-                return BadRequest("Question list is empty.");
-
             var exam = await _examRepository.GetExamByIdForExaminer(examId);
 
             if (exam == null)
                 return BadRequest("Exam Not Found.");
+            if (exam.UserId != userId)
+                return Unauthorized("You are not authorized to modify this Exam!!");
 
+            if (questions == null || questions.Questions.Count == 0)
+                return BadRequest("Question list is empty.");    
+           
             var availableQuestionCount = await _questionRepository.GetQuestionsByExamId(examId);
             if (availableQuestionCount.Count + questions.Questions.Count > exam.TotalQuestions)
                 return BadRequest("Adding these questions would exceed the total number of questions allowed for this exam.");
 
             if (questions.Questions.Any(q => string.IsNullOrWhiteSpace(q.Question) || q.Marks <= 0))
                 return BadRequest("One or more questions have invalid data.");
-
 
             var result = await _questionRepository.AddBatchQuestionsToExam(questions, examId);
             return result > 0 ? Ok("Questions added successfully") : BadRequest("Failed to add Questions");
@@ -90,8 +93,16 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Examiner")]
         [HttpGet("get-question-by-examId/{examId}")]
-        public async Task<IActionResult> GetQuestionByExam(int examId)
+        public async Task<IActionResult> GetQuestionByExam([FromQuery] int userId, int examId)
         {
+
+            var exam = await _examRepository.GetExamByIdForExaminer(examId);
+
+            if (exam == null)
+                return BadRequest("Exam Not Found.");
+            if (exam.UserId != userId)
+                return Unauthorized("You are not authorized to modify this Exam!!");
+
             var result = await _questionRepository.GetQuestionsByExamId(examId);
             if (result == null)
                 return StatusCode(500, "An error occurred while retrieving questions.");
