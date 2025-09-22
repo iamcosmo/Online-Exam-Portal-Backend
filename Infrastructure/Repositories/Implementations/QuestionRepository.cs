@@ -100,22 +100,29 @@ namespace Infrastructure.Repositories.Implementations
                 return 0;
 
             // Only update properties if they are not null
-            if (updatedQuestion.Tid != null)
-                existingQuestion.Tid = updatedQuestion.Tid;
-            if (updatedQuestion.Eid != null)
-                existingQuestion.Eid = updatedQuestion.Eid;
-            if (updatedQuestion.Type != null)
-                existingQuestion.Type = updatedQuestion.Type;
-            if (updatedQuestion.Question1 != null)
-                existingQuestion.Question1 = updatedQuestion.Question1;
-            if (updatedQuestion.Marks != null)
-                existingQuestion.Marks = updatedQuestion.Marks;
-            if (updatedQuestion.Options != null)
-                existingQuestion.Options = updatedQuestion.Options;
-            if (updatedQuestion.CorrectOptions != null)
-                existingQuestion.CorrectOptions = updatedQuestion.CorrectOptions;
-            if (updatedQuestion.ApprovalStatus != null)
-                existingQuestion.ApprovalStatus = updatedQuestion.ApprovalStatus;
+
+            existingQuestion.Type = question.type;
+            existingQuestion.Question1 = question.question;
+            existingQuestion.Marks = question.marks;
+            existingQuestion.Options = question.options;
+            existingQuestion.CorrectOptions = JsonConvert.SerializeObject(question.correctOptions);
+            existingQuestion.ApprovalStatus = question.ApprovalStatus;
+            //if (updatedQuestion.Tid != null)
+            //    existingQuestion.Tid = updatedQuestion.Tid;
+            //if (updatedQuestion.Eid != null)
+            //    existingQuestion.Eid = updatedQuestion.Eid;
+            //if (updatedQuestion.Type != null)
+            //    existingQuestion.Type = updatedQuestion.Type;
+            //if (updatedQuestion.Question1 != null)
+            //    existingQuestion.Question1 = updatedQuestion.Question1;
+            //if (updatedQuestion.Marks != null)
+            //    existingQuestion.Marks = updatedQuestion.Marks;
+            //if (updatedQuestion.Options != null)
+            //    existingQuestion.Options = updatedQuestion.Options;
+            //if (updatedQuestion.CorrectOptions != null)
+            //    existingQuestion.CorrectOptions = updatedQuestion.CorrectOptions;
+            //if (updatedQuestion.ApprovalStatus != null)
+            //    existingQuestion.ApprovalStatus = updatedQuestion.ApprovalStatus;
 
             return await _context.SaveChangesAsync();
         }
