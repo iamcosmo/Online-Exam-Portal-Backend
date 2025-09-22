@@ -30,6 +30,7 @@ namespace Infrastructure.Repositories.Implementations
             {
                 return new List<Topic> { };
             }
+            Console.WriteLine(exam.Tids);
 
             var topicIds = JsonConvert.DeserializeObject<List<int>>(exam.Tids);
 

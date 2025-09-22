@@ -49,7 +49,7 @@ namespace Infrastructure.Repositories.Implementations
         public async Task<List<Exam>> ExamsToBeApprovedList()
         {
             List<Exam> ExamList = new List<Exam> { };
-            ExamList = await _context.Exams.Where(e => e.SubmittedForApproval == true).ToListAsync();
+            ExamList = await _context.Exams.Include(q => q.Questions).Where(e => e.SubmittedForApproval == true).ToListAsync();
             return ExamList;
 
         }
@@ -62,6 +62,7 @@ namespace Infrastructure.Repositories.Implementations
             if (dto.action == "approve") { exam.setApprovalStatus(1); }
             else if (dto.action == "reject") { exam.setApprovalStatus(0); }
             exam.ApprovedByUserId = dto.userId;
+            exam.SubmittedForApproval = false;
             return await _context.SaveChangesAsync();
 
         }

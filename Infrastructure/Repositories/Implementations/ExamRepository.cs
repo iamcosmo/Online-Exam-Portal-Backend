@@ -2,10 +2,8 @@
 using Domain.Models;
 using Infrastructure.DTOs.ExamDTOs;
 using Infrastructure.Repositories.Interfaces;
-using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Data;
 namespace Infrastructure.Repositories.Implementations
@@ -106,9 +104,31 @@ namespace Infrastructure.Repositories.Implementations
             var examdata = await _context.Exams.Where(e => e.UserId == userid).ToListAsync();
             return examdata;
         }
-        public async Task<Exam> GetExamByIdForExaminer(int examId)
+        public async Task<ExamWithQuestionsDTO> GetExamByIdForExaminer(int examId)
         {
-            return await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
+            return await _context.Exams
+                                .Where(e => e.Eid == examId)
+                                .Select(e => new ExamWithQuestionsDTO
+                                {
+                                    Eid = e.Eid,
+                                    ExamName = e.Name,
+                                    TotalQuestions = e.TotalQuestions,
+                                    ApprovalStatusOfExam = e.ApprovalStatus,
+                                    Tids = e.Tids,
+                                    Questions = e.Questions.Select(q => new QuestionDTO
+                                    {
+                                        Qid = q.Qid,
+                                        Type = q.Type,
+                                        Options = q.Options,
+                                        Marks = q.Marks,
+                                        QuestionText = q.Question1,
+                                        CorrectOptions = q.CorrectOptions,
+                                        ApprovalStatus = q.ApprovalStatus
+                                    }).ToList()
+                                })
+                                .FirstOrDefaultAsync();
+
+
         }
         public async Task<List<Exam>> GetExamsAttemptedByUser(int UserId)
         {
@@ -163,10 +183,28 @@ namespace Infrastructure.Repositories.Implementations
                 })
                 .FirstOrDefaultAsync();
         }
-        public async Task<StartExamResponseDTO> StartExam(int examId)
+        public async Task<StartExamResponseDTO> StartExam(int examId, int userId)
         {
+
+            var hasUnprocessedAttempt = await _context.Responses
+                   .AnyAsync(r => r.Eid == examId && r.UserId == userId && r.IsSubmittedFresh == true);
+
+            if (hasUnprocessedAttempt)
+            {
+                Console.WriteLine("Processing the Previous Attempt.");
+                var result = await _context.Database.ExecuteSqlRawAsync(
+                    "EXEC CreateExamResult @p0, @p1",
+                    parameters: new object[] { examId, userId });
+            }
+
+            var allAttempts = await _context.Results.Where(r => r.UserId == userId && r.Eid == examId).MaxAsync(r => (int?)r.Attempts) ?? 0;
+            if (allAttempts == 3)
+            {
+                return new StartExamResponseDTO();
+            }
+
             var list = await _context.Exams.Include(e => e.Questions)
-                .Where(e => e.Eid == examId)
+                .Where(e => e.Eid == examId && e.ApprovalStatus == 1)
                 .Select(e => new StartExamResponseDTO
                 {
                     EID = e.Eid,
@@ -174,7 +212,9 @@ namespace Infrastructure.Repositories.Implementations
                     Duration = e.Duration,
                     Name = e.Name,
                     DisplayedQuestions = e.DisplayedQuestions,
-                    Questions = e.Questions.Select(
+                    Questions = e.Questions
+                            .Where(q => q.ApprovalStatus == 1)
+                            .Select(
                             q => new StartExamQuestionsDTO
                             {
                                 Qid = q.Qid,
@@ -187,6 +227,28 @@ namespace Infrastructure.Repositories.Implementations
                     ).ToList(),
                 }).ToListAsync();
             var Data = list.FirstOrDefault();
+
+            if (Data != null)
+            {
+                var random = new Random();
+                var selectedQuestions = Data.Questions
+                    .OrderBy(q => random.Next())
+                    .Take((int)Data.DisplayedQuestions)
+                    .ToList();
+
+                var response = new StartExamResponseDTO
+                {
+                    EID = Data.EID,
+                    TotalMarks = Data.TotalMarks,
+                    Duration = Data.Duration,
+                    Name = Data.Name,
+                    DisplayedQuestions = Data.DisplayedQuestions,
+                    Questions = selectedQuestions
+                };
+
+                return response;
+            }
+
 
             return Data;
         }
