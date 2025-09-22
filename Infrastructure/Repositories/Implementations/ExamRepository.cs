@@ -256,6 +256,13 @@ namespace Infrastructure.Repositories.Implementations
         public async Task<int> SubmitExam(SubmittedExamDTO submittedData)
         {
 
+            var allAttempts = await _context.Results.Where(r => r.UserId == submittedData.UserId && r.Eid == submittedData.EID).MaxAsync(r => (int?)r.Attempts) ?? 0;
+
+            if (allAttempts >= 3)
+            {
+                return -1;
+            }
+
             var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == submittedData.EID);
             if (exam == null)
             {
