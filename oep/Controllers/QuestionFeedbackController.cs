@@ -18,11 +18,11 @@ namespace OEP.Controllers
         {
             _questionFeedbackRepository = questionFeedbackRepository;
         }
-        [HttpGet("questions-feedback-index")]
-        public IActionResult Index()
-        {
-            return Ok("QuestionFeedback Index Page");
-        }
+        //[HttpGet("questions-feedback-index")]
+        //public IActionResult Index()
+        //{
+        //    return Ok("QuestionFeedback Index Page");
+        //}
 
         [Authorize(Roles = "Student")]
         [HttpPost("add-question-feedback")]
