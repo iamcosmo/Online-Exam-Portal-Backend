@@ -4,6 +4,7 @@ using Infrastructure.DTOs.ExamDTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using System.Data;
 namespace Infrastructure.Repositories.Implementations
@@ -44,7 +45,10 @@ namespace Infrastructure.Repositories.Implementations
         {
 
             Exam ToBeUpdatedExam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
-
+            if (ToBeUpdatedExam.SubmittedForApproval == true)
+            {
+                return -1;
+            }
             if (ToBeUpdatedExam == null)
             {
                 return 0;
@@ -192,10 +196,13 @@ namespace Infrastructure.Repositories.Implementations
 
             if (hasUnprocessedAttempt)
             {
-                Console.WriteLine("Processing the Previous Attempt.");
+                var examIdParam = new SqlParameter("@examId", examId);
+                var userIdParam = new SqlParameter("@userId", userId);
+
                 var result = await _context.Database.ExecuteSqlRawAsync(
-                    "EXEC CreateExamResult @p0, @p1",
-                    parameters: new object[] { examId, userId });
+                    "EXEC CreateExamResult @examId, @userId",
+                    examIdParam, userIdParam);
+
             }
 
             var allAttempts = await _context.Results.Where(r => r.UserId == userId && r.Eid == examId).MaxAsync(r => (int?)r.Attempts) ?? 0;
@@ -313,6 +320,16 @@ namespace Infrastructure.Repositories.Implementations
                 return -1;
             }
             exam.SubmittedForApproval = true;
+
+            //Assigning a admin id
+            var random = new Random();
+            var adminIds = await _context.Users
+                .Where(u => u.Role == "Admin")
+                .Select(a => a.UserId)
+                .ToListAsync();
+            var randomAdminId = adminIds.OrderBy(x => random.Next()).FirstOrDefault();
+            exam.ReviewerId = randomAdminId;
+
             return await _context.SaveChangesAsync();
         }
 

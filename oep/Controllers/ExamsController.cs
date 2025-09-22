@@ -34,6 +34,10 @@ namespace OEP.Controllers
         {
 
             var result = await _examRepository.UpdateExam(examId, dto);
+            if (result == -1)
+            {
+                return BadRequest("This exam has been submitted for approval and cannot be updated.");
+            }
             return result > 0 ? Ok("Exam updated successfully") : StatusCode(500, "Exam was not updated due to Internal Errors.");
         }
 

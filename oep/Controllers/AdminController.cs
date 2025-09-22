@@ -146,6 +146,13 @@ namespace OEP.Controllers
         }
 
 
+        [HttpPost("add-adminremarks/{examId}")]
+        public async Task<IActionResult> AddAdminRemarksAction(int examId, [FromBody] string remarks)
+        {
+            var status = await _adminRepository.AddAdminRemarks(examId, remarks);
+            return status > 0 ? Ok("Admin Remarks added") : BadRequest("Some error occured while adding remarks");
+        }
+
         [Authorize(Roles = "Admin")]
         [HttpGet("topic-list")]
         public async Task<IActionResult> TopicsToBeApprovedAction()
