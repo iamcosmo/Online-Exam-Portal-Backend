@@ -30,7 +30,7 @@ namespace Infrastructure.Repositories.Interfaces
 
         Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync();
 
-        Task<int> ApproveOrRejectTopic(int topicId);
+        Task<int> ApproveOrRejectTopic(int topicId, int userId);
 
     }
 

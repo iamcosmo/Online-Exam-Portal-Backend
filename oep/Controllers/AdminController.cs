@@ -158,9 +158,9 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("approve-topic")]
-        public async Task<IActionResult> ApproveOrRejectTopicAction(int topicId)
+        public async Task<IActionResult> ApproveOrRejectTopicAction([FromQuery] int topicId, [FromQuery] int userId)
         {
-            var status = await _adminRepository.ApproveOrRejectTopic(topicId);
+            var status = await _adminRepository.ApproveOrRejectTopic(topicId, userId);
 
             return Ok(new { TopicUpdateStatus = status });
         }
