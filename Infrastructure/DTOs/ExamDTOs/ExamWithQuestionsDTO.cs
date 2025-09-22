@@ -14,6 +14,8 @@ namespace Infrastructure.DTOs.ExamDTOs
         public List<QuestionDTO> Questions { get; set; }
         public int? ApprovalStatusOfExam { get; set; }
         public string Tids { get; set; }
+
+        public int? UserId { get; set; }
     }
 
     public class QuestionDTO

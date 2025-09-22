@@ -110,6 +110,7 @@ namespace Infrastructure.Repositories.Implementations
                                 .Where(e => e.Eid == examId)
                                 .Select(e => new ExamWithQuestionsDTO
                                 {
+                                    UserId = e.UserId,
                                     Eid = e.Eid,
                                     ExamName = e.Name,
                                     TotalQuestions = e.TotalQuestions,
