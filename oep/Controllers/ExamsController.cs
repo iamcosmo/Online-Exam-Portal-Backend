@@ -86,10 +86,10 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Student")]
-        [HttpGet("get-exams/{id}")]
-        public async Task<IActionResult> GetExamByIdAction(int id)
+        [HttpGet("get-exams/{examId}")]
+        public async Task<IActionResult> GetExamByIdAction(int examId)
         {
-            var exam = await _examRepository.GetExams(id);
+            var exam = await _examRepository.GetExams(examId);
             return exam != null ? Ok(exam) : NotFound("Exam not found");
         }
 
@@ -100,7 +100,7 @@ namespace OEP.Controllers
             try
             {
                 var StartExamData = await _examRepository.StartExam(examId, userId);
-                if (StartExamData != null) return Ok(new { ExamData = StartExamData, Success = true });
+                if (StartExamData.EID != 0) return Ok(new { ExamData = StartExamData, Success = true });
                 else return NotFound("This Exam is not available or Attempt Limit Reached.");
 
             }
@@ -119,6 +119,10 @@ namespace OEP.Controllers
             if (status > 0)
             {
                 return Ok("Exam Submitted");
+            }
+            else if (status == -1)
+            {
+                return Unauthorized("Attempts Limit Reached cannot submit Exam.");
             }
             else
             {
