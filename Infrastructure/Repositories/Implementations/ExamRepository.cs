@@ -308,6 +308,10 @@ namespace Infrastructure.Repositories.Implementations
         public async Task<int> SubmitExamForApproval(int examId)
         {
             var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
+            if (exam.Description == null || exam.TotalQuestions == null || exam.TotalMarks == null || exam.Questions == null || exam.DisplayedQuestions == null || exam.Duration == null || exam.Name == null || exam.Tids == null)
+            {
+                return -1;
+            }
             exam.SubmittedForApproval = true;
             return await _context.SaveChangesAsync();
         }
