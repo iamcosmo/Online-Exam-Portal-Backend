@@ -123,11 +123,16 @@ namespace Infrastructure.Repositories.Implementations
             return await _context.Topics.Select(t => new ApproveTopicsDTO { Id = t.Tid, TopicName = t.Subject }).ToListAsync();
         }
 
-        public async Task<int> ApproveOrRejectTopic(int topicId)
+        public async Task<int> ApproveOrRejectTopic(int topicId, int userId)
         {
             Topic? topic = await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId);
 
-            if (topic != null) { topic.SetApprovalStatus(1); await _context.SaveChangesAsync(); }
+            if (topic != null)
+            {
+                topic.SetApprovalStatus(1);
+                topic.ApprovedByUserId = userId;
+                await _context.SaveChangesAsync();
+            }
             return topic != null ? 1 : 0;
         }
     }
