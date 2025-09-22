@@ -62,7 +62,7 @@ namespace OEP.Controllers
             var user = _authRepository.Login(dto.Email, dto.Password);
             if (user == null)
             {
-                return Unauthorized("Invalid credentials");
+                return Unauthorized("Invalid credentials Or You are Blocked.");
             }
 
             string token = _tokenService.GenerateJwtToken(user);

@@ -47,7 +47,10 @@ namespace Infrastructure.Repositories.Implementations
         }
         public User? Login(string email, string password)
         {
-            return _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
+            var user = _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
+            if (user.IsBlocked == true) return null;
+            else return user;
+
         }
 
         public bool ValidateToken(string token)

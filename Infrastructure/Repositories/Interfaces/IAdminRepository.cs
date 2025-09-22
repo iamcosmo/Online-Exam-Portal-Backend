@@ -27,7 +27,7 @@ namespace Infrastructure.Repositories.Interfaces
 
         //Task<List<Question>> GetAllReportedQuestionsAsync();
 
-
+        Task<int> AddAdminRemarks(int examId, string remarks);
         Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync();
 
         Task<int> ApproveOrRejectTopic(int topicId, int userId);

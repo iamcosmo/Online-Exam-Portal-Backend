@@ -118,6 +118,15 @@ namespace Infrastructure.Repositories.Implementations
             return true;
         }
 
+        public async Task<int> AddAdminRemarks(int examId, string remarks)
+        {
+            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
+            exam.AdminRemarks = remarks;
+            exam.SubmittedForApproval = false;
+            return await _context.SaveChangesAsync();
+
+        }
+
         public async Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync()
         {
             return await _context.Topics.Select(t => new ApproveTopicsDTO { Id = t.Tid, TopicName = t.Subject }).ToListAsync();
