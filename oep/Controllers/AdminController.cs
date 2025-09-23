@@ -82,10 +82,6 @@ namespace OEP.Controllers
             return Ok(questions);
         }
 
-        // GET /admin/review-questions/{qid}
-        //Task<List<QuestionReport>> GetAllReportedQuestionsAsync();
-        //Task<QuestionReport?> GetReportedQuestionByIdAsync(int qid);
-        //Task<bool> UpdateReportedQuestionStatusAsync
         [HttpGet("review-questions/{qid}")]
         public IActionResult GetReportedQuestionById(int qid)
         {
@@ -111,15 +107,6 @@ namespace OEP.Controllers
         }
 
 
-        // oldPOST /review-questions/{qid}
-        //[HttpPost("review-questions/{qid}")]
-        //public async Task<IActionResult> ReviewReportedQuestion(int qid)
-        //{
-        //    var result = await _adminRepository.ReviewReportedQuestionAsync(qid);
-        //    return result ? Ok("Question reviewed.") : BadRequest("Review failed.");
-        //}
-
-        // POST /block-users/{uid}
         [HttpPost("block-users")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
@@ -155,12 +142,12 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpGet("topic-list")]
-        public async Task<IActionResult> TopicsToBeApprovedAction()
+        public async Task<IActionResult> TopicsToBeApprovedAction([FromQuery] int userId)
         {
-            var topics = await _adminRepository.TopicsToBeApprovedAsync();
+            var topics = await _adminRepository.TopicsToBeApprovedAsync(userId);
             if (topics == null || !topics.Any())
                 return NotFound();
-            return Ok(new { Topics = topics, msg = "done" });
+            return Ok(new { Topics = topics });
         }
 
         [Authorize(Roles = "Admin")]

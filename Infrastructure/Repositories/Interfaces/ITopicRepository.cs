@@ -1,5 +1,6 @@
 ﻿using Domain.Models;
 using Infrastructure.DTOs;
+using Infrastructure.DTOs.TopicDTOs;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -17,5 +18,6 @@ namespace Infrastructure.Repositories.Interfaces
         public int CreateTopic(string TopicName);
         public int UpdateTopic(string TopicName, int Tid);
         public int DeleteTopic(int topicId);
+        public Task<int> SubmitTopicForApproval(int topicId);
     }
 }

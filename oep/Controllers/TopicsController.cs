@@ -3,6 +3,7 @@ using Infrastructure.DTOs.TopicDTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace OEP.Controllers
 {
@@ -72,6 +73,13 @@ namespace OEP.Controllers
             return Ok(new { Message = "Topic Deleted", DeletedTopicStatus = DeletedTopic });
         }
 
+        [HttpPost("send-topic-for-approval/{topicId}")]
+        public async Task<IActionResult> SendTopicForApproval([FromRoute] int topicId)
+        {
+            int status = await _topicRepo.SubmitTopicForApproval(topicId);
+            return status > 0 ? Ok("Topic submitted for approval.") : BadRequest("Could not submit Topic for Approval.");
+
+        }
 
 
     }

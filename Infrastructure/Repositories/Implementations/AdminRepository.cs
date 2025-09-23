@@ -21,31 +21,6 @@ namespace Infrastructure.Repositories.Implementations
             _context = context;
         }
 
-
-        //public async Task<bool> RegisterAdminAsync(AdminCreateDto dto)
-        //{
-        //    var user = await _context.Users.FirstOrDefaultAsync(u =>
-        //        u.Email == dto.Email && u.Role == "Admin");
-
-        //    // && !u.IsActive && !u.IsDeleted);
-
-        //    if (user == null)
-        //        return false;
-
-        //    if (!SuperAdminRepository.ValidateToken(dto.Token))
-        //        return false;
-
-        //    user.FullName = dto.Name;
-        //    user.Password = (dto.Password); // implement your hashing logic
-        //    user.IsBlocked = true;
-
-        //    SuperAdminRepository.InvalidateToken(dto.Email);
-        //    await _context.SaveChangesAsync();
-
-        //    return true;
-        //}
-
-
         public async Task<List<Exam>> ExamsToBeApprovedList()
         {
             List<Exam> ExamList = new List<Exam> { };
@@ -66,17 +41,6 @@ namespace Infrastructure.Repositories.Implementations
             return await _context.SaveChangesAsync();
 
         }
-
-        //public async Task<bool> ReviewReportedQuestionAsync(int questionId)
-        //{
-        //    var question = await _context.Questions.FindAsync(questionId);
-        //    if (question == null) return false;
-
-        //    question.ApprovalStatus = 1;
-        //    await _context.SaveChangesAsync();
-        //    return true;
-        //}
-
         public async Task<int> BlockUserAsync(int userId)
         {
             var user = await _context.Users.FindAsync(userId);
@@ -127,9 +91,10 @@ namespace Infrastructure.Repositories.Implementations
 
         }
 
-        public async Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync()
+        public async Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync(int userId)
         {
-            return await _context.Topics.Select(t => new ApproveTopicsDTO { Id = t.Tid, TopicName = t.Subject }).ToListAsync();
+            return await _context.Topics.Where(t => t.SubmittedForApproval == true && t.ApprovedByUserId == userId)
+                .Select(t => new ApproveTopicsDTO { Id = t.Tid, TopicName = t.Subject }).ToListAsync();
         }
 
         public async Task<int> ApproveOrRejectTopic(int topicId, int userId)
@@ -139,7 +104,7 @@ namespace Infrastructure.Repositories.Implementations
             if (topic != null)
             {
                 topic.SetApprovalStatus(1);
-                topic.ApprovedByUserId = userId;
+                topic.SubmittedForApproval = false;
                 await _context.SaveChangesAsync();
             }
             return topic != null ? 1 : 0;
