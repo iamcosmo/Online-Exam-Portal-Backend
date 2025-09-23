@@ -1,8 +1,10 @@
 ﻿using Domain.Data;
 using Domain.Models;
 using Infrastructure.DTOs;
+using Infrastructure.DTOs.TopicDTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 
 namespace Infrastructure.Repositories.Implementations
@@ -72,6 +74,24 @@ namespace Infrastructure.Repositories.Implementations
                 return _context.SaveChanges();
             }
             return 0;
+        }
+
+        public async Task<int> SubmitTopicForApproval(int topicId)
+        {
+            var topic = await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId);
+
+            //Assigning a admin id
+            var random = new Random();
+            var adminIds = await _context.Users
+                .Where(u => u.Role == "Admin")
+                .Select(a => a.UserId)
+                .ToListAsync();
+            var randomAdminId = adminIds.OrderBy(x => random.Next()).FirstOrDefault();
+            topic.ApprovedByUserId = randomAdminId;
+            topic.SubmittedForApproval = true;
+
+            return await _context.SaveChangesAsync();
+
         }
     }
 }

@@ -12,7 +12,6 @@ public partial class Exam
     }
     public int Eid { get; set; }
 
-    [ForeignKey("User")]
     public int? UserId { get; set; }
 
     public string Tids { get; set; }
@@ -30,7 +29,7 @@ public partial class Exam
 
     public int? ApprovalStatus { get; set; }
 
-    public void setApprovalStatus(int val) { this.ApprovalStatus = val; } 
+    public void setApprovalStatus(int val) { this.ApprovalStatus = val; }
 
     public int? DisplayedQuestions { get; set; }
 
@@ -38,7 +37,7 @@ public partial class Exam
 
     public int? ReviewerId { get; set; }
 
-   
+
     public virtual ICollection<ExamFeedback> ExamFeedbacks { get; set; } = new List<ExamFeedback>();
 
     public virtual ICollection<Question> Questions { get; set; } = new List<Question>();

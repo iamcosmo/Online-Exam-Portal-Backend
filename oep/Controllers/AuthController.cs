@@ -47,7 +47,7 @@ namespace OEP.Controllers
             // Use the injected service to get the role
             string? userRole = _tokenService.GetRoleFromToken(tokenEncrypted);
 
-            // Your existing logic
+
             string role = !string.IsNullOrEmpty(userRole) ? userRole : "Examiner";
 
             var result = _authRepository.RegisterAdminOrExaminer(inputdto, role);
