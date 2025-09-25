@@ -2,9 +2,10 @@
 using Domain.Models;
 using Infrastructure.DTOs.ExamDTOs;
 using Infrastructure.Repositories.Interfaces;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Data;
 namespace Infrastructure.Repositories.Implementations
@@ -12,12 +13,12 @@ namespace Infrastructure.Repositories.Implementations
     public class ExamRepository : IExamRepository
     {
         private readonly AppDbContext _context;
-        private readonly IConfiguration _config;
+        private readonly ILogger<ExamRepository> _logger;
 
-        public ExamRepository(AppDbContext dbContext, IConfiguration configuration)
+        public ExamRepository(AppDbContext dbContext, ILogger<ExamRepository> logger)
         {
             _context = dbContext;
-            _config = configuration;
+            _logger = logger;
         }
 
         //CRUD
@@ -38,6 +39,7 @@ namespace Infrastructure.Repositories.Implementations
             };
 
             await _context.Exams.AddAsync(exam);
+            _logger.LogInformation("New Exam {@name} created by {@userName}", exam.Name, exam.User.FullName);
             return await _context.SaveChangesAsync();
 
         }
@@ -85,20 +87,25 @@ namespace Infrastructure.Repositories.Implementations
                 if (exam != null && exam.ApprovalStatus == 1)
                 {
                     exam.setApprovalStatus(0);
-                    return _context.SaveChanges();
+                    int status = _context.SaveChanges();
+                    _logger.LogInformation("Exam {@name} deleted by {@userName} at {@time}", exam.Name, exam.User.FullName ?? "Examiner", DateTime.Now);
+                    return status;
                 }
                 else if (exam == null)
                 {
+                    _logger.LogInformation("Exam with examId {@examid} doesn't exists. ", examId);
                     return -1;
                 }
                 else
                 {
+                    _logger.LogInformation("Exam with examId {@examid} already Deleted. ", examId);
                     return 1;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                _logger.LogError("Server was not able to delete the exam with examid {@exmid}. Returned with Error {@error}", examId, ex.Message);
                 return -99;
             }
 
@@ -176,7 +183,7 @@ namespace Infrastructure.Repositories.Implementations
         }
         public async Task<StudentExamViewDTO> GetExams(int examId)
         {
-            return (StudentExamViewDTO)await _context.Exams.Where(e => e.Eid == examId && e.ApprovalStatus == 1 && e.Questions != null)
+            return await _context.Exams.Where(e => e.Eid == examId && e.ApprovalStatus == 1 && e.Questions != null)
                 .Select(e => new StudentExamViewDTO
                 {
                     Name = e.Name,
@@ -202,6 +209,8 @@ namespace Infrastructure.Repositories.Implementations
                 var result = await _context.Database.ExecuteSqlRawAsync(
                     "EXEC CreateExamResult @examId, @userId",
                     examIdParam, userIdParam);
+
+                _logger.LogInformation("Result created for user= {@userid} and exam = {@examid}", userId, examId);
 
             }
 

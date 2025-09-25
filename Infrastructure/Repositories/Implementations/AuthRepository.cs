@@ -4,6 +4,8 @@ using Infrastructure.DTOs.AuthDTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Serilog.Core;
 using System.Security.Claims;
 
 
@@ -13,9 +15,11 @@ namespace Infrastructure.Repositories.Implementations
     {
         private readonly AppDbContext _context;
 
-        public AuthRepository(AppDbContext context)
+        private readonly ILogger<AuthRepository> _logger;
+        public AuthRepository(AppDbContext context, ILogger<AuthRepository> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         public int RegisterAdminOrExaminer(RegistrationInputDTO examinerDTO, string role)
@@ -30,6 +34,7 @@ namespace Infrastructure.Repositories.Implementations
             };
 
             _context.Users.Add(user);
+            _logger.LogInformation("New Admin/Examiner is registered with UserId : {@userid} at {@time}", user.UserId, user.CreatedAt);
             return _context.SaveChanges();
         }
         public int RegisterStudent(RegisterUserDTO dto)
@@ -43,13 +48,18 @@ namespace Infrastructure.Repositories.Implementations
                 PhoneNo = dto.PhoneNo
             };
             _context.Users.Add(user);
+            _logger.LogInformation("New Student is registered with UserId : {@userid} at {@time}", user.UserId, user.CreatedAt);
             return _context.SaveChanges();
         }
         public User? Login(string email, string password)
         {
             var user = _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
             if (user.IsBlocked == true) return null;
-            else return user;
+            else
+            {
+                _logger.LogInformation("{@Role} with userId {@userid} logged in at {@time}", user.Role, user.UserId, user.CreatedAt);
+                return user;
+            }
 
         }
 
