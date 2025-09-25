@@ -53,7 +53,6 @@ namespace Infrastructure.Repositories.Implementations
             return _context.SaveChanges();
         }
 
-
         public int DeleteUser(int id)
         {
             var user = _context.Users.FirstOrDefault(u => u.UserId == id);
