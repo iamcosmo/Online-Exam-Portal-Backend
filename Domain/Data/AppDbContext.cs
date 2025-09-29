@@ -227,6 +227,8 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.UpdatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+            entity.Property(e => e.Otp)
+               .HasColumnName("Otp");
         });
 
         OnModelCreatingPartial(modelBuilder);

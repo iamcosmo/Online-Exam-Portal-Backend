@@ -19,11 +19,12 @@ namespace OEP.Controllers
     {
         private readonly IAuthRepository _authRepository;
         private readonly TokenService _tokenService;
+       
 
 
-        public AuthController(IAuthRepository userRepository, TokenService tokenService)
+        public AuthController(IAuthRepository authRepository, TokenService tokenService)
         {
-            _authRepository = userRepository;
+            _authRepository = authRepository;
             _tokenService = tokenService;
         }
 
@@ -33,7 +34,7 @@ namespace OEP.Controllers
         public IActionResult RegisterStudentAction([FromBody] RegisterUserDTO dto)
         {
             var result = _authRepository.RegisterStudent(dto);
-            return result > 0 ? Ok("User registered successfully") : BadRequest("Registration failed");
+            return result > 0 ? Ok("User Saved! Please verify Email via OTP-verification") : BadRequest("Registration failed");
         }
 
         [HttpPost("internal/register")]
@@ -62,11 +63,27 @@ namespace OEP.Controllers
             var user = _authRepository.Login(dto.Email, dto.Password);
             if (user == null)
             {
-                return Unauthorized("Invalid credentials Or You are Blocked.");
+                return Unauthorized("Invalid credentials Or You are Blocked Or Verify your Email.");
             }
 
             string token = _tokenService.GenerateJwtToken(user);
             return Ok(new { Token = token });
+        }
+
+        [HttpPost("student/verifyotp/{userId}")]
+        public IActionResult VerifyOTP([FromBody] int otp, int userId)
+        {
+            if(_authRepository.VerifyOTP(userId, otp))                      
+                return Ok("OTP verified successfully");            
+
+            return Unauthorized("Incorrect OTP!!");
+        }
+
+        [HttpGet("student/resendotp/{userId}")]
+        public IActionResult ResendOTP(int userId)
+        {
+            int result = _authRepository.ResendOTP(userId);
+            return result > 0 ? Ok("OTP Resent Successfully") : BadRequest("Failed to resend OTP");
         }
 
 
