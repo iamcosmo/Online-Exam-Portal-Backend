@@ -24,13 +24,19 @@ namespace Infrastructure.Repositories.Implementations
 
         public int RegisterAdminOrExaminer(RegistrationInputDTO examinerDTO, string role)
         {
+
+            Random random = new Random();
+            int newOtp = random.Next(100000, 999999);
+           
             var user = new User
             {
                 FullName = examinerDTO.FullName,
                 Email = examinerDTO.Email,
                 Password = examinerDTO.Password,
                 Role = role,
-                PhoneNo = examinerDTO.PhoneNo
+                PhoneNo = examinerDTO.PhoneNo,
+                Dob = examinerDTO.Dob,
+                Otp = newOtp
             };
 
             _context.Users.Add(user);
@@ -54,18 +60,54 @@ namespace Infrastructure.Repositories.Implementations
         public User? Login(string email, string password)
         {
             var user = _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
+
+            if (user?.Otp != null)
+            {
+                _logger.LogWarning("User with userId {@userid} attempted to login without verifying OTP at {@time}", user.UserId, DateTime.Now);
+                return null;
+            }
+
             if (user.IsBlocked == true) return null;
             else
             {
                 _logger.LogInformation("{@Role} with userId {@userid} logged in at {@time}", user.Role, user.UserId, user.CreatedAt);
                 return user;
-            }
+            }         
 
         }
 
         public bool ValidateToken(string token)
         {
             return _context.Validations.Any(v => v.Token == token);
+        }
+
+        public bool VerifyOTP(int userId, int otp)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.UserId == userId && u.Otp == otp);
+            if (user != null)
+            {
+                user.Otp = null;
+                user.RegistrationDate = DateOnly.FromDateTime(DateTime.Now);
+                _context.SaveChanges();
+                _logger.LogInformation("OTP verified for UserId : {@userid} at {@time}", user.UserId, DateTime.Now);
+                return true;
+            }
+            return false;
+        }
+
+        public int ResendOTP(int userId)
+        {
+            var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
+            if (user != null)
+            {
+                Random random = new Random();
+                int newOtp = random.Next(100000, 999999);
+                user.Otp = newOtp;
+                _context.SaveChanges();
+                _logger.LogInformation("OTP resent for UserId : {@userid} at {@time}", user.UserId, DateTime.Now);
+                return newOtp;
+            }
+            return 0;
         }
     }
 }
