@@ -16,7 +16,6 @@ namespace oep
     {
         public static void Main(string[] args)
         {
-
             try
             {
                 var builder = WebApplication.CreateBuilder(args);
@@ -141,8 +140,7 @@ namespace oep
             }
             catch (Exception ex)
             {
-
-                Log.Fatal(ex, "Application start-up failed");
+                Log.Fatal(ex, "Application start-up failed ::: Internal Server Error.");
             }
             finally
             {
