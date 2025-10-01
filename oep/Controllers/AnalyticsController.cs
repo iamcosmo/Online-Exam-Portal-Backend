@@ -39,5 +39,12 @@ namespace OEP.Controllers
             if (examinerAnalyticsData != null) return Ok(examinerAnalyticsData);
             else return Ok("No Data available or Examiner Not Found");
         }
+
+        //[HttpGet("student/{userId}")]
+        //[Authorize(Roles = "Student")]
+
+        
+
+
     }
 }
