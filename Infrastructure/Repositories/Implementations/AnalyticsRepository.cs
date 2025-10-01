@@ -86,6 +86,11 @@ namespace Infrastructure.Repositories.Implementations
         public async Task<ActionResult<StudentAnalyticsDTO>> GetStudentAnalytics(int userId)
         {
 
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == userId);
+
+            if (!userExists)           
+                return new NotFoundResult();            
+
             var analyticsDto = new StudentAnalyticsDTO
             {
                 UserId = userId,
