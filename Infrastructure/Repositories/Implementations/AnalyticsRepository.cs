@@ -137,20 +137,20 @@ namespace Infrastructure.Repositories.Implementations
                 // 6. For each topic, calculate average score from Results where Exam contains that topic.
                 // 7. Return list of TopicWiseAverageScore.
 
-                    OverallAverageScoreTopicWise = await (
-                        from result in _context.Results
-                        join exam in _context.Exams on result.Eid equals exam.Eid
-                        where result.UserId == userId
-                        from topicId in exam.Tids.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                        join topic in _context.Topics on int.Parse(topicId) equals topic.Tid
-                        group new { result, topic } by new { topic.Tid, topic.Subject } into g
-                        select new TopicWiseAverageScore
-                        {
-                            TopicId = g.Key.Tid,
-                            Topic = g.Key.Subject,
-                            AverageScore = (double)g.Average(x => x.result.Score ?? 0)
-                        }
-                    ).ToListAsync()
+                OverallAverageScoreTopicWise = await (
+                    from result in _context.Results
+                    join exam in _context.Exams on result.Eid equals exam.Eid
+                    where result.UserId == userId
+                    from topicId in exam.Tids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    join topic in _context.Topics on int.Parse(topicId) equals topic.Tid
+                    group new { result, topic } by new { topic.Tid, topic.Subject } into g
+                    select new TopicWiseAverageScore
+                    {
+                        TopicId = g.Key.Tid,
+                        Topic = g.Key.Subject,
+                        AverageScore = (double)g.Average(x => x.result.Score ?? 0)
+                    }
+                ).ToListAsync()
             };
 
             return analyticsDto;
