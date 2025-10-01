@@ -14,5 +14,7 @@ namespace Infrastructure.DTOs.AuthDTOs
         public string Password { get; set; }
 
         public string? PhoneNo { get; set; }
+
+        public DateOnly? Dob { get; set; }
     }
 }
