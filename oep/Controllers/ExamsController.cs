@@ -116,7 +116,7 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpPost("submit-exam")]
-        public async Task<IActionResult> SubmitExamAction(SubmittedExamDTO examdto)
+        public async Task<IActionResult> SubmitExamAction([FromBody] SubmittedExamDTO examdto)
         {
             var status = await _examRepository.SubmitExam(examdto);
 
