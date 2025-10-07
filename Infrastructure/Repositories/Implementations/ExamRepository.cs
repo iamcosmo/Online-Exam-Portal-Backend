@@ -323,7 +323,23 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<int> SubmitExamForApproval(int examId)
         {
-            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
+            var exam = await _context.Exams.Include(e => e.Questions).FirstOrDefaultAsync(e => e.Eid == examId);
+
+            //checking if exam has total questions available
+            if (exam.Questions.Count != exam.TotalQuestions)
+            {
+                return -2;
+            }
+
+            decimal totalMarksSum = 0;
+
+            //updating total marks
+            foreach (var ques in exam.Questions)
+            {
+                totalMarksSum += (decimal)ques.Marks;
+            }
+            exam.TotalMarks = totalMarksSum;
+
             if (exam.Description == null || exam.TotalQuestions == null || exam.TotalMarks == null || exam.Questions == null || exam.DisplayedQuestions == null || exam.Duration == null || exam.Name == null || exam.Tids == null)
             {
                 return -1;
