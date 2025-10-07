@@ -69,15 +69,15 @@ public partial class AppDbContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.Tids).HasColumnName("TIDs");
             entity.Property(e => e.TotalMarks).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.MarksPerQuestion);
 
-           
             entity.HasOne(d => d.User).WithMany(p => p.ExamUsers)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK__Exams__UserId__3F466844");
 
             entity.Property(e => e.SubmittedForApproval)
                   .HasColumnName("SubmittedForApproval")
-                  .HasDefaultValue(false);
+                  .HasDefaultValue(false);            
 
             entity.HasOne(d => d.Reviewer)
                   .WithMany(p => p.ExamReviewers) 
