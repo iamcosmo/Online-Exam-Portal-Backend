@@ -83,5 +83,83 @@ namespace Infrastructure.Repositories.Implementations
             return dto != null ? dto : new ExaminerAnalyticsDto();
         }
 
+        public async Task<ActionResult<StudentAnalyticsDTO>> GetStudentAnalytics(int userId)
+        {
+
+            var userExists = await _context.Users.AnyAsync(u => u.UserId == userId);
+
+            if (!userExists)           
+                return new NotFoundResult();            
+
+            var analyticsDto = new StudentAnalyticsDTO
+            {
+                UserId = userId,
+                AverageScoreMultipleAttempts = await _context.Results
+                    .Where(r => r.UserId == userId)
+                    .GroupBy(r => r.Eid)
+                    .Select(g => new AverageScoreMultipleAttempts
+                    {
+                        ExamId = g.Key,
+                        ExamTitle = g.First().EidNavigation.Name,
+                        AverageScore = (double)g.Average(r => r.Score),
+                        TotalAttempts = g.Count()
+                    }).ToListAsync(),
+                TotalExamsTaken = await _context.Results
+                    .Where(r => r.UserId == userId)
+                    .Select(r => r.Eid)
+                    .Distinct()
+                    .CountAsync(),
+                TotalQuestionsEncountered = await _context.Responses
+                    .Where(rd => rd.UserId == userId)
+                    .Select(rd => rd.Qid)
+                    .Distinct()
+                    .CountAsync(),
+                ExamAttemptsRecords = new AttemptsRecords
+                {
+                    SingleAttempts = await _context.Results
+                        .Where(r => r.UserId == userId)
+                        .GroupBy(r => r.Eid)
+                        .Where(g => g.Count() == 1)
+                        .CountAsync(),
+                    DoubleAttempts = await _context.Results
+                        .Where(r => r.UserId == userId)
+                        .GroupBy(r => r.Eid)
+                        .Where(g => g.Count() == 2)
+                        .CountAsync(),
+                    TrippleAttempts = await _context.Results
+                        .Where(r => r.UserId == userId)
+                        .GroupBy(r => r.Eid)
+                        .Where(g => g.Count() >= 3)
+                        .CountAsync()
+                },
+
+                // Pseudocode:
+                // 1. From Results, filter by userId.
+                // 2. Join Results with Exams on Eid to get Tids (topic ids as string).
+                // 3. Split Tids string into individual topic ids.
+                // 4. Join topic ids with Topics table to get topic names.
+                // 5. Group by topic id and topic name.
+                // 6. For each topic, calculate average score from Results where Exam contains that topic.
+                // 7. Return list of TopicWiseAverageScore.
+
+                OverallAverageScoreTopicWise = await (
+                    from result in _context.Results
+                    join exam in _context.Exams on result.Eid equals exam.Eid
+                    where result.UserId == userId
+                    from topicId in exam.Tids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    join topic in _context.Topics on int.Parse(topicId) equals topic.Tid
+                    group new { result, topic } by new { topic.Tid, topic.Subject } into g
+                    select new TopicWiseAverageScore
+                    {
+                        TopicId = g.Key.Tid,
+                        Topic = g.Key.Subject,
+                        AverageScore = (double)g.Average(x => x.result.Score ?? 0)
+                    }
+                ).ToListAsync()
+            };
+
+            return analyticsDto;
+        }
+
     }
 }
