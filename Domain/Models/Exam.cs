@@ -33,6 +33,8 @@ public partial class Exam
 
     public int? DisplayedQuestions { get; set; }
 
+    public int? MarksPerQuestion { get; set; }
+
     public string? AdminRemarks { get; set; }
 
     public int? ReviewerId { get; set; }
