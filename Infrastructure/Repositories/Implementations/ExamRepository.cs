@@ -34,7 +34,9 @@ namespace Infrastructure.Repositories.Implementations
                 Tids = JsonConvert.SerializeObject(dto.Tids),
                 DisplayedQuestions = dto.DisplayedQuestions,
                 UserId = dto.userId,
-                SubmittedForApproval = false
+                SubmittedForApproval = false,
+                MarksPerQuestion = dto.MarksPerQ,
+                TotalMarks = dto.MarksPerQ * dto.DisplayedQuestions
 
             };
 
@@ -75,6 +77,13 @@ namespace Infrastructure.Repositories.Implementations
             if (dto.DisplayedQuestions != null)
             {
                 ToBeUpdatedExam.DisplayedQuestions = dto.DisplayedQuestions;
+                ToBeUpdatedExam.TotalMarks = ToBeUpdatedExam.MarksPerQuestion * dto.DisplayedQuestions;
+
+            }
+            if (dto.MarksPerQuestion != null)
+            {
+                ToBeUpdatedExam.MarksPerQuestion = dto.MarksPerQuestion;
+                ToBeUpdatedExam.TotalMarks = dto.MarksPerQuestion * ToBeUpdatedExam.DisplayedQuestions;
             }
             return await _context.SaveChangesAsync();
         }
@@ -126,6 +135,7 @@ namespace Infrastructure.Repositories.Implementations
                                     ExamName = e.Name,
                                     TotalQuestions = e.TotalQuestions,
                                     ApprovalStatusOfExam = e.ApprovalStatus,
+                                    MarksPerQuestion = (int)e.MarksPerQuestion,
                                     Tids = e.Tids,
                                     Questions = e.Questions.Select(q => new QuestionDTO
                                     {
@@ -299,7 +309,7 @@ namespace Infrastructure.Repositories.Implementations
                         Qid = responseDto.Qid,
                         UserId = submittedData.UserId,
                         Resp = JsonConvert.SerializeObject(responseDto.Resp),
-                        RespScore =0,
+                        RespScore = 0,
                         IsSubmittedFresh = true
                     };
 
@@ -330,15 +340,6 @@ namespace Infrastructure.Repositories.Implementations
             {
                 return -2;
             }
-
-            decimal totalMarksSum = 0;
-
-            //updating total marks
-            foreach (var ques in exam.Questions)
-            {
-                totalMarksSum += (decimal)ques.Marks;
-            }
-            exam.TotalMarks = totalMarksSum;
 
             if (exam.Description == null || exam.TotalQuestions == null || exam.TotalMarks == null || exam.Questions == null || exam.DisplayedQuestions == null || exam.Duration == null || exam.Name == null || exam.Tids == null)
             {
