@@ -25,7 +25,7 @@ namespace OEP.Controllers
         public async Task<IActionResult> AddExamAction([FromBody] AddExamDTO dto)
         {
             var result = await _examRepository.AddExam(dto);
-            return result > 0 ? Ok("Exam added successfully") : BadRequest("Failed to add exam");
+            return result > 0 ? Ok(new { msg = "Exam added successfully" }) : BadRequest(new { Err = "Failed to add exam" });
         }
 
         [Authorize(Roles = "Examiner")]

@@ -35,13 +35,13 @@ namespace Infrastructure.Repositories.Implementations
                 DisplayedQuestions = dto.DisplayedQuestions,
                 UserId = dto.userId,
                 SubmittedForApproval = false,
-                MarksPerQuestion = dto.MarksPerQ,
-                TotalMarks = dto.MarksPerQ * dto.DisplayedQuestions
+                MarksPerQuestion = dto.MarksPerQuestion,
+                TotalMarks = dto.MarksPerQuestion * dto.DisplayedQuestions
 
             };
 
             await _context.Exams.AddAsync(exam);
-            _logger.LogInformation("New Exam {@name} created by {@userName}", exam.Name, exam.User.FullName);
+            _logger.LogInformation("New Exam {@name} created by {@userName}", exam.Name, exam.UserId);
             return await _context.SaveChangesAsync();
 
         }
