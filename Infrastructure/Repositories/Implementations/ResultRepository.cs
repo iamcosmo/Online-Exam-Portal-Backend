@@ -4,6 +4,7 @@ using Infrastructure.Repositories.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -17,11 +18,13 @@ namespace Infrastructure.Repositories.Implementations
     {
         private readonly AppDbContext _context;
         private readonly IConfiguration _config;
+        private readonly ILogger<ResultRepository> _logger;
 
-        public ResultRepository(AppDbContext dbContext, IConfiguration configuration)
+        public ResultRepository(AppDbContext dbContext, IConfiguration configuration, ILogger<ResultRepository> logger)
         {
             _context = dbContext;
             _config = configuration;
+            _logger = logger;
         }
         public async Task<List<ExamResultsDTO>> ViewExamResults(int examid, int userid)
         {
@@ -39,8 +42,10 @@ namespace Infrastructure.Repositories.Implementations
         public async Task<int> CreateExamResults(int examid, int userid)
         {
             string connectionString = _config.GetConnectionString("DefaultConnection");
-            using (var connection = new SqlConnection(connectionString))
+
+            try
             {
+                using (var connection = new SqlConnection(connectionString))
                 using (var command = new SqlCommand("CreateExamResult", connection))
                 {
                     command.CommandType = CommandType.StoredProcedure;
@@ -52,6 +57,13 @@ namespace Infrastructure.Repositories.Implementations
                     return rowsAffected > 0 ? 1 : 0;
                 }
             }
+            catch (SqlException ex)
+            {
+
+                _logger.LogInformation("SQL Error: " + ex.Message);
+                return -1;
+            }
+
         }
     }
 }
