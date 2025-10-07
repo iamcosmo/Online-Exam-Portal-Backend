@@ -299,7 +299,7 @@ namespace Infrastructure.Repositories.Implementations
                         Qid = responseDto.Qid,
                         UserId = submittedData.UserId,
                         Resp = JsonConvert.SerializeObject(responseDto.Resp),
-                        RespScore = null,
+                        RespScore =0,
                         IsSubmittedFresh = true
                     };
 
