@@ -135,7 +135,7 @@ namespace Infrastructure.Repositories.Implementations
                                     ExamName = e.Name,
                                     TotalQuestions = e.TotalQuestions,
                                     ApprovalStatusOfExam = e.ApprovalStatus,
-                                    MarksPerQuestion = (int)e.MarksPerQuestion,
+                                    MarksPerQuestion = e.MarksPerQuestion??0,
                                     Tids = e.Tids,
                                     Questions = e.Questions.Select(q => new QuestionDTO
                                     {
