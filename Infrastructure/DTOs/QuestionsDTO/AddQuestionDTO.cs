@@ -12,7 +12,7 @@ namespace Infrastructure.DTOs.QuestionsDTO
 
         public string question { get; set; }
 
-        public decimal marks { get; set; }
+        //public decimal marks { get; set; }
 
         public string options { get; set; }
 
