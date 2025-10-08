@@ -10,7 +10,7 @@ namespace Infrastructure.DTOs.QuestionsDTO
     {
         public string Type { get; set; }
         public string Question { get; set; }
-        public decimal Marks { get; set; }
+        //public decimal Marks { get; set; }
         public string Options { get; set; }
         public List<string> CorrectOptions { get; set; }
         public int ApprovalStatus { get; set; }
