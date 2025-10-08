@@ -71,7 +71,7 @@ namespace OEP.Controllers
             if (availableQuestionCount.Count + questions.Questions.Count > exam.TotalQuestions)
                 return BadRequest("Adding these questions would exceed the total number of questions allowed for this exam.");
 
-            if (questions.Questions.Any(q => string.IsNullOrWhiteSpace(q.Question) || q.Marks <= 0))
+            if (questions.Questions.Any(q => string.IsNullOrWhiteSpace(q.Question)))
                 return BadRequest("One or more questions have invalid data.");
 
             var result = await _questionRepository.AddBatchQuestionsToExam(questions, examId);
