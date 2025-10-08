@@ -36,7 +36,7 @@ namespace OEP.Controllers
             var result = await _examRepository.UpdateExam(examId, dto);
             if (result == -1)
             {
-                return BadRequest("This exam has been submitted for approval and cannot be updated.");
+                return BadRequest(new { msg = "This exam has been submitted for approval and cannot be updated." });
             }
             return result > 0 ? Ok("Exam updated successfully") : StatusCode(500, "Exam was not updated due to Internal Errors.");
         }
@@ -46,9 +46,9 @@ namespace OEP.Controllers
         public async Task<IActionResult> DeleteExamAction(int examid)
         {
             int status = await _examRepository.DeleteExam(examid);
-            if (status >= 1) return Ok("Exam Deleted Successfully.");
-            else if (status == -1) return NotFound("Exam not found.");
-            else return StatusCode(500, "Some error Occured,status value =" + status);
+            if (status >= 1) return Ok(new { msg = "Exam Deleted Successfully." });
+            else if (status == -1) return NotFound(new { msg = "Exam not found." });
+            else return StatusCode(500, new { msg = "Some error Occured,status value =" + status });
         }
 
         [Authorize(Roles = "Examiner")]

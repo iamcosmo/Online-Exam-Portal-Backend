@@ -93,11 +93,11 @@ namespace Infrastructure.Repositories.Implementations
             try
             {
                 var exam = _context.Exams.FirstOrDefault(e => e.Eid == examId);
-                if (exam != null && exam.ApprovalStatus == 1)
+                if (exam != null && (exam.ApprovalStatus == 1 || exam.ApprovalStatus == 0))
                 {
-                    exam.setApprovalStatus(0);
+                    exam.setApprovalStatus(-1);
                     int status = _context.SaveChanges();
-                    _logger.LogInformation("Exam {@name} deleted by {@userName} at {@time}", exam.Name, exam.User.FullName ?? "Examiner", DateTime.Now);
+                    _logger.LogInformation("Exam {@name} deleted by {@userName} at {@time}", exam.Name, exam.UserId ?? -1, DateTime.Now);
                     return status;
                 }
                 else if (exam == null)
@@ -121,13 +121,13 @@ namespace Infrastructure.Repositories.Implementations
         }
         public async Task<List<Exam>> GetExamsForExaminer(int userid)
         {
-            var examdata = await _context.Exams.Where(e => e.UserId == userid).ToListAsync();
+            var examdata = await _context.Exams.Where(e => e.UserId == userid && e.ApprovalStatus != -1).ToListAsync();
             return examdata;
         }
         public async Task<ExamWithQuestionsDTO> GetExamByIdForExaminer(int examId)
         {
             return await _context.Exams
-                                .Where(e => e.Eid == examId)
+                                .Where(e => e.Eid == examId && e.ApprovalStatus != -1)
                                 .Select(e => new ExamWithQuestionsDTO
                                 {
                                     UserId = e.UserId,
@@ -135,14 +135,14 @@ namespace Infrastructure.Repositories.Implementations
                                     ExamName = e.Name,
                                     TotalQuestions = e.TotalQuestions,
                                     ApprovalStatusOfExam = e.ApprovalStatus,
-                                    MarksPerQuestion = (int)e.MarksPerQuestion,
+                                    MarksPerQuestion = e.MarksPerQuestion ?? 0,
                                     Tids = e.Tids,
                                     Questions = e.Questions.Select(q => new QuestionDTO
                                     {
                                         Qid = q.Qid,
                                         Type = q.Type,
                                         Options = q.Options,
-                                        Marks = q.Marks,
+                                        Marks = q.Marks ?? 0,
                                         QuestionText = q.Question1,
                                         CorrectOptions = q.CorrectOptions,
                                         ApprovalStatus = q.ApprovalStatus
