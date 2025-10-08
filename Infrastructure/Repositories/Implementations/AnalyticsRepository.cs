@@ -3,6 +3,7 @@ using Infrastructure.DTOs.Analytics;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -142,20 +143,68 @@ namespace Infrastructure.Repositories.Implementations
                 // 6. For each topic, calculate average score from Results where Exam contains that topic.
                 // 7. Return list of TopicWiseAverageScore.
 
-                OverallAverageScoreTopicWise = await (
-                    from result in _context.Results
-                    join exam in _context.Exams on result.Eid equals exam.Eid
-                    where result.UserId == userId
-                    from topicId in exam.Tids.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                    join topic in _context.Topics on int.Parse(topicId) equals topic.Tid
-                    group new { result, topic } by new { topic.Tid, topic.Subject } into g
-                    select new TopicWiseAverageScore
-                    {
-                        TopicId = g.Key.Tid,
-                        Topic = g.Key.Subject,
-                        AverageScore = (double)g.Average(x => x.result.Score ?? 0)
-                    }
-                ).ToListAsync()
+                //OverallAverageScoreTopicWise = await (
+                //    from result in _context.Results
+                //    join exam in _context.Exams on result.Eid equals exam.Eid
+                //    where result.UserId == userId
+                //    from topicId in exam.Tids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                //    join topic in _context.Topics on int.Parse(topicId) equals topic.Tid
+                //    group new { result, topic } by new { topic.Tid, topic.Subject } into g
+                //    select new TopicWiseAverageScore
+                //    {
+                //        TopicId = g.Key.Tid,
+                //        Topic = g.Key.Subject,
+                //        AverageScore = (double)g.Average(x => x.result.Score ?? 0)
+                //    }
+                //).ToListAsync()
+
+                OverallAverageScoreTopicWise = await Task.Run(() => // Wrap in Task.Run for async compatibility if needed
+                {
+                    // 1. Database Query: Pull Results and Exams for the User
+                    var rawAnalyticsData = (
+                        from result in _context.Results
+                        join exam in _context.Exams on result.Eid equals exam.Eid
+                        where result.UserId == userId
+                        select new
+                        {
+                            result.Score,
+                            exam.Tids // Get the JSON string
+                        }
+                    ).AsEnumerable(); // Force execution of DB query here. The rest runs in memory.
+
+                    // 2. Client-Side Processing: Deserialize JSON and Flatten Data
+                    var topicScores = rawAnalyticsData
+                        .SelectMany(x =>
+                        {
+                            // Safely deserialize the JSON string into an array of integers (Topic IDs)
+                            var topicIds = JsonConvert.DeserializeObject<List<int>>(x.Tids ?? "[]");
+
+                            // Create a flat list of {Score, TopicId} pairs
+                            return topicIds.Select(tid => new { Score = x.Score, TopicId = tid });
+                        })
+                        .ToList(); // Convert to List to use the data efficiently
+
+                    // 3. Final Grouping and Averaging (In-Memory)
+                    var allTopics = _context.Topics.ToList(); // Load ALL topics into memory for joining
+
+                    return topicScores
+                        .Join(
+                            allTopics,
+                            ts => ts.TopicId,
+                            topic => topic.Tid,
+                            (ts, topic) => new { ts.Score, topic.Tid, topic.Subject }
+                        )
+                        .GroupBy(x => new { x.Tid, x.Subject })
+                        .Select(g => new TopicWiseAverageScore
+                        {
+                            TopicId = g.Key.Tid,
+                            Topic = g.Key.Subject,
+                            AverageScore = (double)g.Average(x => x.Score ?? 0)
+                        })
+                        .ToList();
+                }),
+
+
             };
 
             return analyticsDto;

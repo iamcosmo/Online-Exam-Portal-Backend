@@ -42,7 +42,12 @@ namespace Infrastructure.Repositories.Implementations
 
             await _context.Exams.AddAsync(exam);
             _logger.LogInformation("New Exam {@name} created by {@userName}", exam.Name, exam.UserId);
-            return await _context.SaveChangesAsync();
+             var status = await _context.SaveChangesAsync();
+
+            var tids = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == exam.Eid);
+            _logger.LogInformation("Type: {@Type}\tValue: {@Val}", tids.Tids.GetType().Name, tids.Tids);
+
+            return status;
 
         }
         public async Task<int> UpdateExam(int examId, UpdateExamDTO dto)
