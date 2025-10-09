@@ -25,16 +25,21 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<int> AddQuestion(AddQuestionDTO question, int eid)
         {
-           
+
             bool topicExistsAndApproved = await _context.Topics.AnyAsync(t => t.Tid == question.Tid && t.ApprovalStatus == 1);
             if (!topicExistsAndApproved)
                 return 0;
+
+            int? MarksPerQuestion = await _context.Exams
+                .Where(e => e.Eid == eid)
+                .Select(e => e.MarksPerQuestion)
+                .FirstOrDefaultAsync();
 
             Question quest = new()
             {
                 Type = question.type,
                 Question1 = question.question,
-                Marks = question.marks,
+                Marks = MarksPerQuestion,
                 Options = question.options,
                 Tid = question.Tid,
                 CorrectOptions = JsonConvert.SerializeObject(question.correctOptions),
@@ -49,6 +54,11 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<int> AddBatchQuestionsToExam(AddQuestionsByBatchDTO questions, int eid)
         {
+            int? MarksPerQuestion = await _context.Exams
+                .Where(e => e.Eid == eid)
+                .Select(e => e.MarksPerQuestion)
+                .FirstOrDefaultAsync();
+
             List<Question> questionList = new();
             foreach (var question in questions.Questions)
             {
@@ -58,7 +68,7 @@ namespace Infrastructure.Repositories.Implementations
                     Tid = questions.Tid,
                     Type = question.Type,
                     Question1 = question.Question,
-                    Marks = question.Marks,
+                    Marks = MarksPerQuestion,
                     Options = question.Options,
                     CorrectOptions = JsonConvert.SerializeObject(question.CorrectOptions),
                     ApprovalStatus = question.ApprovalStatus
@@ -89,7 +99,6 @@ namespace Infrastructure.Repositories.Implementations
             {
                 Type = question.type,
                 Question1 = question.question,
-                Marks = question.marks,
                 Options = question.options,
                 CorrectOptions = JsonConvert.SerializeObject(question.correctOptions),
                 ApprovalStatus = question.ApprovalStatus
@@ -103,7 +112,6 @@ namespace Infrastructure.Repositories.Implementations
 
             existingQuestion.Type = question.type;
             existingQuestion.Question1 = question.question;
-            existingQuestion.Marks = question.marks;
             existingQuestion.Options = question.options;
             existingQuestion.CorrectOptions = JsonConvert.SerializeObject(question.correctOptions);
             existingQuestion.ApprovalStatus = question.ApprovalStatus;

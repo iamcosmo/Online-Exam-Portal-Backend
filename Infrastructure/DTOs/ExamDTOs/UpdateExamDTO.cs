@@ -14,5 +14,6 @@ namespace Infrastructure.DTOs.ExamDTOs
         public decimal? Duration { get; set; }
         public List<string?>? Tids { get; set; }
         public int? DisplayedQuestions { get; set; }
+        public int MarksPerQuestion { get; set; }
     }
 }
