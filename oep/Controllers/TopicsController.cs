@@ -19,20 +19,20 @@ namespace OEP.Controllers
         }
 
         [HttpGet("get-topic")]
-        public IActionResult GetTopicsAction()
+        public async Task<IActionResult> GetTopicsAction()
         {
 
-            List<Topic> topics = _topicRepo.GetTopics();
-            if (topics == null) return Ok("No Topics Exists");
+            List<GetTopicsDTO> topics = await _topicRepo.GetTopics();
+            if (topics == null) return Ok(new { msg = "No Topics Exists" });
             return Ok(topics);
         }
 
 
         [HttpGet("get-topic/{topicId}")]
-        public IActionResult GetTopicsAction([FromRoute] int topicId)
+        public async Task<IActionResult> GetTopicsAction([FromRoute] int topicId)
         {
 
-            Topic topic = _topicRepo.GetTopics(topicId);
+            Topic topic = await _topicRepo.GetTopics(topicId);
             if (topic == null) return Ok("No Topic Exists");
             return Ok(topic);
         }

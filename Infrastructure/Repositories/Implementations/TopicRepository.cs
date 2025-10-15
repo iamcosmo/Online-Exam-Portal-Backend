@@ -6,6 +6,7 @@ using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.Implementations
 {
@@ -16,13 +17,22 @@ namespace Infrastructure.Repositories.Implementations
         {
             _context = context;
         }
-        public List<Topic> GetTopics()
+        public async Task<List<GetTopicsDTO>> GetTopics()
         {
-            return _context.Topics.ToList();
+            List<GetTopicsDTO> topicList = await _context.Topics
+                .Select(t =>
+                    new GetTopicsDTO
+                    {
+                        tid = t.Tid,
+                        subject = t.Subject ?? "No Topic"
+                    }).ToListAsync();
+
+            return topicList;
+
         }
-        public Topic GetTopics(int topicId)
+        public async Task<Topic> GetTopics(int topicId)
         {
-            return (Topic)_context.Topics.Where(t => t.Tid == topicId);
+            return await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId);
         }
 
         public List<Topic> GetTopicsForQuestions(int examId)
