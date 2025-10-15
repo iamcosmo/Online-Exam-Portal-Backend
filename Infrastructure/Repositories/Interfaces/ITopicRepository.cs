@@ -12,8 +12,8 @@ namespace Infrastructure.Repositories.Interfaces
 {
     public interface ITopicRepository
     {
-        public List<Topic> GetTopics();
-        public Topic GetTopics(int topicId);
+        public Task<List<GetTopicsDTO>> GetTopics();
+        public Task<Topic> GetTopics(int topicId);
         public List<Topic> GetTopicsForQuestions(int examId);
         public int CreateTopic(string TopicName);
         public int UpdateTopic(string TopicName, int Tid);
