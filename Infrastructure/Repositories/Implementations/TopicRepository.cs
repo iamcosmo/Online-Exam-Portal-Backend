@@ -6,6 +6,7 @@ using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.Implementations
@@ -19,20 +20,37 @@ namespace Infrastructure.Repositories.Implementations
         }
         public async Task<List<GetTopicsDTO>> GetTopics()
         {
-            List<GetTopicsDTO> topicList = await _context.Topics
+            List<GetTopicsDTO> topicList = await _context.Topics.Where(t => t.ApprovalStatus == 1)
                 .Select(t =>
                     new GetTopicsDTO
                     {
                         tid = t.Tid,
-                        subject = t.Subject ?? "No Topic"
+                        subject = t.Subject ?? "No Topic",
+                        approvalStatus = t.ApprovalStatus
                     }).ToListAsync();
 
             return topicList;
 
         }
+
+        public async Task<List<GetTopicsDTO>> GetExaminerTopics(int examinerId)
+        {
+            List<GetTopicsDTO> topicList = await _context.Topics.Where(t => t.ExaminerId == examinerId)
+                .Select(t =>
+                    new GetTopicsDTO
+                    {
+                        tid = t.Tid,
+                        subject = t.Subject ?? "No Topic",
+                        approvalStatus = t.ApprovalStatus
+                    }).ToListAsync();
+
+            return topicList;
+
+        }
+
         public async Task<Topic> GetTopics(int topicId)
         {
-            return await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId);
+            return await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId && t.ApprovalStatus == 1);
         }
 
         public List<Topic> GetTopicsForQuestions(int examId)
@@ -65,7 +83,7 @@ namespace Infrastructure.Repositories.Implementations
         }
         public int UpdateTopic(string TopicName, int Tid)
         {
-            var topicToUpdate = _context.Topics.Find(Tid);
+            var topicToUpdate = _context.Topics.Where(t => t.Tid == Tid && t.ApprovalStatus == 0).FirstOrDefault();
             if (topicToUpdate == null)
             {
                 return 0;
@@ -76,7 +94,7 @@ namespace Infrastructure.Repositories.Implementations
         }
         public int DeleteTopic(int topicId)
         {
-            var topic = _context.Topics.Find(topicId);
+            var topic = _context.Topics.Where(t => t.Tid == topicId && t.ApprovalStatus == 0).FirstOrDefault();
 
             if (topic != null)
             {
