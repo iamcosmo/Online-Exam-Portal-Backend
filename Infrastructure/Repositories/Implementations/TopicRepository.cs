@@ -41,7 +41,8 @@ namespace Infrastructure.Repositories.Implementations
                     {
                         tid = t.Tid,
                         subject = t.Subject ?? "No Topic",
-                        approvalStatus = t.ApprovalStatus
+                        approvalStatus = t.ApprovalStatus,
+                        submittedForApproval = t.SubmittedForApproval
                     }).ToListAsync();
 
             return topicList;
@@ -72,11 +73,12 @@ namespace Infrastructure.Repositories.Implementations
             return topics;
 
         }
-        public int CreateTopic(string TopicName)
+        public int CreateTopic(string TopicName, int examinerId)
         {
             Topic topic = new Topic
             {
-                Subject = TopicName
+                Subject = TopicName,
+                ExaminerId = examinerId
             };
             var CreatedTopic = _context.Topics.Add(topic);
             return _context.SaveChanges();

@@ -27,7 +27,7 @@ namespace OEP.Controllers
             return Ok(topics);
         }
 
-        [HttpGet("get-examiner-topic")]
+        [HttpGet("get-examiner-topic/{examinerId}")]
         public async Task<IActionResult> GetExaminerTopicsAction([FromRoute] int examinerId)
         {
 
@@ -55,10 +55,10 @@ namespace OEP.Controllers
         }
 
         [HttpPost("add-topic")]
-        public IActionResult CreateTopicAction(string TopicName)
+        public IActionResult CreateTopicAction([FromBody] CreateTopicBodyDTO createTopicdto)
         {
 
-            var CreatedTopic = _topicRepo.CreateTopic(TopicName);
+            var CreatedTopic = _topicRepo.CreateTopic(createTopicdto.TopicName, createTopicdto.examinerId);
             if (CreatedTopic == null) return StatusCode(500, "Could not add Topic");
 
             return Ok(new { Message = "Topic Created", TopicStatus = CreatedTopic });
@@ -73,7 +73,7 @@ namespace OEP.Controllers
             return Ok(new { Message = "Topic Updated", TopicStatus = UpdatedTopic });
         }
 
-        [HttpPost("delete-topic/{topicId}")]
+        [HttpDelete("delete-topic/{topicId}")]
         public IActionResult DeleteTopicAction([FromRoute] int topicId)
         {
             var DeletedTopic = _topicRepo.DeleteTopic(topicId);
@@ -86,7 +86,7 @@ namespace OEP.Controllers
         public async Task<IActionResult> SendTopicForApproval([FromRoute] int topicId)
         {
             int status = await _topicRepo.SubmitTopicForApproval(topicId);
-            return status > 0 ? Ok("Topic submitted for approval.") : BadRequest("Could not submit Topic for Approval.");
+            return status > 0 ? Ok(new { Message = "Topic submitted for approval.", TopicStatus = status }) : BadRequest(new { Message = "Could not submit Topic for Approval." });
 
         }
 

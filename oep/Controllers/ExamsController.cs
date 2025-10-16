@@ -38,7 +38,7 @@ namespace OEP.Controllers
             {
                 return BadRequest(new { msg = "This exam has been submitted for approval and cannot be updated." });
             }
-            return result > 0 ? Ok("Exam updated successfully") : StatusCode(500, "Exam was not updated due to Internal Errors.");
+            return result > 0 ? Ok(new { msg = "Exam updated successfully" }) : StatusCode(500, new { msg = "Exam was not updated due to Internal Errors." });
         }
 
         [Authorize(Roles = "Examiner")]
