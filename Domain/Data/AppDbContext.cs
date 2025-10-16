@@ -61,7 +61,7 @@ public partial class AppDbContext : DbContext
             entity.HasKey(e => e.Eid).HasName("PK__Exams__C190170BDABF6CFC");
 
             entity.Property(e => e.Eid).HasColumnName("EID");
-          
+
             entity.Property(e => e.Description).IsUnicode(false);
             entity.Property(e => e.Duration).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Name)
@@ -77,10 +77,10 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.SubmittedForApproval)
                   .HasColumnName("SubmittedForApproval")
-                  .HasDefaultValue(false);            
+                  .HasDefaultValue(false);
 
             entity.HasOne(d => d.Reviewer)
-                  .WithMany(p => p.ExamReviewers) 
+                  .WithMany(p => p.ExamReviewers)
                   .HasForeignKey(d => d.ReviewerId)
                   .HasConstraintName("FK_Exams_ReviewerId");
 
@@ -203,10 +203,17 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Tid).HasColumnName("TID");
             entity.Property(e => e.ApprovedByUserId).HasColumnName("ApprovedByUserID");
             entity.Property(e => e.Subject).HasMaxLength(255);
+            entity.Property(e => e.ExaminerId).HasColumnName("ExaminerId");
 
-            entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.Topics)
+            entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.ApprovedTopics)
                 .HasForeignKey(d => d.ApprovedByUserId)
                 .HasConstraintName("FK__Topics__Approved__3B75D760");
+
+            entity.HasOne(d => d.Examiner)
+                  .WithMany(p => p.CreatedTopics)
+                  .HasForeignKey(d => d.ExaminerId)
+                  .OnDelete(DeleteBehavior.Restrict)
+                  .HasConstraintName("FK_Topics_User_Examiner");
         });
 
         modelBuilder.Entity<User>(entity =>

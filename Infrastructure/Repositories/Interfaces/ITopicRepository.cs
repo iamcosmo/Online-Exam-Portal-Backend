@@ -13,6 +13,7 @@ namespace Infrastructure.Repositories.Interfaces
     public interface ITopicRepository
     {
         public Task<List<GetTopicsDTO>> GetTopics();
+        public Task<List<GetTopicsDTO>> GetExaminerTopics(int examinerId);
         public Task<Topic> GetTopics(int topicId);
         public List<Topic> GetTopicsForQuestions(int examId);
         public int CreateTopic(string TopicName);

@@ -10,5 +10,6 @@ namespace Infrastructure.DTOs.TopicDTOs
     {
         public int? tid { get; set; }
         public string? subject { get; set; }
+        public int? approvalStatus { get; set; }
     }
 }
