@@ -38,6 +38,18 @@ namespace Infrastructure.Repositories.Implementations
 
             return results;
         }
+
+        public async Task<List<ExamResultsDTO>> GetAllResultsForUser(int userid)
+        {
+            List<ExamResultsDTO> results = await _context.Results.Where(r => r.UserId == userid).Select(r => new ExamResultsDTO
+            {
+                UserId = r.UserId,
+                Eid = r.Eid,
+                Attempts = r.Attempts,
+                Score = r.Score
+            }).ToListAsync();
+            return results;
+        }
         //Using ADO.NET
         public async Task<int> CreateExamResults(int examid, int userid)
         {
