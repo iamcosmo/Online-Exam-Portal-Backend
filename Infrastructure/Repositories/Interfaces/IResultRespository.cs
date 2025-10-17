@@ -11,5 +11,7 @@ namespace Infrastructure.Repositories.Interfaces
     {
         public Task<List<ExamResultsDTO>> ViewExamResults(int examid, int userid);
         public Task<int> CreateExamResults(int examid, int userid);
+
+        public Task<List<ExamResultsDTO>> GetAllResultsForUser(int userid);
     }
 }
