@@ -48,5 +48,17 @@ namespace OEP.Controllers
             if (studentAnalyticsData != null) return Ok(studentAnalyticsData);
             else return Ok("No Data available or Student Not Found");
         }
+
+        [HttpGet("total-active-exams")]
+        public async Task<int> GetTotalActiveExamsAction()
+        {
+            return await analyticsRepository.GetTotalActiveExams();
+        }
+
+        [HttpGet("total-active-questions")]
+        public async Task<int> GetTotalActiveQuestionsAction()
+        {
+            return await analyticsRepository.GetTotalActiveQuestions();
+        }
     }
 }

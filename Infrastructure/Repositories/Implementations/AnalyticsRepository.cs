@@ -210,5 +210,14 @@ namespace Infrastructure.Repositories.Implementations
             return analyticsDto;
         }
 
+        public async Task<int> GetTotalActiveExams()
+        {           
+            return await _context.Exams.CountAsync(e => e.ApprovalStatus == 1);
+        }
+
+        public async Task<int> GetTotalActiveQuestions()
+        {         
+            return await _context.Questions.CountAsync(q => q.ApprovalStatus == 1);
+        }
     }
 }
