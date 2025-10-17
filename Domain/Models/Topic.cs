@@ -7,7 +7,7 @@ public partial class Topic
 {
     public Topic() { ApprovalStatus = 0; }
     public int Tid { get; set; }
-    public int ExaminerId { get; set; }
+    public int? ExaminerId { get; set; }
 
     public string? Subject { get; set; }
 
@@ -19,6 +19,6 @@ public partial class Topic
     public bool SubmittedForApproval { get; set; }
 
     public virtual User? ApprovedByUser { get; set; }
-    public virtual User Examiner { get; set; } = null!;
+    public virtual User? Examiner { get; set; }
     public virtual ICollection<Question> Questions { get; set; } = new List<Question>();
 }
