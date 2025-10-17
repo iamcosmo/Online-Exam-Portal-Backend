@@ -20,24 +20,66 @@ namespace Infrastructure.Repositories.Implementations
         }
 
 
-        public List<User> GetAllUsers()
+        public List<UserDetailsDTO> GetAllUsers()
         {
-            return _context.Users.ToList();
+
+            var users = _context.Users.ToList();
+
+            var userDtos = users.Select(user => new UserDetailsDTO
+            {
+                FullName = user.FullName,
+                Email = user.Email,
+                Dob = (DateOnly)user.Dob,
+                PhoneNo = user.PhoneNo,
+                Role = user.Role,
+                IsBlocked = (bool)user.IsBlocked
+            }).ToList();
+
+            return userDtos;
+
         }
 
-        public User? GetUserById(int id)
+        public UserDetailsDTO? GetUserById(int id)
         {
-            return _context.Users.FirstOrDefault(u => u.UserId == id);
+
+            var user = _context.Users.FirstOrDefault(u => u.UserId == id);
+            if (user == null)
+                return null;
+
+            return new UserDetailsDTO
+            {
+                FullName = user.FullName,
+                Email = user.Email,
+                Dob = (DateOnly)user.Dob,
+                PhoneNo = user.PhoneNo,
+                Role = user.Role,
+                IsBlocked = (bool)user.IsBlocked
+            };
+
         }
 
-        public List<User> GetUsersByRole(string role)
+        public List<UserDetailsDTO> GetUsersByRole(string role)
         {
-            return _context.Users.Where(u => u.Role == role).ToList();
+
+            var users = _context.Users.Where(u => u.Role == role).ToList();
+
+            var userDtos = users.Select(user => new UserDetailsDTO
+            {
+                FullName = user.FullName,
+                Email = user.Email,
+                Dob = (DateOnly)user.Dob,
+                PhoneNo = user.PhoneNo,
+                Role = user.Role,
+                IsBlocked = (bool)user.IsBlocked
+            }).ToList();
+
+            return userDtos;
+
         }
 
         public int UpdateUser(int id, UpdateUserDTO dto)
         {
-            var existingUser = _context.Users.FirstOrDefault(u => u.UserId == dto.Id);
+            var existingUser = _context.Users.FirstOrDefault(u => u.UserId == id);
             if (existingUser == null)
                 return 0;
 
@@ -49,6 +91,11 @@ namespace Infrastructure.Repositories.Implementations
 
             if (!string.IsNullOrEmpty(dto.PhoneNo))
                 existingUser.PhoneNo = dto.PhoneNo;
+
+
+            if (!string.IsNullOrEmpty(dto.Email))
+                existingUser.Email = dto.Email;
+
 
             return _context.SaveChanges();
         }

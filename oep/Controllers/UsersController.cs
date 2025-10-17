@@ -33,7 +33,7 @@ namespace OEP.Controllers
         }
 
         // GET /users/{id}
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Student,Examiner")]
         [HttpGet("{id}")]
         public IActionResult GetUserById(int id)
         {
