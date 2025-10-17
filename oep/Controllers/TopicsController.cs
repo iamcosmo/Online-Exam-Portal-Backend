@@ -19,20 +19,29 @@ namespace OEP.Controllers
         }
 
         [HttpGet("get-topic")]
-        public IActionResult GetTopicsAction()
+        public async Task<IActionResult> GetTopicsAction()
         {
 
-            List<Topic> topics = _topicRepo.GetTopics();
-            if (topics == null) return Ok("No Topics Exists");
+            List<GetTopicsDTO> topics = await _topicRepo.GetTopics();
+            if (topics == null) return Ok(new { msg = "No Topics Exists" });
+            return Ok(topics);
+        }
+
+        [HttpGet("get-examiner-topic/{examinerId}")]
+        public async Task<IActionResult> GetExaminerTopicsAction([FromRoute] int examinerId)
+        {
+
+            List<GetTopicsDTO> topics = await _topicRepo.GetExaminerTopics(examinerId);
+            if (topics == null) return Ok(new { msg = "No Topics Exists" });
             return Ok(topics);
         }
 
 
         [HttpGet("get-topic/{topicId}")]
-        public IActionResult GetTopicsAction([FromRoute] int topicId)
+        public async Task<IActionResult> GetTopicsAction([FromRoute] int topicId)
         {
 
-            Topic topic = _topicRepo.GetTopics(topicId);
+            Topic topic = await _topicRepo.GetTopics(topicId);
             if (topic == null) return Ok("No Topic Exists");
             return Ok(topic);
         }
@@ -46,13 +55,13 @@ namespace OEP.Controllers
         }
 
         [HttpPost("add-topic")]
-        public IActionResult CreateTopicAction(string TopicName)
+        public IActionResult CreateTopicAction([FromBody] CreateTopicBodyDTO createTopicdto)
         {
 
-            var CreatedTopic = _topicRepo.CreateTopic(TopicName);
+            var CreatedTopic = _topicRepo.CreateTopic(createTopicdto.TopicName, createTopicdto.examinerId);
             if (CreatedTopic == null) return StatusCode(500, "Could not add Topic");
 
-            return Ok(new { Message = "Topic Created", CreatedTopicStatus = CreatedTopic });
+            return Ok(new { Message = "Topic Created", TopicStatus = CreatedTopic });
         }
 
         [HttpPost("update-topic/{Tid}")]
@@ -61,23 +70,23 @@ namespace OEP.Controllers
             var UpdatedTopic = _topicRepo.UpdateTopic(updateTopicdto.Name, Tid);
             if (UpdatedTopic == null) return StatusCode(500, "Could not update Topic");
 
-            return Ok(new { Message = "Topic Updated", UpdatedTopicStatus = UpdatedTopic });
+            return Ok(new { Message = "Topic Updated", TopicStatus = UpdatedTopic });
         }
 
-        [HttpPost("delete-topic/{topicId}")]
+        [HttpDelete("delete-topic/{topicId}")]
         public IActionResult DeleteTopicAction([FromRoute] int topicId)
         {
             var DeletedTopic = _topicRepo.DeleteTopic(topicId);
             if (DeletedTopic == null) return StatusCode(500, "Could not delete Topic");
 
-            return Ok(new { Message = "Topic Deleted", DeletedTopicStatus = DeletedTopic });
+            return Ok(new { Message = "Topic Deleted", TopicStatus = DeletedTopic });
         }
 
         [HttpPost("send-topic-for-approval/{topicId}")]
         public async Task<IActionResult> SendTopicForApproval([FromRoute] int topicId)
         {
             int status = await _topicRepo.SubmitTopicForApproval(topicId);
-            return status > 0 ? Ok("Topic submitted for approval.") : BadRequest("Could not submit Topic for Approval.");
+            return status > 0 ? Ok(new { Message = "Topic submitted for approval.", TopicStatus = status }) : BadRequest(new { Message = "Could not submit Topic for Approval." });
 
         }
 

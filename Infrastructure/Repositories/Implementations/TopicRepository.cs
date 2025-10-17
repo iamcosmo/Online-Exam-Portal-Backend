@@ -6,6 +6,8 @@ using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.Implementations
 {
@@ -16,13 +18,40 @@ namespace Infrastructure.Repositories.Implementations
         {
             _context = context;
         }
-        public List<Topic> GetTopics()
+        public async Task<List<GetTopicsDTO>> GetTopics()
         {
-            return _context.Topics.ToList();
+            List<GetTopicsDTO> topicList = await _context.Topics.Where(t => t.ApprovalStatus == 1)
+                .Select(t =>
+                    new GetTopicsDTO
+                    {
+                        tid = t.Tid,
+                        subject = t.Subject ?? "No Topic",
+                        approvalStatus = t.ApprovalStatus
+                    }).ToListAsync();
+
+            return topicList;
+
         }
-        public Topic GetTopics(int topicId)
+
+        public async Task<List<GetTopicsDTO>> GetExaminerTopics(int examinerId)
         {
-            return (Topic)_context.Topics.Where(t => t.Tid == topicId);
+            List<GetTopicsDTO> topicList = await _context.Topics.Where(t => t.ExaminerId == examinerId)
+                .Select(t =>
+                    new GetTopicsDTO
+                    {
+                        tid = t.Tid,
+                        subject = t.Subject ?? "No Topic",
+                        approvalStatus = t.ApprovalStatus,
+                        submittedForApproval = t.SubmittedForApproval
+                    }).ToListAsync();
+
+            return topicList;
+
+        }
+
+        public async Task<Topic> GetTopics(int topicId)
+        {
+            return await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId && t.ApprovalStatus == 1);
         }
 
         public List<Topic> GetTopicsForQuestions(int examId)
@@ -44,18 +73,19 @@ namespace Infrastructure.Repositories.Implementations
             return topics;
 
         }
-        public int CreateTopic(string TopicName)
+        public int CreateTopic(string TopicName, int examinerId)
         {
             Topic topic = new Topic
             {
-                Subject = TopicName
+                Subject = TopicName,
+                ExaminerId = examinerId
             };
             var CreatedTopic = _context.Topics.Add(topic);
             return _context.SaveChanges();
         }
         public int UpdateTopic(string TopicName, int Tid)
         {
-            var topicToUpdate = _context.Topics.Find(Tid);
+            var topicToUpdate = _context.Topics.Where(t => t.Tid == Tid && t.ApprovalStatus == 0).FirstOrDefault();
             if (topicToUpdate == null)
             {
                 return 0;
@@ -66,7 +96,7 @@ namespace Infrastructure.Repositories.Implementations
         }
         public int DeleteTopic(int topicId)
         {
-            var topic = _context.Topics.Find(topicId);
+            var topic = _context.Topics.Where(t => t.Tid == topicId && t.ApprovalStatus == 0).FirstOrDefault();
 
             if (topic != null)
             {

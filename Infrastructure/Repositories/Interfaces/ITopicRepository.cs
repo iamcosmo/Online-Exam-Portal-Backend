@@ -12,10 +12,11 @@ namespace Infrastructure.Repositories.Interfaces
 {
     public interface ITopicRepository
     {
-        public List<Topic> GetTopics();
-        public Topic GetTopics(int topicId);
+        public Task<List<GetTopicsDTO>> GetTopics();
+        public Task<List<GetTopicsDTO>> GetExaminerTopics(int examinerId);
+        public Task<Topic> GetTopics(int topicId);
         public List<Topic> GetTopicsForQuestions(int examId);
-        public int CreateTopic(string TopicName);
+        public int CreateTopic(string TopicName, int examinerId);
         public int UpdateTopic(string TopicName, int Tid);
         public int DeleteTopic(int topicId);
         public Task<int> SubmitTopicForApproval(int topicId);
