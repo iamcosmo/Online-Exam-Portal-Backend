@@ -42,7 +42,7 @@ namespace Infrastructure.Repositories.Implementations
 
             await _context.Exams.AddAsync(exam);
             _logger.LogInformation("New Exam {@name} created by {@userName}", exam.Name, exam.UserId);
-             var status = await _context.SaveChangesAsync();
+            var status = await _context.SaveChangesAsync();
 
             var tids = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == exam.Eid);
             _logger.LogInformation("Type: {@Type}\tValue: {@Val}", tids.Tids.GetType().Name, tids.Tids);
@@ -139,7 +139,7 @@ namespace Infrastructure.Repositories.Implementations
                                     Eid = e.Eid,
                                     ExamName = e.Name,
                                     TotalQuestions = e.TotalQuestions,
-                                    ApprovalStatusOfExam = e.ApprovalStatus,
+                                    approvalStatus = e.ApprovalStatus,
                                     MarksPerQuestion = e.MarksPerQuestion ?? 0,
                                     Tids = e.Tids,
                                     Questions = e.Questions.Select(q => new QuestionDTO
@@ -175,7 +175,7 @@ namespace Infrastructure.Repositories.Implementations
         }
 
         //Student functions
-        public async Task<List<GetExamDataDTO>> GetExams()
+        public async Task<List<GetExamDataDTO>> GetExamsForStudents(int studentId)
         {
             var examdata = await _context.Exams
                 .Include(e => e.Results.Where(s => s.Eid == e.Eid))
@@ -190,7 +190,7 @@ namespace Infrastructure.Repositories.Implementations
                 Tids = e.Tids,
                 displayedQuestions = e.DisplayedQuestions ?? 0,
                 AttemptNo = e.Results
-                                .Where(r => r.Eid == e.Eid && r.UserId == e.UserId)
+                                .Where(r => r.Eid == e.Eid && r.UserId == studentId)
                                 .Max(r => (int?)r.Attempts) ?? 0
             }).ToListAsync();
             if (examdata == null) return new List<GetExamDataDTO> { };

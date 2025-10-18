@@ -7,7 +7,7 @@ namespace Infrastructure.Repositories.Interfaces
     {
         public Task<int> AddExam(AddExamDTO dto);
         public Task<int> UpdateExam(int examId, UpdateExamDTO dto);
-        public Task<List<GetExamDataDTO>> GetExams();
+        public Task<List<GetExamDataDTO>> GetExamsForStudents(int studentId);
         public Task<StudentExamViewDTO> GetExams(int examId);
         public Task<List<Exam>> GetExamsForExaminer(int userid);
         public Task<int> SubmitExamForApproval(int examId);
