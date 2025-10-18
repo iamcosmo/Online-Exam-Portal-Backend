@@ -49,7 +49,7 @@ namespace Infrastructure.Repositories.Implementations
         {
             var dto = new ExaminerAnalyticsDto
             {
-                TotalExamsCreated = await _context.Exams.Where(e => e.Eid == examinerId).CountAsync(),
+                TotalExamsCreated = await _context.Exams.Where(e => e.UserId == examinerId).CountAsync(),
 
                 AverageScoresPerExam = await _context.Results
                     .Where(r => r.EidNavigation.UserId == examinerId)
@@ -89,8 +89,8 @@ namespace Infrastructure.Repositories.Implementations
 
             var userExists = await _context.Users.AnyAsync(u => u.UserId == userId);
 
-            if (!userExists)           
-                return new NotFoundResult();            
+            if (!userExists)
+                return new NotFoundResult();
 
             var analyticsDto = new StudentAnalyticsDTO
             {
@@ -211,12 +211,12 @@ namespace Infrastructure.Repositories.Implementations
         }
 
         public async Task<int> GetTotalActiveExams()
-        {           
+        {
             return await _context.Exams.CountAsync(e => e.ApprovalStatus == 1);
         }
 
         public async Task<int> GetTotalActiveQuestions()
-        {         
+        {
             return await _context.Questions.CountAsync(q => q.ApprovalStatus == 1);
         }
     }
