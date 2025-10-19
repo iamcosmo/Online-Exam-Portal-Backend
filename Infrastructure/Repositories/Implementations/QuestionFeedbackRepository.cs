@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.Implementations
 {
-    public class QuestionFeedbackRepository:IQuestionFeedbackRepository
+    public class QuestionFeedbackRepository : IQuestionFeedbackRepository
     {
 
         private readonly AppDbContext _context;
@@ -21,16 +21,32 @@ namespace Infrastructure.Repositories.Implementations
         {
             _context = dbContext;
         }
-        public string AddQuestionFeedbackDTO(QuestionReport qFeedback)
+        public async Task<string> AddQuestionFeedbackDTO(AddQuestionFeedbackDTO qFeedback)
         {
-            bool exists = _context.QuestionReports
-                .Any(qr => qr.Qid == qFeedback.Qid && qr.UserId == qFeedback.UserId);
 
-            if (exists)          
-                return "You have alreayd Reported this!";            
+            var feedback = new QuestionReport
+            {
+                Qid = qFeedback.qid,
+                Feedback = qFeedback.feedback,
+                UserId = qFeedback.studentId
+            };
 
-            _context.QuestionReports.Add(qFeedback);
-            return _context.SaveChanges()>0?"Reported Successfully!!":"There was an error Reporting this Question!";
+            bool exists = await _context.QuestionReports
+                .AnyAsync(qr => qr.Qid == feedback.Qid && qr.UserId == feedback.UserId);
+
+            if (exists)
+                return "You have alreayd Reported this!";
+
+            var random = new Random();
+            var adminIds = await _context.Users
+                .Where(u => u.Role == "Admin" && u.IsBlocked == false)
+                .Select(a => a.UserId)
+                .ToListAsync();
+            var randomAdminId = adminIds.OrderBy(x => random.Next()).FirstOrDefault();
+            feedback.ReviewerId = randomAdminId != null ? randomAdminId : 7;
+
+            _context.QuestionReports.Add(feedback);
+            return _context.SaveChanges() > 0 ? "Reported Successfully!!" : "There was an error Reporting this Question!";
         }
         public async Task<List<GetQuestionFeedback>> GetFeedbackByQuestionId(int qid)
         {
@@ -48,7 +64,6 @@ namespace Infrastructure.Repositories.Implementations
             // Fix: Return an empty list if no feedbacks found, not a string
             return feedbacks;
         }
-
         public async Task<List<GetQuestionFeedback>> GetAllFeedbacks()
         {
             List<QuestionReport> reports = await _context.QuestionReports.ToListAsync();
@@ -62,7 +77,6 @@ namespace Infrastructure.Repositories.Implementations
 
             return feedbacks;
         }
-
         public async Task<List<GetQuestionFeedback>> GetAllFeedbacks(int userId)
         {
             List<QuestionReport> reports = await _context.QuestionReports
@@ -80,15 +94,15 @@ namespace Infrastructure.Repositories.Implementations
         }
         public async Task<int> UpdateQuestionFeedback(string updatedFeedback, int qid, int uId)
         {
-            
+
             var existingReport = await _context.QuestionReports
                 .FirstOrDefaultAsync(qr => qr.Qid == qid && qr.UserId == uId);
 
-            
+
             if (existingReport != null)
             {
                 existingReport.Feedback = updatedFeedback;
-               
+
                 return await _context.SaveChangesAsync();
             }
 
