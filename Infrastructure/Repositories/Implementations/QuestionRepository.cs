@@ -1,15 +1,9 @@
 ﻿using Domain.Data;
 using Domain.Models;
-using Infrastructure.DTOs;
 using Infrastructure.DTOs.QuestionsDTO;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories.Implementations
 {
