@@ -62,9 +62,9 @@ namespace Infrastructure.Repositories.Implementations
         }
 
 
-        public List<QuestionReport> GetAllReportedQuestionsAsync()
+        public async Task<List<QuestionReport>> GetAllReportedQuestionsAsync(int adminId)
         {
-            return _context.QuestionReports.ToList();
+            return await _context.QuestionReports.Where(r=>r.UserId==adminId).Select(r=>new QuestionReport {Qid=r.Qid,Feedback=r.Feedback,UserId=r.UserId}).ToListAsync();
         }
 
         public QuestionReport? GetReportedQuestionByIdAsync(int qid)
@@ -97,17 +97,26 @@ namespace Infrastructure.Repositories.Implementations
                 .Select(t => new ApproveTopicsDTO { Id = t.Tid, TopicName = t.Subject }).ToListAsync();
         }
 
-        public async Task<int> ApproveOrRejectTopic(int topicId, int userId)
+        public async Task<int> ApproveOrRejectTopic(int topicId, int userId,string Action)
         {
-            Topic? topic = await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId);
-
-            if (topic != null)
+            var topic = await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId);
+            if (topic == null)
+                return 0;
+            if(Action.ToLower()=="approve")
             {
                 topic.SetApprovalStatus(1);
+            }
+
+            else if(Action.ToLower()=="reject")
+            {
+                topic.SetApprovalStatus(0);
+            }
+            
+                
                 topic.SubmittedForApproval = false;
                 await _context.SaveChangesAsync();
-            }
-            return topic != null ? 1 : 0;
+
+            return 1;
         }
     }
 

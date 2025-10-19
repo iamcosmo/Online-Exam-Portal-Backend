@@ -69,10 +69,10 @@ namespace OEP.Controllers
 
 
 
-        [HttpGet("reported-questions")]
-        public IActionResult GetAllReportedQuestions()
+        [HttpGet("reported-questions/{adminId}")]
+        public async Task<IActionResult> GetAllReportedQuestions(int adminId)
         {
-            var questions = _adminRepository.GetAllReportedQuestionsAsync();
+            var questions =await _adminRepository.GetAllReportedQuestionsAsync(adminId);
 
             if (questions == null || !questions.Any())
             {
@@ -153,11 +153,17 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("approve-topic")]
-        public async Task<IActionResult> ApproveOrRejectTopicAction([FromQuery] int topicId, [FromQuery] int userId)
+        public async Task<IActionResult> ApproveOrRejectTopicAction([FromBody] TopicActionDTO dto )
         {
-            var status = await _adminRepository.ApproveOrRejectTopic(topicId, userId);
+            if (dto == null||string.IsNullOrEmpty(dto.Action))
+            {
+                return BadRequest(new { Message = "Invalid request data." });
+            }
+            var status = await _adminRepository.ApproveOrRejectTopic(dto.TopicId, dto.UserId,dto.Action);
+            if (status == 1)
+                return Ok(new { Message = $"Topic {dto.Action}d Successfully." });
 
-            return Ok(new { TopicUpdateStatus = status });
+            return NotFound(new {Message="Topic not found or update failed."});
         }
     }
 
