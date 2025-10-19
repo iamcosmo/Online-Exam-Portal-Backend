@@ -1,5 +1,6 @@
 ﻿using Domain.Data;
 using Infrastructure.DTOs.ExamDTOs;
+using Infrastructure.DTOs.ResultDTOs;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -55,7 +56,7 @@ namespace Infrastructure.Repositories.Implementations
             return results;
         }
         //Using ADO.NET
-        public async Task<int> CreateExamResults(int examid, int userid)
+        public async Task<CreateResultDTO> CreateExamResults(int examid, int userid)
         {
             string connectionString = _config.GetConnectionString("DefaultConnection");
 
@@ -70,14 +71,15 @@ namespace Infrastructure.Repositories.Implementations
 
                     await connection.OpenAsync();
                     int rowsAffected = await command.ExecuteNonQueryAsync();
-                    return rowsAffected > 0 ? 1 : 0;
+                    string msg = rowsAffected > 0 ? "Result created" : "Result cannot be created";
+                    return new CreateResultDTO(rowsAffected, msg);
                 }
             }
             catch (SqlException ex)
             {
 
                 _logger.LogInformation("SQL Error: " + ex.Message);
-                return -1;
+                return new CreateResultDTO(-1, ex.Message); ;
             }
 
         }
