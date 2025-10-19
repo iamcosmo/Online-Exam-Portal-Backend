@@ -24,13 +24,13 @@ namespace OEP.Controllers
         }
 
 
-        [HttpPost("approve-exam-list")]
-        public async Task<IActionResult> ToBeApprovedExamListAction()
+        [HttpGet("approve-exam-list")]
+        public async Task<IActionResult> ToBeApprovedExamListAction([FromQuery] int userid)
         {
-            var examList = await _adminRepository.ExamsToBeApprovedList();
-            if (examList == null)
+            var examList = await _adminRepository.ExamsToBeApprovedList(userid);
+            if (examList == null||!examList.Any())
             {
-                return Ok("No Exams to be Approved.");
+                return Ok(new { message = "No Exams to be Approved.", ExamList = new List<Exam>() });
             }
             else
             {
@@ -145,8 +145,9 @@ namespace OEP.Controllers
         public async Task<IActionResult> TopicsToBeApprovedAction([FromQuery] int userId)
         {
             var topics = await _adminRepository.TopicsToBeApprovedAsync(userId);
-            if (topics == null || !topics.Any())
-                return NotFound();
+            if (topics == null)
+                return Ok(new {Message="No topics Found For approval"});
+
             return Ok(new { Topics = topics });
         }
 
