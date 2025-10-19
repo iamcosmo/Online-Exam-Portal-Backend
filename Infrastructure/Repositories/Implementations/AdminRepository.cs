@@ -24,7 +24,7 @@ namespace Infrastructure.Repositories.Implementations
         public async Task<List<Exam>> ExamsToBeApprovedList(int reviewerId)
         {
             List<Exam> ExamList = new List<Exam> { };
-            ExamList = await _context.Exams.Include(q => q.Questions).Where(e => e.SubmittedForApproval == true&&e.ReviewerId==reviewerId).ToListAsync();
+            ExamList = await _context.Exams.Include(q => q.Questions).Where(e => e.SubmittedForApproval == true && e.ReviewerId == reviewerId).ToListAsync();
             return ExamList;
 
         }
@@ -61,15 +61,17 @@ namespace Infrastructure.Repositories.Implementations
                 .ToListAsync();
         }
 
-
         public async Task<List<QuestionReport>> GetAllReportedQuestionsAsync(int adminId)
+
         {
-            return await _context.QuestionReports.Where(r=>r.UserId==adminId).Select(r=>new QuestionReport {Qid=r.Qid,Feedback=r.Feedback,UserId=r.UserId}).ToListAsync();
+            return await _context.QuestionReports.Where(r => r.ReviewerId == adminId)
+                .Select(r => new QuestionReport { Qid = r.Qid, Feedback = r.Feedback, UserId = r.UserId })
+                .ToListAsync();
         }
 
-        public QuestionReport? GetReportedQuestionByIdAsync(int qid)
+        public async Task<Question?> GetReportedQuestionByIdAsync(int qid)
         {
-            return _context.QuestionReports.FirstOrDefault(r => r.Qid == qid);
+            return await _context.Questions.FirstOrDefaultAsync(r => r.Qid == qid);
         }
 
         public async Task<bool> UpdateReportedQuestionStatusAsync(int qid, int status)
@@ -97,24 +99,24 @@ namespace Infrastructure.Repositories.Implementations
                 .Select(t => new ApproveTopicsDTO { Id = t.Tid, TopicName = t.Subject }).ToListAsync();
         }
 
-        public async Task<int> ApproveOrRejectTopic(int topicId, int userId,string Action)
+        public async Task<int> ApproveOrRejectTopic(int topicId, int userId, string Action)
         {
             var topic = await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId);
             if (topic == null)
                 return 0;
-            if(Action.ToLower()=="approve")
+            if (Action.ToLower() == "approve")
             {
                 topic.SetApprovalStatus(1);
             }
 
-            else if(Action.ToLower()=="reject")
+            else if (Action.ToLower() == "reject")
             {
                 topic.SetApprovalStatus(0);
             }
-            
-                
-                topic.SubmittedForApproval = false;
-                await _context.SaveChangesAsync();
+
+
+            topic.SubmittedForApproval = false;
+            await _context.SaveChangesAsync();
 
             return 1;
         }
