@@ -22,7 +22,7 @@ namespace Infrastructure.Repositories.Implementations
         }
 
         //CRUD
-        public async Task<int> AddExam(AddExamDTO dto)
+        public async Task<AddExamResponseDTO> AddExam(AddExamDTO dto)
         {
             Exam exam = new Exam
             {
@@ -44,10 +44,9 @@ namespace Infrastructure.Repositories.Implementations
             _logger.LogInformation("New Exam {@name} created by {@userName}", exam.Name, exam.UserId);
             var status = await _context.SaveChangesAsync();
 
-            var tids = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == exam.Eid);
-            _logger.LogInformation("Type: {@Type}\tValue: {@Val}", tids.Tids.GetType().Name, tids.Tids);
 
-            return status;
+            AddExamResponseDTO res = new AddExamResponseDTO(status, exam.Eid);
+            return res;
 
         }
         public async Task<int> UpdateExam(int examId, UpdateExamDTO dto)
