@@ -18,7 +18,7 @@ namespace Infrastructure.Repositories.Interfaces
         Task<int> ApproveExamAsync(ExamApprovalStatusDTO dto);
         //Task<bool> ReviewReportedQuestionAsync(int questionId);
 
-        List<QuestionReport> GetAllReportedQuestionsAsync();
+        Task<List<QuestionReport>> GetAllReportedQuestionsAsync(int adminId);
         QuestionReport? GetReportedQuestionByIdAsync(int qid);
         Task<bool> UpdateReportedQuestionStatusAsync(int qid, int status);
 
@@ -30,7 +30,7 @@ namespace Infrastructure.Repositories.Interfaces
         Task<int> AddAdminRemarks(int examId, string remarks);
         Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync(int userId);
 
-        Task<int> ApproveOrRejectTopic(int topicId, int userId);
+        Task<int> ApproveOrRejectTopic(int topicId, int userId,string Action);
 
     }
 
