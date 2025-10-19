@@ -28,7 +28,7 @@ namespace OEP.Controllers
         public async Task<IActionResult> ToBeApprovedExamListAction([FromQuery] int userid)
         {
             var examList = await _adminRepository.ExamsToBeApprovedList(userid);
-            if (examList == null||!examList.Any())
+            if (examList == null || !examList.Any())
             {
                 return Ok(new { message = "No Exams to be Approved.", ExamList = new List<Exam>() });
             }
@@ -69,25 +69,25 @@ namespace OEP.Controllers
 
 
 
-        [HttpGet("reported-questions/{adminId}")]
-        public async Task<IActionResult> GetAllReportedQuestions(int adminId)
+        [HttpGet("reported-questions")]
+        public async Task<IActionResult> GetAllReportedQuestions([FromQuery] int adminId)
         {
-            var questions =await _adminRepository.GetAllReportedQuestionsAsync(adminId);
+            var questions = await _adminRepository.GetAllReportedQuestionsAsync(adminId);
 
             if (questions == null || !questions.Any())
             {
-                return Ok("No reported questions found.");
+                return Ok(new { msg = "No reported questions found." });
             }
 
             return Ok(questions);
         }
 
         [HttpGet("review-questions/{qid}")]
-        public IActionResult GetReportedQuestionById(int qid)
+        public async Task<IActionResult> GetReportedQuestionById(int qid)
         {
-            var question = _adminRepository.GetReportedQuestionByIdAsync(qid);
+            var question = await _adminRepository.GetReportedQuestionByIdAsync(qid);
             if (question == null)
-                return Ok("No reported questions found.");
+                return Ok(new { msg = "No reported questions found." });
             return Ok(question);
         }
 
@@ -146,24 +146,24 @@ namespace OEP.Controllers
         {
             var topics = await _adminRepository.TopicsToBeApprovedAsync(userId);
             if (topics == null)
-                return Ok(new {Message="No topics Found For approval"});
+                return Ok(new { Message = "No topics Found For approval" });
 
             return Ok(new { Topics = topics });
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("approve-topic")]
-        public async Task<IActionResult> ApproveOrRejectTopicAction([FromBody] TopicActionDTO dto )
+        public async Task<IActionResult> ApproveOrRejectTopicAction([FromBody] TopicActionDTO dto)
         {
-            if (dto == null||string.IsNullOrEmpty(dto.Action))
+            if (dto == null || string.IsNullOrEmpty(dto.Action))
             {
                 return BadRequest(new { Message = "Invalid request data." });
             }
-            var status = await _adminRepository.ApproveOrRejectTopic(dto.TopicId, dto.UserId,dto.Action);
+            var status = await _adminRepository.ApproveOrRejectTopic(dto.TopicId, dto.UserId, dto.Action);
             if (status == 1)
                 return Ok(new { Message = $"Topic {dto.Action}d Successfully." });
 
-            return NotFound(new {Message="Topic not found or update failed."});
+            return NotFound(new { Message = "Topic not found or update failed." });
         }
     }
 

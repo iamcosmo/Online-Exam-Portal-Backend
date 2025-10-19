@@ -43,4 +43,5 @@ public partial class User
     public virtual ICollection<Topic> ApprovedTopics { get; set; } = new List<Topic>();
     public virtual ICollection<Topic> CreatedTopics { get; set; } = new List<Topic>();
     public virtual ICollection<Exam> ExamReviewers { get; set; } = new List<Exam>();
+    public virtual ICollection<QuestionReport> ReviewedQuestionReports { get; set; } = new List<QuestionReport>();
 }
