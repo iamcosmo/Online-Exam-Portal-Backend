@@ -46,7 +46,7 @@ namespace OEP.Controllers
             return Ok(topic);
         }
 
-        [HttpPost("get-exam-topics/{examId}")]
+        [HttpGet("get-exam-topics/{examId}")]
         public IActionResult GetExamTopicsAction([FromRoute] int examId)
         {
             var topics = _topicRepo.GetTopicsForQuestions(examId);
