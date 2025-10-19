@@ -14,7 +14,7 @@ namespace Infrastructure.Repositories.Interfaces
     {
         //Task<bool> RegisterAdminAsync(AdminCreateDto dto);
 
-        Task<List<Exam>> ExamsToBeApprovedList();
+        Task<List<Exam>> ExamsToBeApprovedList(int userid);
         Task<int> ApproveExamAsync(ExamApprovalStatusDTO dto);
         //Task<bool> ReviewReportedQuestionAsync(int questionId);
 

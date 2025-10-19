@@ -21,10 +21,10 @@ namespace Infrastructure.Repositories.Implementations
             _context = context;
         }
 
-        public async Task<List<Exam>> ExamsToBeApprovedList()
+        public async Task<List<Exam>> ExamsToBeApprovedList(int reviewerId)
         {
             List<Exam> ExamList = new List<Exam> { };
-            ExamList = await _context.Exams.Include(q => q.Questions).Where(e => e.SubmittedForApproval == true).ToListAsync();
+            ExamList = await _context.Exams.Include(q => q.Questions).Where(e => e.SubmittedForApproval == true&&e.ReviewerId==reviewerId).ToListAsync();
             return ExamList;
 
         }
