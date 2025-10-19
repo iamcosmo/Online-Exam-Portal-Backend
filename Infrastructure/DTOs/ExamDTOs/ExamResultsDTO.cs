@@ -12,5 +12,11 @@ namespace Infrastructure.DTOs.ExamDTOs
         public int Eid { get; set; }
         public int? Attempts { get; set; }
         public decimal? Score { get; set; }
+
+        public DateTime? TakenOn { get; set; }
+
+        public string? ExamName { get; set; }
+
+        public decimal? TotalMarks { get; set; }
     }
 }

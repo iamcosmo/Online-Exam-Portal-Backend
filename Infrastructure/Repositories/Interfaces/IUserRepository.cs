@@ -10,9 +10,9 @@ namespace Infrastructure.Repositories.Interfaces
 {
     public interface IUserRepository
     {
-        List<User> GetAllUsers();
-        User? GetUserById(int id);
-        List<User> GetUsersByRole(string role);
+        List<UserDetailsDTO> GetAllUsers();
+        UserDetailsDTO? GetUserById(int id);
+        List<UserDetailsDTO> GetUsersByRole(string role);
         int UpdateUser(int id, UpdateUserDTO dto);
         int DeleteUser(int id);
 

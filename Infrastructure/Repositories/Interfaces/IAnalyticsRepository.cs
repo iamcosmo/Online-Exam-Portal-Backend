@@ -15,5 +15,9 @@ namespace Infrastructure.Repositories.Interfaces
         public Task<ActionResult<ExaminerAnalyticsDto>> GetExaminerAnalytics(int examinerId);
 
         public Task<ActionResult<StudentAnalyticsDTO>> GetStudentAnalytics(int userId);
+
+        public Task<int> GetTotalActiveExams();
+
+        public Task<int> GetTotalActiveQuestions();
     }
 }

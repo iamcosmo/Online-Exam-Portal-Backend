@@ -113,11 +113,11 @@ namespace Infrastructure.Repositories.Implementations
             //Assigning a admin id
             var random = new Random();
             var adminIds = await _context.Users
-                .Where(u => u.Role == "Admin")
+                .Where(u => u.Role == "Admin" && u.IsBlocked == false)
                 .Select(a => a.UserId)
                 .ToListAsync();
             var randomAdminId = adminIds.OrderBy(x => random.Next()).FirstOrDefault();
-            topic.ApprovedByUserId = randomAdminId;
+            topic.ApprovedByUserId = randomAdminId != null ? randomAdminId : 7;
             topic.SubmittedForApproval = true;
 
             return await _context.SaveChangesAsync();

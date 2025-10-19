@@ -16,7 +16,7 @@ namespace OEP.Controllers
             _resultRepo = repo;
         }
 
-        [HttpPost("view-exam-results/{examid}")]
+        [HttpPost("view-exam-result/{examid}")]
         public async Task<IActionResult> ViewExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
         {
             var attemptedExams = await _resultRepo.ViewExamResults(examid, userid);
@@ -26,8 +26,15 @@ namespace OEP.Controllers
         [HttpPost("create-results/{examid}")]
         public async Task<IActionResult> CreateExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
         {
-            var status = await _resultRepo.CreateExamResults(examid, userid);
-            return status > 0 ? Ok("Result created") : StatusCode(500, "Result Could not be created.");
+            var response = await _resultRepo.CreateExamResults(examid, userid);
+            return response.status > 0 ? Ok(response) : StatusCode(500, response);
+        }
+
+        [HttpGet("all-results/{userid}")]
+        public async Task<IActionResult> GetAllResultsForUserAction([FromRoute] int userid)
+        {
+            var results = await _resultRepo.GetAllResultsForUser(userid);
+            return Ok(results);
         }
     }
 }

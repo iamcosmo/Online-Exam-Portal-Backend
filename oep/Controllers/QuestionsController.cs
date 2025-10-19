@@ -37,11 +37,7 @@ namespace OEP.Controllers
             if (exam.UserId != userId)
                 return Unauthorized("You are not authorized to modify this Exam!!");
 
-            var tids_exams = exam.Tids ?? "[]";
-
-            // Check if Tid is valid if Tids are present
-            var tidsList = System.Text.Json.JsonSerializer.Deserialize<List<int>>(tids_exams);
-            if (tidsList != null && tidsList.Count > 0 && !tidsList.Contains(question.Tid))
+            if (exam.Tids != null && exam.Tids.Any() && !exam.Tids.Contains(question.Tid))
                 return BadRequest("The provided Tid is not available for this exam.");
 
             var availableQuestionCount = await _questionRepository.GetQuestionsByExamId(examId);
@@ -65,8 +61,8 @@ namespace OEP.Controllers
                 return Unauthorized("You are not authorized to modify this Exam!!");
 
             if (questions == null || questions.Questions.Count == 0)
-                return BadRequest("Question list is empty.");    
-           
+                return BadRequest("Question list is empty.");
+
             var availableQuestionCount = await _questionRepository.GetQuestionsByExamId(examId);
             if (availableQuestionCount.Count + questions.Questions.Count > exam.TotalQuestions)
                 return BadRequest("Adding these questions would exceed the total number of questions allowed for this exam.");

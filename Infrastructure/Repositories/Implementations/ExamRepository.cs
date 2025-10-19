@@ -22,7 +22,7 @@ namespace Infrastructure.Repositories.Implementations
         }
 
         //CRUD
-        public async Task<int> AddExam(AddExamDTO dto)
+        public async Task<AddExamResponseDTO> AddExam(AddExamDTO dto)
         {
             Exam exam = new Exam
             {
@@ -42,12 +42,11 @@ namespace Infrastructure.Repositories.Implementations
 
             await _context.Exams.AddAsync(exam);
             _logger.LogInformation("New Exam {@name} created by {@userName}", exam.Name, exam.UserId);
-             var status = await _context.SaveChangesAsync();
+            var status = await _context.SaveChangesAsync();
 
-            var tids = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == exam.Eid);
-            _logger.LogInformation("Type: {@Type}\tValue: {@Val}", tids.Tids.GetType().Name, tids.Tids);
 
-            return status;
+            AddExamResponseDTO res = new AddExamResponseDTO(status, exam.Eid);
+            return res;
 
         }
         public async Task<int> UpdateExam(int examId, UpdateExamDTO dto)
@@ -131,29 +130,51 @@ namespace Infrastructure.Repositories.Implementations
         }
         public async Task<ExamWithQuestionsDTO> GetExamByIdForExaminer(int examId)
         {
-            return await _context.Exams
-                                .Where(e => e.Eid == examId && e.ApprovalStatus != -1)
-                                .Select(e => new ExamWithQuestionsDTO
-                                {
-                                    UserId = e.UserId,
-                                    Eid = e.Eid,
-                                    ExamName = e.Name,
-                                    TotalQuestions = e.TotalQuestions,
-                                    ApprovalStatusOfExam = e.ApprovalStatus,
-                                    MarksPerQuestion = e.MarksPerQuestion ?? 0,
-                                    Tids = e.Tids,
-                                    Questions = e.Questions.Select(q => new QuestionDTO
-                                    {
-                                        Qid = q.Qid,
-                                        Type = q.Type,
-                                        Options = q.Options,
-                                        Marks = q.Marks ?? 0,
-                                        QuestionText = q.Question1,
-                                        CorrectOptions = q.CorrectOptions,
-                                        ApprovalStatus = q.ApprovalStatus
-                                    }).ToList()
-                                })
-                                .FirstOrDefaultAsync();
+            var examData = await _context.Exams
+                .Where(e => e.Eid == examId && e.ApprovalStatus != -1)
+                .Select(e => new
+                {
+                    e.UserId,
+                    e.Eid,
+                    ExamName = e.Name,
+                    e.TotalQuestions,
+                    approvalStatus = e.ApprovalStatus,
+                    MarksPerQuestion = e.MarksPerQuestion ?? 0,
+                    TidsString = e.Tids,
+                    Questions = e.Questions.Select(q => new QuestionDTO
+                    {
+                        Qid = q.Qid,
+                        Type = q.Type,
+                        Options = q.Options,
+                        Marks = q.Marks ?? 0,
+                        QuestionText = q.Question1,
+                        CorrectOptions = q.CorrectOptions,
+                        ApprovalStatus = q.ApprovalStatus
+                    }).ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (examData == null)
+            {
+                return null;
+            }
+
+
+            List<int> listids = JsonConvert.DeserializeObject<List<int>>(examData.TidsString);
+
+            return new ExamWithQuestionsDTO
+            {
+                UserId = examData.UserId,
+                Eid = examData.Eid,
+                ExamName = examData.ExamName,
+                TotalQuestions = examData.TotalQuestions,
+                approvalStatus = examData.approvalStatus,
+                MarksPerQuestion = examData.MarksPerQuestion,
+                Questions = examData.Questions,
+
+                //Tids = Tids
+                Tids = listids ?? []
+            };
 
 
         }
@@ -175,7 +196,7 @@ namespace Infrastructure.Repositories.Implementations
         }
 
         //Student functions
-        public async Task<List<GetExamDataDTO>> GetExams()
+        public async Task<List<GetExamDataDTO>> GetExamsForStudents(int studentId)
         {
             var examdata = await _context.Exams
                 .Include(e => e.Results.Where(s => s.Eid == e.Eid))
@@ -190,7 +211,7 @@ namespace Infrastructure.Repositories.Implementations
                 Tids = e.Tids,
                 displayedQuestions = e.DisplayedQuestions ?? 0,
                 AttemptNo = e.Results
-                                .Where(r => r.Eid == e.Eid && r.UserId == e.UserId)
+                                .Where(r => r.Eid == e.Eid && r.UserId == studentId)
                                 .Max(r => (int?)r.Attempts) ?? 0
             }).ToListAsync();
             if (examdata == null) return new List<GetExamDataDTO> { };
