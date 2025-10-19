@@ -26,8 +26,8 @@ namespace OEP.Controllers
         [HttpPost("create-results/{examid}")]
         public async Task<IActionResult> CreateExamResultsAction([FromRoute] int examid, [FromQuery] int userid)
         {
-            var status = await _resultRepo.CreateExamResults(examid, userid);
-            return status > 0 ? Ok(new { msg = "Result created" }) : StatusCode(500, new { msg = "Result Could not be created." });
+            var response = await _resultRepo.CreateExamResults(examid, userid);
+            return response.status > 0 ? Ok(response) : StatusCode(500, response);
         }
 
         [HttpGet("all-results/{userid}")]
