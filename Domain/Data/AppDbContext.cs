@@ -143,6 +143,12 @@ public partial class AppDbContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__QuestionR__UserI__5165187F");
+
+            entity.HasOne(d => d.Reviewer)
+              .WithMany(p => p.ReviewedQuestionReports)
+              .HasForeignKey(d => d.ReviewerId)
+              .OnDelete(DeleteBehavior.ClientSetNull)
+              .HasConstraintName("FK_QuestionReports_User_ReviewerId");
         });
 
         modelBuilder.Entity<Response>(entity =>

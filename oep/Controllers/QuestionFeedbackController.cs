@@ -26,24 +26,11 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpPost("add-question-feedback")]
-        public IActionResult AddQuestionFeedback([FromBody] AddQuestionFeedbackDTO qFeedback, [FromQuery] int qId)
+        public IActionResult AddQuestionFeedback([FromBody] AddQuestionFeedbackDTO qFeedback)
         {
-            var userIdClaim = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier);
 
-            if (userIdClaim == null)
-            {
-                return Unauthorized("User ID not found in token claims.");
-            }
 
-            var userId = int.Parse(userIdClaim.Value);
-            var feedback = new QuestionReport
-            {
-                Qid = qId,
-                Feedback = qFeedback.feedback,
-                UserId = userId
-            };
-
-            var result = _questionFeedbackRepository.AddQuestionFeedbackDTO(feedback);
+            var result = _questionFeedbackRepository.AddQuestionFeedbackDTO(qFeedback);
             return Ok(result);
         }
 
@@ -66,7 +53,7 @@ namespace OEP.Controllers
         [HttpGet("get-all-question-feedbacks(e-a)")]
         public async Task<IActionResult> GetAllFeedbacks()
         {
-            
+
             var result = await _questionFeedbackRepository.GetAllFeedbacks();
             return Ok(result);
         }
@@ -84,10 +71,10 @@ namespace OEP.Controllers
         public async Task<IActionResult> UpdateYourFeedback([FromBody] UpdateQuestionFeedbackDTO uFeedback, int qId)
         {
             var result = await _questionFeedbackRepository.UpdateQuestionFeedback(uFeedback.feedback, qId, uFeedback.userId);
-            if (result > 0)            
-                return Ok("Feedback Updated Successfully");            
-            else            
-                return Ok("No such Feedback Found!");            
+            if (result > 0)
+                return Ok("Feedback Updated Successfully");
+            else
+                return Ok("No such Feedback Found!");
         }
 
 

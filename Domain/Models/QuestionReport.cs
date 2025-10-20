@@ -10,6 +10,8 @@ public partial class QuestionReport
     public string? Feedback { get; set; }
 
     public int UserId { get; set; }
+    public int? ReviewerId { get; set; }
+    public virtual User? Reviewer { get; set; }
 
     public virtual Question QidNavigation { get; set; } = null!;
 
