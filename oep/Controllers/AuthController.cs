@@ -34,7 +34,10 @@ namespace OEP.Controllers
         public IActionResult RegisterStudentAction([FromBody] RegisterUserDTO dto)
         {
             var result = _authRepository.RegisterStudent(dto);
-            return result > 0 ? Ok("User Saved! Please verify Email via OTP-verification") : BadRequest("Registration failed");
+            return result > 0 ? Ok(new { message = "User Saved! Please verify Email via OTP-verification" })
+    : BadRequest(new { error = "Registration failed" });
+
+            //? Ok("User Saved! Please verify Email via OTP-verification") : BadRequest("Registration failed");
         }
 
         [HttpPost("internal/register")]
@@ -53,7 +56,12 @@ namespace OEP.Controllers
 
             var result = _authRepository.RegisterAdminOrExaminer(inputdto, role);
 
-            return result > 0 ? Ok("User registered successfully") : BadRequest("Registration failed");
+            //return result > 0 ? Ok("User registered successfully") : BadRequest("Registration failed");
+
+            return result > 0
+                ? Ok(new { message = "User registered successfully", role = role })
+                : BadRequest(new { error = "Registration failed" });
+
         }
 
         // POST: api/auth/login

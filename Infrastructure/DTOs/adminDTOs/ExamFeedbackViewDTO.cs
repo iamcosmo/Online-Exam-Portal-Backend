@@ -11,5 +11,7 @@ namespace Infrastructure.DTOs.adminDTOs
         public int Eid { get; set; }
         public string Feedback { get; set; }
         public int StudentId { get; set; }
+
+        public int ApprovalStatus { get; set; }
     }
 }
