@@ -11,6 +11,7 @@ namespace Infrastructure.DTOs.QuestionFeedbackDTO
 
         public int qid { get; set; }
         public int status { get; set; }
+        public int studentId { get; set; }
 
     }
 }
