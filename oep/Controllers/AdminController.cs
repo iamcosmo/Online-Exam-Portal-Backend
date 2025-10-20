@@ -134,10 +134,11 @@ namespace OEP.Controllers
 
 
         [HttpPost("add-adminremarks/{examId}")]
-        public async Task<IActionResult> AddAdminRemarksAction(int examId, [FromBody] string remarks)
+        public async Task<IActionResult> AddAdminRemarksAction(int examId, [FromBody] RemarkDTO dto)
         {
-            var status = await _adminRepository.AddAdminRemarks(examId, remarks);
-            return status > 0 ? Ok("Admin Remarks added") : BadRequest("Some error occured while adding remarks");
+            if (dto == null || string.IsNullOrEmpty(dto.Remarks)) ;
+            var status = await _adminRepository.AddAdminRemarksAsync(examId, dto.Remarks);
+            return status > 0 ? Ok(new { message = "Admin Remarks added" }) : BadRequest(new { message = "Some error occured while adding remarks" });
         }
 
         [Authorize(Roles = "Admin")]

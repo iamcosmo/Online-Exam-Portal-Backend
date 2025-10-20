@@ -56,8 +56,8 @@ namespace Infrastructure.Repositories.Implementations
         public async Task<IEnumerable<ExamFeedbackViewDTO>> GetExamFeedbacksAsync(int examId)
         {
             return await _context.ExamFeedbacks
-                .Where(f => f.Eid == examId)
-                .Select(ef => new ExamFeedbackViewDTO { Eid = ef.Eid, Feedback = ef.Feedback, StudentId = ef.UserId })
+                .Where(f => f.Eid == examId&&f.EidNavigation.ApprovalStatus==1)
+                .Select(ef => new ExamFeedbackViewDTO { Eid = ef.Eid, Feedback = ef.Feedback, StudentId = ef.UserId,ApprovalStatus=ef.EidNavigation.ApprovalStatus??0})
                 .ToListAsync();
         }
 
@@ -82,14 +82,32 @@ namespace Infrastructure.Repositories.Implementations
             return true;
         }
 
-        public async Task<int> AddAdminRemarks(int examId, string remarks)
+        public async Task<int> AddAdminRemarksAsync(int examId, string remarks)
+
         {
-            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
-            exam.AdminRemarks = remarks;
-            exam.SubmittedForApproval = false;
-            return await _context.SaveChangesAsync();
+
+            var feedback = await _context.ExamFeedbacks
+
+                .Include(f => f.EidNavigation)
+
+                .FirstOrDefaultAsync(f => f.Eid == examId);
+
+            if (feedback == null)
+
+                return 0;
+
+
+            feedback.EidNavigation.AdminRemarks = remarks;
+
+           if(feedback.EidNavigation.ApprovalStatus!=0)
+            feedback.EidNavigation.ApprovalStatus = 0;
+
+            await _context.SaveChangesAsync();
+
+            return 1;
 
         }
+
 
         public async Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync(int userId)
         {
