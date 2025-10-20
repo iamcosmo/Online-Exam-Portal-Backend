@@ -25,7 +25,7 @@ namespace OEP.Controllers
         public async Task<IActionResult> AddExamAction([FromBody] AddExamDTO dto)
         {
             var result = await _examRepository.AddExam(dto);
-            return result > 0 ? Ok(new { msg = "Exam added successfully" }) : BadRequest(new { Err = "Failed to add exam" });
+            return result.status > 0 ? Ok(new { msg = "Exam added successfully", examId = result.examId }) : BadRequest(new { Err = "Failed to add exam" });
         }
 
         [Authorize(Roles = "Examiner")]
@@ -69,22 +69,22 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Examiner")]
-        [HttpPatch("/approval-exam/{examId}")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
+        [HttpPatch("approval-exam/{examId}")]
         public async Task<IActionResult> SubmitExamForApprovalAction(int examId)
         {
             var result = await _examRepository.SubmitExamForApproval(examId);
-            return result > 0 ? Ok("Exam submitted for approval") : StatusCode(500, "Internal Server Error while submitting for approval.");
+            if (result == -2)
+            {
+                return StatusCode(400, new { msg = "Question Count Doesn't match with the number of questions added." });
+            }
+            return result > 0 ? Ok(new { msg = "Exam submitted for approval" }) : StatusCode(500, new { msg = "Internal Server Error while submitting for approval." });
         }
 
-
-
         [Authorize(Roles = "Student")]
-        [HttpGet("get-exams")]
-        public async Task<IActionResult> GetExamsAction()
+        [HttpGet("get-s-exams/{studentId}")]
+        public async Task<IActionResult> GetExamsAction(int studentId)
         {
-            var exams = await _examRepository.GetExams();
+            var exams = await _examRepository.GetExamsForStudents(studentId);
             if (exams == null) return Ok("No exams available.");
             return Ok(exams);
         }
@@ -122,15 +122,15 @@ namespace OEP.Controllers
 
             if (status > 0)
             {
-                return Ok("Exam Submitted");
+                return Ok(new { msg = "Exam Submitted" });
             }
             else if (status == -1)
             {
-                return Unauthorized("Attempts Limit Reached cannot submit Exam.");
+                return Unauthorized(new { msg = "Attempts Limit Reached cannot submit Exam." });
             }
             else
             {
-                return StatusCode(500, "Some Internal Server Error while submitting the exam.");
+                return StatusCode(500, new { msg = "Some Internal Server Error while submitting the exam." });
             }
         }
 

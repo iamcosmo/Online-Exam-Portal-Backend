@@ -12,8 +12,8 @@ namespace Infrastructure.DTOs.ExamDTOs
         public string ExamName { get; set; }
         public int? TotalQuestions { get; set; }
         public List<QuestionDTO> Questions { get; set; }
-        public int? ApprovalStatusOfExam { get; set; }
-        public string Tids { get; set; }
+        public int? approvalStatus { get; set; }
+        public List<int> Tids { get; set; }
         public int MarksPerQuestion { get; set; }
         public int? UserId { get; set; }
     }

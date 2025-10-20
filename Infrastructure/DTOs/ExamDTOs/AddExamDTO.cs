@@ -18,4 +18,17 @@ namespace Infrastructure.DTOs.ExamDTOs
         public int MarksPerQuestion { get; set; }
     }
 
+    public class AddExamResponseDTO
+    {
+
+        public AddExamResponseDTO(int status, int eid)
+        {
+            this.status = status;
+            this.examId = eid;
+        }
+
+        public int status { get; set; }
+        public int examId { get; set; }
+    }
+
 }
