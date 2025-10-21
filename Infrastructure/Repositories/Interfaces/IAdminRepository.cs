@@ -33,6 +33,8 @@ namespace Infrastructure.Repositories.Interfaces
 
         Task<int> ApproveOrRejectTopic(int topicId, int userId, string Action);
 
+        Task<Exam> GetExamWithQuestionsForAdminAsync(int userId);
+
     }
 
 }
