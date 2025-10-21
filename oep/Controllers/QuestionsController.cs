@@ -110,6 +110,33 @@ namespace OEP.Controllers
         }
 
         [Authorize(Roles = "Examiner")]
+        [HttpGet("get-questions-by-uid/{uid}")]
+        public async Task<IActionResult> GetQuestionsByUserId(int uid,[FromQuery] int page = 1,[FromQuery] int pageSize = 10)
+        {
+            
+            var (questions, totalCount) = await _questionRepository.GetQuestionsByExaminerID(uid, page, pageSize);
+
+          
+            if (questions == null)
+                return StatusCode(500, "An error occurred while retrieving questions.");
+
+            // 2. Check if the list is empty by checking the list's Count property
+            if (questions.Count == 0)
+            {
+                return NotFound("No questions found for the specified user or page number is out of range.");
+            }
+
+            // 3. Return a structured object containing both the list and the total count
+            var response = new
+            {
+                Results = questions,
+                TotalCount = totalCount
+            };
+
+            return Ok(response);
+        }
+
+        [Authorize(Roles = "Examiner")]
         [HttpPut("update-question/{qId}")]
         public async Task<IActionResult> UpdateOneQuestion([FromBody] UpdateQuestionDTO question, int qId)
         {
