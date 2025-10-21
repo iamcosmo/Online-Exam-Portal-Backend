@@ -114,42 +114,25 @@ namespace Infrastructure.Repositories.Implementations
         public async Task<int> UpdateQuestion(UpdateQuestionDTO question, int qid)
         {
 
-            var updatedQuestion = new Question
-            {
-                Type = question.type,
-                Question1 = question.question,
-                Options = question.options,
-                CorrectOptions = JsonConvert.SerializeObject(question.correctOptions),
-                ApprovalStatus = question.ApprovalStatus
-            };
-
             var existingQuestion = await _context.Questions.FirstOrDefaultAsync(q => q.Qid == qid);
+
             if (existingQuestion == null)
                 return 0;
 
-            // Only update properties if they are not null
+            if (question.type != null)            
+                existingQuestion.Type = question.type;            
 
-            existingQuestion.Type = question.type;
-            existingQuestion.Question1 = question.question;
-            existingQuestion.Options = question.options;
-            existingQuestion.CorrectOptions = JsonConvert.SerializeObject(question.correctOptions);
-            existingQuestion.ApprovalStatus = question.ApprovalStatus;
-            //if (updatedQuestion.Tid != null)
-            //    existingQuestion.Tid = updatedQuestion.Tid;
-            //if (updatedQuestion.Eid != null)
-            //    existingQuestion.Eid = updatedQuestion.Eid;
-            //if (updatedQuestion.Type != null)
-            //    existingQuestion.Type = updatedQuestion.Type;
-            //if (updatedQuestion.Question1 != null)
-            //    existingQuestion.Question1 = updatedQuestion.Question1;
-            //if (updatedQuestion.Marks != null)
-            //    existingQuestion.Marks = updatedQuestion.Marks;
-            //if (updatedQuestion.Options != null)
-            //    existingQuestion.Options = updatedQuestion.Options;
-            //if (updatedQuestion.CorrectOptions != null)
-            //    existingQuestion.CorrectOptions = updatedQuestion.CorrectOptions;
-            //if (updatedQuestion.ApprovalStatus != null)
-            //    existingQuestion.ApprovalStatus = updatedQuestion.ApprovalStatus;
+            if (question.question != null)            
+                existingQuestion.Question1 = question.question;            
+
+            if (question.options != null)            
+                existingQuestion.Options = question.options;
+
+            if (question.correctOptions != null)
+                existingQuestion.CorrectOptions = JsonConvert.SerializeObject(question.correctOptions);
+
+            if (question.ApprovalStatus.HasValue)             
+                existingQuestion.ApprovalStatus = question.ApprovalStatus;
 
             return await _context.SaveChangesAsync();
         }
