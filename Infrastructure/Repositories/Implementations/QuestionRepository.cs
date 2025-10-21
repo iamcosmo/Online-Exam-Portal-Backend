@@ -86,31 +86,29 @@ namespace Infrastructure.Repositories.Implementations
 
         }
 
-        public async Task<List<ListQuestionsDTO>> GetQuestionsByExaminerID(int examinerId)
+        public async Task<(List<ListQuestionsDTO> Questions, int TotalCount)> GetQuestionsByExaminerID(int examinerId, int page,int pageSize)
         {
-            // 1. Fetch and filter the Question entities
-            var questions = await _context.Questions
-                // Include Exam to access the UserId property
+            // 1. Define the base query (without pagination)
+            var baseQuery = _context.Questions
                 .Include(q => q.EidNavigation)
+                .Where(q => q.EidNavigation != null && q.EidNavigation.UserId == examinerId);
 
-                // Filter: Ensure the Exam exists and its UserId matches the examinerId
-                .Where(q => q.EidNavigation != null && q.EidNavigation.UserId == examinerId)
+            // 2. Get the total count of all matching questions
+            var totalCount = await baseQuery.CountAsync();
 
-                // 2. Project the filtered results into the ListQuestionsDTO format
+            // 3. Apply Skip and Take for pagination
+            var questions = await baseQuery
+                .Skip((page - 1) * pageSize) // Skip items from previous pages
+                .Take(pageSize)              // Take only the current page's items
                 .Select(q => new ListQuestionsDTO
                 {
-                    // Map Question.Question1 to ListQuestionsDTO.QuestionName
                     QuestionName = q.Question1,
-
-                    // Map Question.Qid to ListQuestionsDTO.QuestionId
                     QuestionId = q.Qid,
-
-                    // Map Question.Type to ListQuestionsDTO.QuestionType
                     QuestionType = q.Type
                 })
                 .ToListAsync();
 
-            return questions;
+            return (questions, totalCount);
         }
 
         public async Task<int> UpdateQuestion(UpdateQuestionDTO question, int qid)

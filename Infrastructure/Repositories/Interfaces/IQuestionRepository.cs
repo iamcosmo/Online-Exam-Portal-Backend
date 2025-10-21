@@ -18,7 +18,7 @@ namespace Infrastructure.Repositories.Interfaces
 
         public Question GetQuestionById(int questionId);
 
-        public Task<List<ListQuestionsDTO>> GetQuestionsByExaminerID(int examinerId);
+        public Task<(List<ListQuestionsDTO> Questions, int TotalCount)> GetQuestionsByExaminerID(int examinerId, int page, int pageSize);
 
         public Task<int> UpdateQuestion(UpdateQuestionDTO question, int qid);
 
