@@ -27,7 +27,7 @@ namespace Infrastructure.Repositories.Implementations
             var feedback = new QuestionReport
             {
                 Qid = qFeedback.qid,
-                Feedback = qFeedback.feedback,
+                Feedback = qFeedback.feedback ?? "Empty",
                 UserId = qFeedback.studentId
             };
 
@@ -38,15 +38,18 @@ namespace Infrastructure.Repositories.Implementations
                 return "You have alreayd Reported this!";
 
             var random = new Random();
+
             var adminIds = await _context.Users
                 .Where(u => u.Role == "Admin" && u.IsBlocked == false)
                 .Select(a => a.UserId)
                 .ToListAsync();
+
             var randomAdminId = adminIds.OrderBy(x => random.Next()).FirstOrDefault();
             feedback.ReviewerId = randomAdminId != null ? randomAdminId : 7;
 
-            _context.QuestionReports.Add(feedback);
-            return _context.SaveChanges() > 0 ? "Reported Successfully!!" : "There was an error Reporting this Question!";
+            await _context.QuestionReports.AddAsync(feedback);
+
+            return await _context.SaveChangesAsync() > 0 ? "Reported Successfully!!" : "There was an error Reporting this Question!";
         }
         public async Task<List<GetQuestionFeedback>> GetFeedbackByQuestionId(int qid)
         {
