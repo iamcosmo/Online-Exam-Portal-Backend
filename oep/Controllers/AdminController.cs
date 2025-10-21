@@ -47,17 +47,17 @@ namespace OEP.Controllers
         public async Task<IActionResult> ApproveOrRejectExam([FromBody] ExamApprovalStatusDTO dto)
         {
 
-            if (dto == null || string.IsNullOrWhiteSpace(dto.action) || (dto.action != "approve" && dto.action != "reject"))
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Status))
             {
                 return BadRequest("Invalid request data.");
             }
-            dto.action = dto.action.ToLower();
+            
 
             int result = await _adminRepository.ApproveExamAsync(dto);
 
             if (result >= 1)
             {
-                return Ok($"Exam with ID {dto.eid} has been {(dto.action == "approve" ? "approved" : "rejected")}.");
+                return Ok(new {message= $"Exam with ID {dto.ExamId} has been {(dto.Status.ToLower() == "approve" ? "approved" : "rejected")}." });
             }
             else
             {
@@ -125,10 +125,10 @@ namespace OEP.Controllers
 
 
         // GET /exam-feedback-review/{eid}
-        [HttpGet("exam-feedback-review/{eid}")]
-        public async Task<IActionResult> GetExamFeedbacks([FromRoute] int eid)
+        [HttpGet("exam-feedback-review")]
+        public async Task<IActionResult> GetExamFeedbacks([FromQuery] int userId)
         {
-            var feedbacks = await _adminRepository.GetExamFeedbacksAsync(eid);
+            var feedbacks = await _adminRepository.GetExamFeedbacksAsync(userId);
             return feedbacks != null ? Ok(feedbacks) : NotFound("No feedbacks found.");
         }
 
@@ -151,6 +151,77 @@ namespace OEP.Controllers
 
             return Ok(new { Topics = topics });
         }
+
+        // ✅ ADMIN — Get Exam With Questions For Review
+
+        [Authorize(Roles = "Admin")]
+
+        [HttpGet("exam/{examId}/review")]
+
+        public async Task<IActionResult> GetExamWithQuestionsForReview(int examId)
+
+        {
+
+            try
+
+            {
+
+                var exam = await _adminRepository.GetExamWithQuestionsForAdminAsync(examId);
+
+                if (exam == null)
+
+                {
+
+                    return NotFound(new { message = "Exam not found or not submitted for review." });
+
+                }
+
+                var response = new
+
+                {
+
+                    examId = exam.Eid,
+
+                    name = exam.Name,
+
+                    description = exam.Description,
+
+                    totalMarks = exam.TotalMarks,
+
+                    questions = exam.Questions.Select(q => new
+
+                    {
+
+                        q.Qid,
+
+                        q.Question1,           // ✅ correct name from your Question model
+
+                        q.Type,
+
+                        q.Options,            // ✅ this is a JSON string
+
+                        q.CorrectOptions,     // ✅ property name from your Question model
+
+                        q.Marks
+
+                    })
+
+                };
+
+                return Ok(response);
+
+            }
+
+            catch (Exception ex)
+
+            {
+
+                return StatusCode(500, new { message = "Error while fetching exam details.", error = ex.Message });
+
+            }
+
+        }
+
 
         [Authorize(Roles = "Admin")]
         [HttpPatch("approve-topic")]

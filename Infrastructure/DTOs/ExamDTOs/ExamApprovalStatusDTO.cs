@@ -9,8 +9,8 @@ namespace Infrastructure.DTOs.ExamDTOs
 {
     public class ExamApprovalStatusDTO
     {
-        public int eid { get; set; }
-        public string action { get; set; }
-        public int userId { get; set; }
+        public int ExamId { get; set; }
+        public string Status { get; set; }
+        public int UserId { get; set; }
     }
 }
