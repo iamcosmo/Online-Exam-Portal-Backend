@@ -30,14 +30,25 @@ namespace Infrastructure.Repositories.Implementations
                 return -1;
             }
 
-            var feedback = new ExamFeedback
+            var existingFeedback = _context.ExamFeedbacks.FirstOrDefault(e => e.Eid == examId && e.UserId == dto.Userid);
+            if (existingFeedback != null)
             {
-                Eid = examId,
-                UserId = dto.Userid,
-                Feedback = dto.Feedback
-            };
+                // Update existing feedback
+                existingFeedback.Feedback = dto.Feedback;
+            }
+            else
+            {
+                // Add new feedback
+                var feedback = new ExamFeedback
+                {
+                    Eid = examId,
+                    UserId = dto.Userid,
+                    Feedback = dto.Feedback
+                };
 
-            _context.ExamFeedbacks.Add(feedback);
+                _context.ExamFeedbacks.Add(feedback);
+            }
+
             return _context.SaveChanges();
         }
 
