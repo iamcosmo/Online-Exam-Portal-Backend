@@ -86,6 +86,33 @@ namespace Infrastructure.Repositories.Implementations
 
         }
 
+        public async Task<List<ListQuestionsDTO>> GetQuestionsByExaminerID(int examinerId)
+        {
+            // 1. Fetch and filter the Question entities
+            var questions = await _context.Questions
+                // Include Exam to access the UserId property
+                .Include(q => q.EidNavigation)
+
+                // Filter: Ensure the Exam exists and its UserId matches the examinerId
+                .Where(q => q.EidNavigation != null && q.EidNavigation.UserId == examinerId)
+
+                // 2. Project the filtered results into the ListQuestionsDTO format
+                .Select(q => new ListQuestionsDTO
+                {
+                    // Map Question.Question1 to ListQuestionsDTO.QuestionName
+                    QuestionName = q.Question1,
+
+                    // Map Question.Qid to ListQuestionsDTO.QuestionId
+                    QuestionId = q.Qid,
+
+                    // Map Question.Type to ListQuestionsDTO.QuestionType
+                    QuestionType = q.Type
+                })
+                .ToListAsync();
+
+            return questions;
+        }
+
         public async Task<int> UpdateQuestion(UpdateQuestionDTO question, int qid)
         {
 

@@ -109,6 +109,18 @@ namespace OEP.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles ="Examiner")]
+        [HttpGet("get-questions-by-uid/{uid}")]
+        public async Task<IActionResult> GetQuestionsByUserId(int uid)
+        {
+            var result = await _questionRepository.GetQuestionsByExaminerID(uid);
+            if (result == null)
+                return StatusCode(500, "An error occurred while retrieving questions.");
+            if (result.Count == 0)
+                return NotFound("No questions found for the specified user.");
+            return Ok(result);
+        }
+
         [Authorize(Roles = "Examiner")]
         [HttpPut("update-question/{qId}")]
         public async Task<IActionResult> UpdateOneQuestion([FromBody] UpdateQuestionDTO question, int qId)
