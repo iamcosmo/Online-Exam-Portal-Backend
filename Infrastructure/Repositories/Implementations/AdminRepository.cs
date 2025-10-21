@@ -105,7 +105,7 @@ namespace Infrastructure.Repositories.Implementations
         }
 
 
-        public async Task<bool> UpdateReportedQuestionStatusAsync(int qid, int status)
+        public async Task<bool> UpdateReportedQuestionStatusAsync(QuestionReviewDTO dto)
         {
 
 
