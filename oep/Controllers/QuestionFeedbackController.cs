@@ -28,8 +28,6 @@ namespace OEP.Controllers
         [HttpPost("add-question-feedback")]
         public IActionResult AddQuestionFeedback([FromBody] AddQuestionFeedbackDTO qFeedback)
         {
-
-
             var result = _questionFeedbackRepository.AddQuestionFeedbackDTO(qFeedback);
             return Ok(result);
         }
