@@ -104,6 +104,8 @@ namespace OEP.Controllers
             try
             {
                 var StartExamData = await _examRepository.StartExam(examId, userId);
+
+                if (StartExamData == null) return Ok(new { Success = false });
                 if (StartExamData.EID != 0) return Ok(new { ExamData = StartExamData, Success = true });
                 else return NotFound("This Exam is not available or Attempt Limit Reached.");
 
