@@ -47,7 +47,7 @@ namespace oep
                         sqlServerOptions => sqlServerOptions.CommandTimeout(120)
                     )
                 );
-                builder.Services.AddControllers(););
+
                 builder.Services.AddControllers()
                     .AddJsonOptions(x =>
                                     x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
