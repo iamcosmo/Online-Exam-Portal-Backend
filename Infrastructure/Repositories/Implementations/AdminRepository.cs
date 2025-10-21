@@ -2,6 +2,7 @@
 using Domain.Models;
 using Infrastructure.DTOs.adminDTOs;
 using Infrastructure.DTOs.ExamDTOs;
+using Infrastructure.DTOs.QuestionFeedbackDTO;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -106,11 +107,39 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<bool> UpdateReportedQuestionStatusAsync(int qid, int status)
         {
-            var question = await _context.Questions.FindAsync(qid);
+
+
+            var question = await _context.Questions.FirstOrDefaultAsync(q => q.Qid == dto.qid);
+
             if (question == null) return false;
 
-            question.ApprovalStatus = status;
-            await _context.SaveChangesAsync();
+            try
+            {
+
+                question.ApprovalStatus = dto.status;
+
+                await _context.SaveChangesAsync();
+
+                var reportToDelete = await _context.QuestionReports.FindAsync(dto.qid, dto.studentId);
+
+                if (reportToDelete != null)
+                {
+                    _context.QuestionReports.Remove(reportToDelete);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+
+                    Console.WriteLine("Delete failed: QuestionReport not found for QID: {0} and StudentID: {1}", dto.qid, dto.studentId);
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+
             return true;
         }
 

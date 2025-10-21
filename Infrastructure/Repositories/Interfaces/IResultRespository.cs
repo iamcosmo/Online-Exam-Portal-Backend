@@ -9,5 +9,7 @@ namespace Infrastructure.Repositories.Interfaces
         public Task<CreateResultDTO> CreateExamResults(int examid, int userid);
 
         public Task<List<ExamResultsDTO>> GetAllResultsForUser(int userid);
+        public Task<ResultCalculationResponseDTO> ExecuteAndGetAllResultsAsync(int examId, int userId);
+
     }
 }

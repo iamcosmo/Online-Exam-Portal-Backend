@@ -251,9 +251,9 @@ namespace Infrastructure.Repositories.Implementations
             }
 
             var allAttempts = await _context.Results.Where(r => r.UserId == userId && r.Eid == examId).MaxAsync(r => (int?)r.Attempts) ?? 0;
-            if (allAttempts == 3)
+            if (allAttempts >= 3)
             {
-                return new StartExamResponseDTO();
+                return null;
             }
 
             var list = await _context.Exams.Include(e => e.Questions)

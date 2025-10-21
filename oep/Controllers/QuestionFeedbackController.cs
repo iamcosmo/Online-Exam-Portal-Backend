@@ -26,12 +26,10 @@ namespace OEP.Controllers
 
         [Authorize(Roles = "Student")]
         [HttpPost("add-question-feedback")]
-        public IActionResult AddQuestionFeedback([FromBody] AddQuestionFeedbackDTO qFeedback)
+        public async Task<IActionResult> AddQuestionFeedback([FromBody] AddQuestionFeedbackDTO qFeedback)
         {
-
-
-            var result = _questionFeedbackRepository.AddQuestionFeedbackDTO(qFeedback);
-            return Ok(result);
+            var result = await _questionFeedbackRepository.AddQuestionFeedbackDTO(qFeedback);
+            return Ok(new { msg = result });
         }
 
         [Authorize(Roles = "Admin,Examiner")]

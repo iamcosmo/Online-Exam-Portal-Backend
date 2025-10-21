@@ -98,7 +98,7 @@ namespace OEP.Controllers
             if (dto.status != 0 && dto.status != 1)
                 return BadRequest("Invalid status. Use 0 or 1.");
 
-            var result = await _adminRepository.UpdateReportedQuestionStatusAsync(dto.qid, dto.status);
+            var result = await _adminRepository.UpdateReportedQuestionStatusAsync(dto);
 
             if (!result)
                 return Ok("No reported questions found.");

@@ -45,15 +45,14 @@ namespace Infrastructure.Repositories.Implementations
             var user = _context.Users.FirstOrDefault(u => u.UserId == id);
             if (user == null)
                 return null;
-
             return new UserDetailsDTO
             {
                 FullName = user.FullName,
                 Email = user.Email,
-                Dob = (DateOnly)user.Dob,
+                Dob = user.Dob.GetValueOrDefault(),
+                IsBlocked = user.IsBlocked.GetValueOrDefault(),
                 PhoneNo = user.PhoneNo,
-                Role = user.Role,
-                IsBlocked = (bool)user.IsBlocked
+                Role = user.Role
             };
 
         }

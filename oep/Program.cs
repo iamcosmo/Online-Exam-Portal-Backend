@@ -103,7 +103,7 @@ namespace oep
                            ValidateAudience = true,
                            ValidIssuer = builder.Configuration["Jwt:Issuer"],
                            ValidAudience = builder.Configuration["Jwt:Audience"],
-                 
+
                        };
                    });
 

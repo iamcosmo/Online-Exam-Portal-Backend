@@ -83,5 +83,60 @@ namespace Infrastructure.Repositories.Implementations
             }
 
         }
+
+        public async Task<ResultCalculationResponseDTO> ExecuteAndGetAllResultsAsync(int examId, int userId)
+        {
+            bool hasFreshSubmissions = false;
+            try
+            {
+                // Step 1: Check if there are any fresh submissions BEFORE running the procedure.
+                // This tells us if a new result is expected to be created.
+                hasFreshSubmissions = await _context.Responses
+                    .AnyAsync(r => r.Eid == examId && r.UserId == userId && r.IsSubmittedFresh == true);
+
+                if (hasFreshSubmissions)
+                {
+                    // Step 2: Execute the stored procedure to calculate the new result.
+                    await _context.Database.ExecuteSqlInterpolatedAsync(
+                        $"EXEC CreateExamResult @ExamId = {examId}, @UserId = {userId}"
+                    );
+                }
+
+                // Step 3: ALWAYS fetch the complete history of results for the user and exam.
+                var allResults = await _context.Results
+                    .AsNoTracking()
+                    .Where(r => r.Eid == examId && r.UserId == userId)
+                    .OrderBy(r => r.Attempts) // Order by attempt number chronologically
+                    .ToListAsync();
+
+                if (!allResults.Any())
+                {
+                    // If after all that, there are still no results, return a clear message.
+                    return new ResultCalculationResponseDTO { Success = false, Message = "No results found for this exam." };
+                }
+
+                return new ResultCalculationResponseDTO
+                {
+                    Success = true,
+                    Message = "Successfully retrieved results.",
+                    NewResultCalculated = hasFreshSubmissions, // Pass the flag to the frontend
+                    Results = allResults
+                };
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex)
+            {
+                if (ex.Message.Contains("Maximum number of attempts reached."))
+                {
+                    return new ResultCalculationResponseDTO { Success = false, Message = ex.Message };
+                }
+                // Log the full exception (ex)
+                return new ResultCalculationResponseDTO { Success = false, Message = "A database error occurred." };
+            }
+            catch (Exception ex)
+            {
+                // Log the full exception (ex)
+                return new ResultCalculationResponseDTO { Success = false, Message = "An internal error occurred." };
+            }
+        }
     }
 }

@@ -11,19 +11,34 @@ using Infrastructure.DTOs.ExamDTOs;
 
 namespace Infrastructure.Repositories.Implementations
 {
- 
 
-        public class ExamFeedbackRepository : IExamFeedbackRepository
+
+    public class ExamFeedbackRepository : IExamFeedbackRepository
+    {
+        private readonly AppDbContext _context;
+
+        public ExamFeedbackRepository(AppDbContext context)
         {
-            private readonly AppDbContext _context;
+            _context = context;
+        }
 
-            public ExamFeedbackRepository(AppDbContext context)
+        public int AddFeedback(int examId, ExamFeedbackDto dto)
+        {
+            var exam = _context.Exams.FirstOrDefault(e => e.Eid == examId && e.ApprovalStatus == 1);
+            if (exam == null)
             {
-                _context = context;
+                return -1;
             }
 
-            public void AddFeedback(int examId, ExamFeedbackDto dto)
+            var existingFeedback = _context.ExamFeedbacks.FirstOrDefault(e => e.Eid == examId && e.UserId == dto.Userid);
+            if (existingFeedback != null)
             {
+                // Update existing feedback
+                existingFeedback.Feedback = dto.Feedback;
+            }
+            else
+            {
+                // Add new feedback
                 var feedback = new ExamFeedback
                 {
                     Eid = examId,
@@ -32,29 +47,31 @@ namespace Infrastructure.Repositories.Implementations
                 };
 
                 _context.ExamFeedbacks.Add(feedback);
-                _context.SaveChanges();
             }
 
-            public IEnumerable<ExamFeedback> GetAllFeedbacks(int examId)
-            {
-                return _context.ExamFeedbacks
-                    .Include(f => f.User)
-                    .Include(f => f.EidNavigation)
-                    .Where(f => f.Eid == examId)
-                    .ToList();
-            }
-
-            public IEnumerable<ExamFeedbackDto> GetStudentFeedback(int examId, int userId)
-            {
-                return _context.ExamFeedbacks
-                    .Where(f => f.Eid == examId && f.UserId == userId)
-                    .Select(f => new ExamFeedbackDto
-                    {
-                        Feedback = f.Feedback
-                    })
-                    .ToList();
-            }
+            return _context.SaveChanges();
         }
 
+        public IEnumerable<ExamFeedback> GetAllFeedbacks(int examId)
+        {
+            return _context.ExamFeedbacks
+                .Include(f => f.User)
+                .Include(f => f.EidNavigation)
+                .Where(f => f.Eid == examId)
+                .ToList();
+        }
+
+        public IEnumerable<ExamFeedbackDto> GetStudentFeedback(int examId, int userId)
+        {
+            return _context.ExamFeedbacks
+                .Where(f => f.Eid == examId && f.UserId == userId)
+                .Select(f => new ExamFeedbackDto
+                {
+                    Feedback = f.Feedback
+                })
+                .ToList();
+        }
     }
+
+}
 

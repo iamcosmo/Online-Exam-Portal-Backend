@@ -36,5 +36,18 @@ namespace OEP.Controllers
             var results = await _resultRepo.GetAllResultsForUser(userid);
             return Ok(results);
         }
+
+        [HttpGet("calculate/{examId}/{userId}")]
+        public async Task<IActionResult> CalculateAndGetResult(int examId, int userId)
+        {
+            var response = await _resultRepo.ExecuteAndGetAllResultsAsync(examId, userId);
+
+            if (!response.Success)
+            {
+                return Ok(response);
+            }
+
+            return Ok(response);
+        }
     }
 }

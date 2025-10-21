@@ -1,6 +1,7 @@
 ﻿using Domain.Models;
 using Infrastructure.DTOs.adminDTOs;
 using Infrastructure.DTOs.ExamDTOs;
+using Infrastructure.DTOs.QuestionFeedbackDTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ namespace Infrastructure.Repositories.Interfaces
 
         Task<List<QuestionReport>> GetAllReportedQuestionsAsync(int adminId);
         Task<Question?> GetReportedQuestionByIdAsync(int qid);
-        Task<bool> UpdateReportedQuestionStatusAsync(int qid, int status);
+        Task<bool> UpdateReportedQuestionStatusAsync(QuestionReviewDTO dto);
 
         Task<int> BlockUserAsync(int userId);
         Task<IEnumerable<ExamFeedbackViewDTO>> GetExamFeedbacksAsync(int examId);
