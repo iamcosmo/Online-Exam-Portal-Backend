@@ -87,7 +87,7 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<List<QuestionReport>> GetAllReportedQuestionsAsync(int adminId)
         {
-            return await _context.QuestionReports.Where(r => r.UserId == adminId).Select(r => new QuestionReport { Qid = r.Qid, Feedback = r.Feedback, UserId = r.UserId }).ToListAsync();
+            return await _context.QuestionReports.Where(r => r.ReviewerId == adminId).Select(r => new QuestionReport { Qid = r.Qid, Feedback = r.Feedback, UserId = r.UserId }).ToListAsync();
         }
 
         public async Task<Question?> GetReportedQuestionByIdAsync(int qid)
@@ -96,7 +96,7 @@ namespace Infrastructure.Repositories.Implementations
 
             var report = await _context.QuestionReports
 
-                .Include(r => r.QidNavigation)     // ✅ this is the correct navigation property
+                .Include(r => r.QidNavigation)
 
                 .FirstOrDefaultAsync(r => r.Qid == qid);
 
