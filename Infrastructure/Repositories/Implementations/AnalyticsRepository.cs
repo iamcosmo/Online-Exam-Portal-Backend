@@ -255,7 +255,7 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<int> GetTotalActiveQuestions()
         {
-            return await _context.Questions.CountAsync(q => q.ApprovalStatus == 1);
+            return await _context.Questions.CountAsync(q => q.ApprovalStatus == 1 && q.EidNavigation.ApprovalStatus == 1);
         }
     }
 }
