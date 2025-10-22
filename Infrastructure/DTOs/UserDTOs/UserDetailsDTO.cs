@@ -15,6 +15,7 @@ namespace Infrastructure.DTOs.UserDTOs
         public string PhoneNo { get; set; }
         public string Role { get; set; }
         public bool IsBlocked { get; set; }
+        public DateOnly? RegistrationDate { get; set; }
 
     }
 }
