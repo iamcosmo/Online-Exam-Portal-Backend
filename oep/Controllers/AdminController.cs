@@ -107,20 +107,28 @@ namespace OEP.Controllers
         }
 
 
-        [HttpPost("block-users")]
-        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+        [HttpPut("blockuser/{id}")]
 
-        public async Task<IActionResult> BlockUser([FromBody] BlockUserDTO dto)
+        public async Task<IActionResult> BlockUser(int id)
+
         {
-            int result = await _adminRepository.BlockUserAsync(dto.uid);
-            if (result == -1)
-            {
-                return Unauthorized("You are not allowed to Block Admins.");
-            }
 
-            return result >= 1 ? Ok($"User with ID {dto.uid} blocked.") : BadRequest("Blocking failed.");
+            var result = await _adminRepository.BlockUserAsync(id);
+
+            if (result.Contains("not found"))
+
+                return NotFound(result);
+
+            if (result.Contains("not allowed"))
+
+                return Unauthorized(result);
+
+            if (result.Contains("already blocked"))
+
+                return BadRequest(result);
+
+            return Ok(result);
+
         }
 
 

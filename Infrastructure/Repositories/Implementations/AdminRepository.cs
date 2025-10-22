@@ -58,16 +58,17 @@ namespace Infrastructure.Repositories.Implementations
 
         }
 
-        public async Task<int> BlockUserAsync(int userId)
+        public async Task<string> BlockUserAsync(int userId)
         {
-            var user = await _context.Users.FindAsync(userId);
-            if (user == null) return 0;
+            var user = await _context.Users.FirstOrDefaultAsync(u=>u.UserId==userId);
+            if (user == null) return "User not found";
 
-            if (user.Role == "Admin") { return -1; }
-
+            if (user.Role == "Admin") { return "You are not allowed to block admin"; }
+            if (user.IsBlocked==true) { return $"User with ID {userId} is already blocked"; }
             user.IsBlocked = true;
+            _context.Users.Update(user);
             await _context.SaveChangesAsync();
-            return 1;
+            return $"User with ID {userId} has been successfully blocked";
         }
 
         public async Task<IEnumerable<ExamFeedbackViewDTO>> GetExamFeedbacksAsync(int userId)
