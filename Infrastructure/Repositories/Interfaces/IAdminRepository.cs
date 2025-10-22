@@ -23,10 +23,8 @@ namespace Infrastructure.Repositories.Interfaces
         Task<Question?> GetReportedQuestionByIdAsync(int qid);
         Task<bool> UpdateReportedQuestionStatusAsync(QuestionReviewDTO dto);
 
-        Task<int> BlockUserAsync(int userId);
+        Task<string> BlockUserAsync(int userId);
         Task<IEnumerable<ExamFeedbackViewDTO>> GetExamFeedbacksAsync(int examId);
-
-        //Task<List<Question>> GetAllReportedQuestionsAsync();
 
         Task<int> AddAdminRemarksAsync(int examId, string remarks);
         Task<List<ApproveTopicsDTO>> TopicsToBeApprovedAsync(int userId);
