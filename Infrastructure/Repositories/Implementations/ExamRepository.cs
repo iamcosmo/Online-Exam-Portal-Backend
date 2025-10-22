@@ -53,7 +53,7 @@ namespace Infrastructure.Repositories.Implementations
         {
 
             Exam ToBeUpdatedExam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == examId);
-            if (ToBeUpdatedExam.SubmittedForApproval == true)
+            if (ToBeUpdatedExam.SubmittedForApproval == true || ToBeUpdatedExam.ApprovalStatus==1)
             {
                 return -1;
             }
@@ -65,6 +65,10 @@ namespace Infrastructure.Repositories.Implementations
             if (dto.TotalQuestions != null && ToBeUpdatedExam.TotalQuestions != dto.TotalQuestions)
             {
                 ToBeUpdatedExam.TotalQuestions = (int)dto.TotalQuestions;
+            }
+            if (dto.Name != null)
+            {
+                ToBeUpdatedExam.Name = dto.Name;
             }
             if (dto.Description != null)
             {
