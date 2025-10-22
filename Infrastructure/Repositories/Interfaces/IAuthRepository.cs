@@ -10,7 +10,7 @@ namespace Infrastructure.Repositories.Interfaces
 {
     public interface IAuthRepository
     {
-        int RegisterStudent(RegisterUserDTO dto);
+        StudentRegisterResponseDTO RegisterStudent(RegisterUserDTO dto);
         int RegisterAdminOrExaminer(RegistrationInputDTO examinerDTO, string role);
         User? Login(string email, string password);
         bool ValidateToken(string token);

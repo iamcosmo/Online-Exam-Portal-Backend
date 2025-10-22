@@ -19,7 +19,7 @@ namespace OEP.Controllers
     {
         private readonly IAuthRepository _authRepository;
         private readonly TokenService _tokenService;
-       
+
 
 
         public AuthController(IAuthRepository authRepository, TokenService tokenService)
@@ -34,7 +34,7 @@ namespace OEP.Controllers
         public IActionResult RegisterStudentAction([FromBody] RegisterUserDTO dto)
         {
             var result = _authRepository.RegisterStudent(dto);
-            return result > 0 ? Ok(new { message = "User Saved! Please verify Email via OTP-verification" })
+            return result.status > 0 ? Ok(new { msg = "User Saved! Please verify Email via OTP-verification", result.UserId })
     : BadRequest(new { error = "Registration failed" });
 
             //? Ok("User Saved! Please verify Email via OTP-verification") : BadRequest("Registration failed");
@@ -81,8 +81,8 @@ namespace OEP.Controllers
         [HttpPost("student/verifyotp/{userId}")]
         public IActionResult VerifyOTP([FromBody] int otp, int userId)
         {
-            if(_authRepository.VerifyOTP(userId, otp))                      
-                return Ok("OTP verified successfully");            
+            if (_authRepository.VerifyOTP(userId, otp))
+                return Ok("OTP verified successfully");
 
             return Unauthorized("Incorrect OTP!!");
         }
