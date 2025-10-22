@@ -12,6 +12,9 @@ namespace Infrastructure.DTOs.Analytics
         public List<ExamScoreDto> AverageScoresPerExam { get; set; }
         public List<QuestionApprovalDto> QuestionApprovalStats { get; set; }
         public List<ExamParticipationDto> StudentParticipation { get; set; }
+        public List<TopicQuestionCountDto> TopicQuestionCounts { get; set; }
+        public List<TopicScoreDto> AvgTopicScores { get; set; }
+        public List<TopicApprovalDto> TopicApprovalStats { get; set; }
     }
     public class ExamScoreDto
     {
@@ -31,5 +34,25 @@ namespace Infrastructure.DTOs.Analytics
         public int ExamId { get; set; }
         public string ExamTitle { get; set; }
         public int StudentCount { get; set; }
+    }
+
+    public class TopicQuestionCountDto
+    {
+        public int TopicId { get; set; }
+        public string Subject { get; set; }
+        public int QuestionCount { get; set; }
+    }
+    public class TopicScoreDto
+    {
+        public int TopicId { get; set; }
+        public string Subject { get; set; }
+        public decimal AverageScore { get; set; }
+    }
+    public class TopicApprovalDto
+    {
+        public int TopicId { get; set; }
+        public string Subject { get; set; }
+        public bool IsApproved { get; set; }
+        public int Count { get; set; }
     }
 }
