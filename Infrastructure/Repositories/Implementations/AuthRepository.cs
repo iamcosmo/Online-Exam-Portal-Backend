@@ -27,8 +27,8 @@ namespace Infrastructure.Repositories.Implementations
         }
 
         public int RegisterAdminOrExaminer(RegistrationInputDTO examinerDTO, string role)
-        {           
-           
+        {
+
             var user = new User
             {
                 FullName = examinerDTO.FullName,
@@ -36,14 +36,14 @@ namespace Infrastructure.Repositories.Implementations
                 Password = examinerDTO.Password,
                 Role = role,
                 PhoneNo = examinerDTO.PhoneNo,
-                Dob = examinerDTO.Dob,               
+                Dob = examinerDTO.Dob,
             };
 
             _context.Users.Add(user);
             _logger.LogInformation("New Admin/Examiner is registered with UserId : {@userid} at {@time}", user.UserId, user.CreatedAt);
             return _context.SaveChanges();
         }
-        public int RegisterStudent(RegisterUserDTO dto)
+        public StudentRegisterResponseDTO RegisterStudent(RegisterUserDTO dto)
         {
 
             Random random = new Random();
@@ -72,10 +72,11 @@ namespace Infrastructure.Repositories.Implementations
             catch (Exception ex)
             {
                 _logger.LogError("Failed to send OTP email to {Email}. Error: {ErrorMessage}", dto.Email, ex.Message);
-                return 0; 
+                return new StudentRegisterResponseDTO { status = 0, UserId = -1 };
             }
             _logger.LogInformation("New Student registeration Started with UserId : {@userid} at {@time}. Verify Email!", user.UserId, user.CreatedAt);
-            return _context.SaveChanges();
+            int status = _context.SaveChanges();
+            return new StudentRegisterResponseDTO { status = status, UserId = user.UserId };
         }
         public User? Login(string email, string password)
         {
@@ -92,7 +93,7 @@ namespace Infrastructure.Repositories.Implementations
             {
                 _logger.LogInformation("{@Role} with userId {@userid} logged in at {@time}", user.Role, user.UserId, user.CreatedAt);
                 return user;
-            }         
+            }
 
         }
 
