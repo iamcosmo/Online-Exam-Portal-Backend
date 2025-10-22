@@ -79,6 +79,44 @@ namespace Infrastructure.Repositories.Implementations
                         ExamTitle = g.First().EidNavigation.Name,
                         StudentCount = g.Select(r => r.UserId).Distinct().Count()
                     }).ToListAsync()
+                    ,
+                TopicApprovalStats = await _context.Topics
+                    .Where(t => t.ExaminerId == examinerId)
+                    .GroupBy(t => new { t.Tid, t.Subject, IsApproved = t.ApprovalStatus == 1 })
+                    .Select(g => new TopicApprovalDto
+                    {
+                        TopicId = g.Key.Tid,
+                        Subject = g.Key.Subject,
+                        IsApproved = g.Key.IsApproved,
+                        Count = g.Count()
+                    }).ToListAsync(),
+
+                AvgTopicScores = await _context.Responses
+                    .Include(r => r.QidNavigation)
+                    .ThenInclude(q => q.TidNavigation)
+                    .Where(r => r.QidNavigation.TidNavigation.ExaminerId == examinerId)
+                    .GroupBy(r => new { r.QidNavigation.Tid, r.QidNavigation.TidNavigation.Subject })
+                    .Select(g => new TopicScoreDto
+                    {
+                        TopicId = g.Key.Tid,
+                        Subject = g.Key.Subject,
+                        AverageScore = g.Average(r => r.RespScore ?? 0)
+
+                    }).ToListAsync()
+                    ,
+
+
+                TopicQuestionCounts = await _context.Questions
+                    .Include(q => q.TidNavigation)
+                    .Where(q => q.TidNavigation.ExaminerId == examinerId)
+                    .GroupBy(q => new { q.Tid, q.TidNavigation.Subject })
+                    .Select(g => new TopicQuestionCountDto
+                    {
+                        TopicId = g.Key.Tid,
+                        Subject = g.Key.Subject,
+                        QuestionCount = g.Count()
+                    }).ToListAsync()
+
             };
 
             return dto != null ? dto : new ExaminerAnalyticsDto();
