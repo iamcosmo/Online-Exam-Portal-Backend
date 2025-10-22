@@ -48,11 +48,11 @@ namespace Infrastructure.Repositories.Implementations
             return new UserDetailsDTO
             {
                 FullName = user.FullName,
-                Email = user.Email,
                 Dob = user.Dob.GetValueOrDefault(),
                 IsBlocked = user.IsBlocked.GetValueOrDefault(),
                 PhoneNo = user.PhoneNo,
-                Role = user.Role
+                Role = user.Role,
+                RegistrationDate = user.RegistrationDate
             };
 
         }
