@@ -40,20 +40,39 @@ namespace Infrastructure.Repositories.Implementations
             return results;
         }
 
-        public async Task<List<ExamResultsDTO>> GetAllResultsForUser(int userid)
+        public async Task<List<ExamSummaryDTO>> GetAllResultsForUser(int userid)
         {
-            List<ExamResultsDTO> results = await _context.Results.Where(r => r.UserId == userid).Include(r => r.EidNavigation).Select(r => new ExamResultsDTO
-            {
-                UserId = r.UserId,
-                Eid = r.Eid,
-                Attempts = r.Attempts,
-                Score = r.Score,
-                TakenOn = r.CreatedAt,
-                ExamName = r.EidNavigation.Name,
-                TotalMarks = r.EidNavigation.TotalMarks
+            List<ExamSummaryDTO> groupedResults = await _context.Results
+            .Where(r => r.UserId == userid)
+            .Include(r => r.EidNavigation)
 
-            }).ToListAsync();
-            return results;
+            .GroupBy(r => new
+            {
+                r.Eid,
+                r.EidNavigation.Name,
+                r.EidNavigation.TotalMarks 
+            })
+            .Select(group => new ExamSummaryDTO
+            {
+                Eid = group.Key.Eid,
+                ExamName = group.Key.Name ?? string.Empty,
+
+                
+                TotalMarks = group.Key.TotalMarks ?? 0M, 
+
+                AttemptsData = group
+                    .Select(r => new AttemptDTO
+                    {
+                        Attempt = r.Attempts ?? 0,
+                        Score = r.Score ?? 0M,
+                        TakenOn = r.CreatedAt ?? DateTime.MinValue 
+                    })
+                    .OrderBy(a => a.Attempt)
+                    .ToList()
+            })
+            .ToListAsync();
+
+            return groupedResults;
         }
         //Using ADO.NET
         public async Task<CreateResultDTO> CreateExamResults(int examid, int userid)
