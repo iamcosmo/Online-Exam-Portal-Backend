@@ -6,11 +6,9 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.DTOs.AuthDTOs
 {
-    public class StudentRegisterResponseDTO
+    public class ResendOtpResponseDTO
     {
         public int status { get; set; }
-        public int UserId { get; set; }
-        public string? Message { get; set; }
-        public int? Otp { get; set; }
+        public int otp { get; set; }
     }
 }
