@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using System.Security.Claims;
+using static System.Net.WebRequestMethods;
 
 
 namespace Infrastructure.Repositories.Implementations
@@ -29,7 +30,21 @@ namespace Infrastructure.Repositories.Implementations
         public int RegisterAdminOrExaminer(RegistrationInputDTO examinerDTO, string role)
         {
 
-            var user = new User
+
+
+            bool emailExists = _context.Users.Any(u => u.Email == examinerDTO.Email);
+            bool phoneExists = _context.Users.Any(u => u.PhoneNo == examinerDTO.PhoneNo);
+
+            if (emailExists || phoneExists)
+            {
+                _logger.LogWarning("Attempt to register with existing Email or Phone. Email: {Email}, Phone: {Phone}", examinerDTO.Email, examinerDTO.PhoneNo);
+                return -1;
+
+            }
+
+
+
+                var user = new User
             {
                 FullName = examinerDTO.FullName,
                 Email = examinerDTO.Email,
@@ -45,7 +60,7 @@ namespace Infrastructure.Repositories.Implementations
         }
         public StudentRegisterResponseDTO RegisterStudent(RegisterUserDTO dto)
         {
-
+            // Logic for sending verification email
             Random random = new Random();
             int newOtp = random.Next(100000, 999999);
 
@@ -59,24 +74,68 @@ namespace Infrastructure.Repositories.Implementations
                 Dob = dto.Dob,
                 Otp = newOtp
             };
+
             _context.Users.Add(user);
-
-
-            string emailSubject = "Verify Your Email";
-            string emailBody = $"Dear {dto.FullName},\n\nYour OTP for email verification is: {newOtp}\n\nThank you!";
-
-            try
-            {
-                _emailService.SendSimpleEmail(dto.Email, emailSubject, emailBody);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed to send OTP email to {Email}. Error: {ErrorMessage}", dto.Email, ex.Message);
-                return new StudentRegisterResponseDTO { status = 0, UserId = -1 };
-            }
-            _logger.LogInformation("New Student registeration Started with UserId : {@userid} at {@time}. Verify Email!", user.UserId, user.CreatedAt);
             int status = _context.SaveChanges();
-            return new StudentRegisterResponseDTO { status = status, UserId = user.UserId };
+
+            if (dto.VerifyEmail)
+            {
+
+                string emailSubject = "Verify Your Email";
+                string emailBody = $"Dear {dto.FullName},\n\nYour OTP for email verification is: {newOtp}\n\nThank you!";
+
+                try
+                {
+                    _emailService.SendSimpleEmail(dto.Email, emailSubject, emailBody);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError("Failed to send OTP email to {Email}. Error: {ErrorMessage}", dto.Email, ex.Message);
+                    // Return failure, user is not saved
+                    return new StudentRegisterResponseDTO
+                    {
+                        status = 0,
+                        UserId = -1,
+                        Message = "Failed to send verification email."
+                    };
+                }
+            }
+
+
+
+
+            if (status > 0)
+            {
+                if (dto.VerifyEmail)
+                {
+                    _logger.LogInformation("New Student registration Started with UserId : {@userid} at {@time}. Verify Email!", user.UserId, user.CreatedAt);
+                    return new StudentRegisterResponseDTO
+                    {
+                        status = status,
+                        UserId = user.UserId,
+                        Message = "User Saved! Please verify Email via OTP-verification"
+                    };
+                }
+                else
+                {
+                    _logger.LogInformation("New Student registration Started with UserId : {@userid} at {@time}. Direct verification.", user.UserId, user.CreatedAt);
+                    return new StudentRegisterResponseDTO
+                    {
+                        status = status,
+                        UserId = user.UserId,
+                        Otp = newOtp,
+                        Message = "User Saved! See the console for OTP."
+                    };
+                }
+            }
+
+            // Default failure
+            return new StudentRegisterResponseDTO
+            {
+                status = 0,
+                UserId = -1,
+                Message = "Registration failed."
+            };
         }
         public User? Login(string email, string password)
         {
@@ -102,33 +161,40 @@ namespace Infrastructure.Repositories.Implementations
             return _context.Validations.Any(v => v.Token == token);
         }
 
-        public bool VerifyOTP(int userId, int otp)
+        public bool VerifyOTP(VerifyOtpRequestDTO dto, int userId)
         {
-            var user = _context.Users.FirstOrDefault(u => u.UserId == userId && u.Otp == otp);
+            Console.WriteLine("Checking if otp incoming is correct: " + dto.otp + " " + dto.AllowSuccessMail);
+            var user = _context.Users.FirstOrDefault(u => u.UserId == userId && u.Otp == dto.otp);
             if (user != null)
             {
                 user.Otp = null;
                 user.RegistrationDate = DateOnly.FromDateTime(DateTime.Now);
                 _context.SaveChanges();
-                string emailSubject = "Email Verified Successfully";
-                string emailBody = $"Dear {user.FullName},\n\nYour Email OTP verification was successful.\nYou are officially Verified Now!!\n\nThank you!";
 
-                try
+                if (dto.AllowSuccessMail)
                 {
-                    _emailService.SendSimpleEmail(user.Email, emailSubject, emailBody);
+
+                    string emailSubject = "Email Verified Successfully";
+                    string emailBody = $"Dear {user.FullName},\n\nYour Email OTP verification was successful.\nYou are officially Verified Now!!\n\nThank you!";
+
+                    try
+                    {
+                        _emailService.SendSimpleEmail(user.Email, emailSubject, emailBody);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError("Failed to send confirmation email to {Email}. Error: {ErrorMessage}", user.Email, ex.Message);
+                        return false;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError("Failed to send confirmation email to {Email}. Error: {ErrorMessage}", user.Email, ex.Message);
-                    return false;
-                }
+
                 _logger.LogInformation("OTP verified for UserId : {@userid} at {@time}", user.UserId, DateTime.Now);
                 return true;
             }
             return false;
         }
 
-        public int ResendOTP(int userId)
+        public ResendOtpResponseDTO ResendOTP(int userId)
         {
             var user = _context.Users.FirstOrDefault(u => u.UserId == userId);
             if (user != null)
@@ -136,11 +202,11 @@ namespace Infrastructure.Repositories.Implementations
                 Random random = new Random();
                 int newOtp = random.Next(100000, 999999);
                 user.Otp = newOtp;
-                _context.SaveChanges();
+                int status = _context.SaveChanges();
                 _logger.LogInformation("OTP resent for UserId : {@userid} at {@time}", user.UserId, DateTime.Now);
-                return newOtp;
+                return new ResendOtpResponseDTO { status = 1, otp = newOtp };
             }
-            return 0;
+            return new ResendOtpResponseDTO { status = -1, otp = -1 };
         }
     }
 }

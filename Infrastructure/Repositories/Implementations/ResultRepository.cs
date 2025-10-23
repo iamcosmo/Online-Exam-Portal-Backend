@@ -42,37 +42,37 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<List<ExamSummaryDTO>> GetAllResultsForUser(int userid)
         {
-            List<ExamSummaryDTO> groupedResults = await _context.Results
+
+            var appearedExamIds = await _context.Responses
             .Where(r => r.UserId == userid)
-            .Include(r => r.EidNavigation)
+            .Select(r => r.Eid)
+            .Distinct()
+            .ToListAsync();
 
-            .GroupBy(r => new
+            List<ExamSummaryDTO> examSummaries = await _context.Exams
+            .Where(e => appearedExamIds.Contains(e.Eid))
+            .Select(exam => new ExamSummaryDTO
             {
-                r.Eid,
-                r.EidNavigation.Name,
-                r.EidNavigation.TotalMarks 
-            })
-            .Select(group => new ExamSummaryDTO
-            {
-                Eid = group.Key.Eid,
-                ExamName = group.Key.Name ?? string.Empty,
+                Eid = exam.Eid,
+                ExamName = exam.Name ?? string.Empty,
+                TotalMarks = exam.TotalMarks ?? 0M,
 
-                
-                TotalMarks = group.Key.TotalMarks ?? 0M, 
-
-                AttemptsData = group
+                // Fetch the AttemptsData for this specific Exam and User.
+                // This is optional (can be an empty list if no results exist).
+                AttemptsData = exam.Results
+                    .Where(r => r.UserId == userid)
                     .Select(r => new AttemptDTO
                     {
                         Attempt = r.Attempts ?? 0,
                         Score = r.Score ?? 0M,
-                        TakenOn = r.CreatedAt ?? DateTime.MinValue 
+                        TakenOn = r.CreatedAt ?? DateTime.MinValue
                     })
                     .OrderBy(a => a.Attempt)
                     .ToList()
             })
             .ToListAsync();
 
-            return groupedResults;
+            return examSummaries;
         }
         //Using ADO.NET
         public async Task<CreateResultDTO> CreateExamResults(int examid, int userid)
@@ -125,7 +125,13 @@ namespace Infrastructure.Repositories.Implementations
                 var allResults = await _context.Results
                     .AsNoTracking()
                     .Where(r => r.Eid == examId && r.UserId == userId)
-                    .OrderBy(r => r.Attempts) // Order by attempt number chronologically
+                    .OrderBy(r => r.Attempts)
+                    .Select(group => new ResultDTO
+                    {
+                        attempt = group.Attempts,
+                        score = group.Score,
+                        takenOn = group.UpdatedAt
+                    })
                     .ToListAsync();
 
                 if (!allResults.Any())
@@ -134,11 +140,18 @@ namespace Infrastructure.Repositories.Implementations
                     return new ResultCalculationResponseDTO { Success = false, Message = "No results found for this exam." };
                 }
 
+                var examData = await _context.Exams.Where(e => e.Eid == examId)
+                    .Select(e => new { e.Name, e.TotalMarks })
+                    .FirstOrDefaultAsync();
+
                 return new ResultCalculationResponseDTO
                 {
                     Success = true,
                     Message = "Successfully retrieved results.",
-                    NewResultCalculated = hasFreshSubmissions, // Pass the flag to the frontend
+                    NewResultCalculated = hasFreshSubmissions,
+                    Eid = examId,
+                    ExamName = examData.Name,
+                    TotalMarks = examData.TotalMarks,
                     Results = allResults
                 };
             }
