@@ -29,7 +29,21 @@ namespace Infrastructure.Repositories.Implementations
         public int RegisterAdminOrExaminer(RegistrationInputDTO examinerDTO, string role)
         {
 
-            var user = new User
+
+
+            bool emailExists = _context.Users.Any(u => u.Email == examinerDTO.Email);
+            bool phoneExists = _context.Users.Any(u => u.PhoneNo == examinerDTO.PhoneNo);
+
+            if (emailExists || phoneExists)
+            {
+                _logger.LogWarning("Attempt to register with existing Email or Phone. Email: {Email}, Phone: {Phone}", examinerDTO.Email, examinerDTO.PhoneNo);
+                return -1;
+
+            }
+
+
+
+                var user = new User
             {
                 FullName = examinerDTO.FullName,
                 Email = examinerDTO.Email,
@@ -45,6 +59,20 @@ namespace Infrastructure.Repositories.Implementations
         }
         public StudentRegisterResponseDTO RegisterStudent(RegisterUserDTO dto)
         {
+
+
+
+            bool emailExists = _context.Users.Any(u => u.Email == dto.Email);
+            bool phoneExists = _context.Users.Any(u => u.PhoneNo == dto.PhoneNo);
+
+            if (emailExists || phoneExists)
+            {
+                _logger.LogWarning("Student registration failed due to existing Email or Phone. Email: {Email}, Phone: {Phone}", dto.Email, dto.PhoneNo);
+                return new StudentRegisterResponseDTO { status = 0, UserId = -1 };
+            }
+
+
+
 
             Random random = new Random();
             int newOtp = random.Next(100000, 999999);
@@ -65,15 +93,15 @@ namespace Infrastructure.Repositories.Implementations
             string emailSubject = "Verify Your Email";
             string emailBody = $"Dear {dto.FullName},\n\nYour OTP for email verification is: {newOtp}\n\nThank you!";
 
-            try
-            {
-                _emailService.SendSimpleEmail(dto.Email, emailSubject, emailBody);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Failed to send OTP email to {Email}. Error: {ErrorMessage}", dto.Email, ex.Message);
-                return new StudentRegisterResponseDTO { status = 0, UserId = -1 };
-            }
+            //try
+            //{
+            //    _emailService.SendSimpleEmail(dto.Email, emailSubject, emailBody);
+            //}
+            //catch (Exception ex)
+            //{
+            //    _logger.LogError("Failed to send OTP email to {Email}. Error: {ErrorMessage}", dto.Email, ex.Message);
+            //    return new StudentRegisterResponseDTO { status = 0, UserId = -1 };
+            //}
             _logger.LogInformation("New Student registeration Started with UserId : {@userid} at {@time}. Verify Email!", user.UserId, user.CreatedAt);
             int status = _context.SaveChanges();
             return new StudentRegisterResponseDTO { status = status, UserId = user.UserId };
