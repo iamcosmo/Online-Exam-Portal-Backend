@@ -223,9 +223,9 @@ namespace Infrastructure.Repositories.Implementations
                         AverageScore = (double)g.Average(r => r.Score),
                         TotalAttempts = g.Count()
                     }).ToListAsync(),
-                TotalExamsTaken = await _context.Results
-                    .Where(r => r.UserId == userId)
-                    .Select(r => r.Eid)
+                TotalExamsTaken = await _context.Responses
+                    .Where(rd => rd.UserId == userId)
+                    .Select(rd => rd.Eid)
                     .Distinct()
                     .CountAsync(),
                 TotalQuestionsEncountered = await _context.Responses
@@ -252,33 +252,11 @@ namespace Infrastructure.Repositories.Implementations
                         .CountAsync()
                 },
 
-                // Pseudocode:
-                // 1. From Results, filter by userId.
-                // 2. Join Results with Exams on Eid to get Tids (topic ids as string).
-                // 3. Split Tids string into individual topic ids.
-                // 4. Join topic ids with Topics table to get topic names.
-                // 5. Group by topic id and topic name.
-                // 6. For each topic, calculate average score from Results where Exam contains that topic.
-                // 7. Return list of TopicWiseAverageScore.
+               
 
-                //OverallAverageScoreTopicWise = await (
-                //    from result in _context.Results
-                //    join exam in _context.Exams on result.Eid equals exam.Eid
-                //    where result.UserId == userId
-                //    from topicId in exam.Tids.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                //    join topic in _context.Topics on int.Parse(topicId) equals topic.Tid
-                //    group new { result, topic } by new { topic.Tid, topic.Subject } into g
-                //    select new TopicWiseAverageScore
-                //    {
-                //        TopicId = g.Key.Tid,
-                //        Topic = g.Key.Subject,
-                //        AverageScore = (double)g.Average(x => x.result.Score ?? 0)
-                //    }
-                //).ToListAsync()
-
-                OverallAverageScoreTopicWise = await Task.Run(() => // Wrap in Task.Run for async compatibility if needed
+                OverallAverageScoreTopicWise = await Task.Run(() =>
                 {
-                    // 1. Database Query: Pull Results and Exams for the User
+                   
                     var rawAnalyticsData = (
                         from result in _context.Results
                         join exam in _context.Exams on result.Eid equals exam.Eid
@@ -286,24 +264,19 @@ namespace Infrastructure.Repositories.Implementations
                         select new
                         {
                             result.Score,
-                            exam.Tids // Get the JSON string
+                            exam.Tids 
                         }
-                    ).AsEnumerable(); // Force execution of DB query here. The rest runs in memory.
-
-                    // 2. Client-Side Processing: Deserialize JSON and Flatten Data
+                    ).AsEnumerable(); 
                     var topicScores = rawAnalyticsData
                         .SelectMany(x =>
-                        {
-                            // Safely deserialize the JSON string into an array of integers (Topic IDs)
-                            var topicIds = JsonConvert.DeserializeObject<List<int>>(x.Tids ?? "[]");
-
-                            // Create a flat list of {Score, TopicId} pairs
+                        {                            
+                            var topicIds = JsonConvert.DeserializeObject<List<int>>(x.Tids ?? "[]");                             
                             return topicIds.Select(tid => new { Score = x.Score, TopicId = tid });
                         })
-                        .ToList(); // Convert to List to use the data efficiently
+                        .ToList(); 
 
-                    // 3. Final Grouping and Averaging (In-Memory)
-                    var allTopics = _context.Topics.ToList(); // Load ALL topics into memory for joining
+                   
+                    var allTopics = _context.Topics.ToList();
 
                     return topicScores
                         .Join(
@@ -321,8 +294,6 @@ namespace Infrastructure.Repositories.Implementations
                         })
                         .ToList();
                 }),
-
-
             };
 
             return analyticsDto;
