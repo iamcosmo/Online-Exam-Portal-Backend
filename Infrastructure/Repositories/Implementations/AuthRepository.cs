@@ -30,7 +30,21 @@ namespace Infrastructure.Repositories.Implementations
         public int RegisterAdminOrExaminer(RegistrationInputDTO examinerDTO, string role)
         {
 
-            var user = new User
+
+
+            bool emailExists = _context.Users.Any(u => u.Email == examinerDTO.Email);
+            bool phoneExists = _context.Users.Any(u => u.PhoneNo == examinerDTO.PhoneNo);
+
+            if (emailExists || phoneExists)
+            {
+                _logger.LogWarning("Attempt to register with existing Email or Phone. Email: {Email}, Phone: {Phone}", examinerDTO.Email, examinerDTO.PhoneNo);
+                return -1;
+
+            }
+
+
+
+                var user = new User
             {
                 FullName = examinerDTO.FullName,
                 Email = examinerDTO.Email,
