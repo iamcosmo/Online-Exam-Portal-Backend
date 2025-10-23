@@ -57,7 +57,7 @@ namespace Infrastructure.Repositories.Implementations
                     .Select(g => new ExamScoreDto
                     {
                         ExamId = g.Key,
-                        ExamTitle = g.First().EidNavigation.Name,
+                        ExamTitle = g.First().EidNavigation.Name, // This is the correct pattern
                         AverageScore = (double)g.Average(r => r.Score)
                     }).ToListAsync(),
 
@@ -76,51 +76,131 @@ namespace Infrastructure.Repositories.Implementations
                     .Select(g => new ExamParticipationDto
                     {
                         ExamId = g.Key,
-                        ExamTitle = g.First().EidNavigation.Name,
+                        ExamTitle = g.First().EidNavigation.Name, // This is the correct pattern
                         StudentCount = g.Select(r => r.UserId).Distinct().Count()
-                    }).ToListAsync()
-                    ,
+                    }).ToListAsync(),
+
+                // --- FIX 1 ---
+                // Group by Tid and ApprovalStatus, not Subject
                 TopicApprovalStats = await _context.Topics
                     .Where(t => t.ExaminerId == examinerId)
-                    .GroupBy(t => new { t.Tid, t.Subject, IsApproved = t.ApprovalStatus == 1 })
+                    .GroupBy(t => new { t.Tid, IsApproved = t.ApprovalStatus == 1 })
                     .Select(g => new TopicApprovalDto
                     {
                         TopicId = g.Key.Tid,
-                        Subject = g.Key.Subject,
+                        Subject = g.First().Subject, // Get Subject using g.First()
                         IsApproved = g.Key.IsApproved,
                         Count = g.Count()
                     }).ToListAsync(),
 
+                // --- FIX 2 ---
+                // Group by Tid, not Subject
                 AvgTopicScores = await _context.Responses
                     .Include(r => r.QidNavigation)
                     .ThenInclude(q => q.TidNavigation)
                     .Where(r => r.QidNavigation.TidNavigation.ExaminerId == examinerId)
-                    .GroupBy(r => new { r.QidNavigation.Tid, r.QidNavigation.TidNavigation.Subject })
+                    .GroupBy(r => r.QidNavigation.Tid) // Group by the ID
                     .Select(g => new TopicScoreDto
                     {
-                        TopicId = g.Key.Tid,
-                        Subject = g.Key.Subject,
+                        TopicId = g.Key,
+                        Subject = g.First().QidNavigation.TidNavigation.Subject, // Get Subject using g.First()
                         AverageScore = g.Average(r => r.RespScore ?? 0)
+                    }).ToListAsync(),
 
-                    }).ToListAsync()
-                    ,
-
-
+                // --- FIX 3 ---
+                // Group by Tid, not Subject
                 TopicQuestionCounts = await _context.Questions
                     .Include(q => q.TidNavigation)
                     .Where(q => q.TidNavigation.ExaminerId == examinerId)
-                    .GroupBy(q => new { q.Tid, q.TidNavigation.Subject })
+                    .GroupBy(q => q.Tid) // Group by the ID
                     .Select(g => new TopicQuestionCountDto
                     {
-                        TopicId = g.Key.Tid,
-                        Subject = g.Key.Subject,
+                        TopicId = g.Key,
+                        Subject = g.First().TidNavigation.Subject, // Get Subject using g.First()
                         QuestionCount = g.Count()
-                    }).ToListAsync()
+                    }).ToListAsync(),
 
+                QuestionTypeDistribution = await _context.Questions
+                    .Include(q => q.TidNavigation)
+                    .Where(q => q.TidNavigation.ExaminerId == examinerId)
+                    .GroupBy(q => q.Type) // Grouping by Type is usually fine if it's varchar(100) or similar.
+                                          // If Type is also nvarchar(max), group by an ID if one exists.
+                    .Select(g => new QuestionTypeDto
+                    {
+                        Type = g.Key ?? "Uncategorized",
+                        Count = g.Count()
+                    }).ToListAsync(),
+
+                SubmissionsOverTime = await _context.Results
+                    .Include(r => r.EidNavigation)
+                    .Where(r => r.EidNavigation.UserId == examinerId && r.CreatedAt.HasValue)
+                    .GroupBy(r => r.CreatedAt.Value.Date)
+                    .Select(g => new TimeSeriesDto
+                    {
+                        Date = g.Key,
+                        SubmissionCount = g.Count()
+                    })
+                    .OrderBy(x => x.Date)
+                    .ToListAsync(),
+
+                // --- FIX 4 ---
+                // Group by Eid, not Name
+                ExamPerformanceCorrelation = await _context.Results
+                    .Include(r => r.EidNavigation)
+                    .Where(r => r.EidNavigation.UserId == examinerId)
+                    .GroupBy(r => r.Eid) // Group by the ID
+                    .Select(g => new ExamPerformanceCorrelationDto
+                    {
+                        ExamId = g.Key,
+                        ExamTitle = g.First().EidNavigation.Name, // Get Name using g.First()
+                        AverageScore = (double)g.Average(r => r.Score),
+                        StudentCount = g.Select(r => r.UserId).Distinct().Count()
+                    }).ToListAsync(),
             };
+
+            // --- FIX 5 (Revised) ---
+            // Step 1: Fetch the raw data from SQL without any string manipulation.
+            // We select into an anonymous type first.
+            var rawQuestionScores = await _context.Responses
+                    .Include(r => r.QidNavigation)
+                    .ThenInclude(q => q.TidNavigation)
+                .Where(r => r.QidNavigation.TidNavigation.ExaminerId == examinerId)
+                .GroupBy(r => r.Qid) // Group by the Question ID
+                .Select(g => new
+                {
+                    QuestionId = g.Key,
+                    QuestionText = g.First().QidNavigation.Question1, // Get the FULL text
+                    AverageScore = g.Average(r => r.RespScore ?? 0)
+                })
+                .ToListAsync(); // <-- Executes the query, brings data into C# memory
+
+            // Step 2: Now that the data is in memory (a List<>),
+            // perform the string manipulation using C#'s .Length and .Substring (LINQ-to-Objects).
+            var allQuestionScores = rawQuestionScores
+                .Select(g => new QuestionPerformanceDto
+                {
+                    QuestionId = g.QuestionId,
+                    QuestionText = (g.QuestionText != null && g.QuestionText.Length > 50
+                                    ? g.QuestionText.Substring(0, 50) + "..."
+                                    : g.QuestionText) ?? "No Text", // Handle potential null text
+                    AverageScore = g.AverageScore
+                })
+                .ToList();
+
+            // Populate the DTO with the Top 5 hardest and easiest
+            dto.HardestQuestions = allQuestionScores
+                .OrderBy(q => q.AverageScore)
+                .Take(5)
+                .ToList();
+
+            dto.EasiestQuestions = allQuestionScores
+                .OrderByDescending(q => q.AverageScore)
+                .Take(5)
+                .ToList();
 
             return dto != null ? dto : new ExaminerAnalyticsDto();
         }
+
 
         public async Task<ActionResult<StudentAnalyticsDTO>> GetStudentAnalytics(int userId)
         {
