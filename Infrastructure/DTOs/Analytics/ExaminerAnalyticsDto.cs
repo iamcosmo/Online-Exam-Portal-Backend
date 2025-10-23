@@ -15,6 +15,11 @@ namespace Infrastructure.DTOs.Analytics
         public List<TopicQuestionCountDto> TopicQuestionCounts { get; set; }
         public List<TopicScoreDto> AvgTopicScores { get; set; }
         public List<TopicApprovalDto> TopicApprovalStats { get; set; }
+        public List<QuestionTypeDto> QuestionTypeDistribution { get; set; }
+        public List<TimeSeriesDto> SubmissionsOverTime { get; set; }
+        public List<QuestionPerformanceDto> HardestQuestions { get; set; }
+        public List<QuestionPerformanceDto> EasiestQuestions { get; set; }
+        public List<ExamPerformanceCorrelationDto> ExamPerformanceCorrelation { get; set; }
     }
     public class ExamScoreDto
     {
@@ -54,5 +59,31 @@ namespace Infrastructure.DTOs.Analytics
         public string Subject { get; set; }
         public bool IsApproved { get; set; }
         public int Count { get; set; }
+    }
+    public class QuestionTypeDto
+    {
+        public string Type { get; set; }
+        public int Count { get; set; }
+    }
+
+    public class TimeSeriesDto
+    {
+        public DateTime Date { get; set; }
+        public int SubmissionCount { get; set; }
+    }
+
+    public class QuestionPerformanceDto
+    {
+        public int QuestionId { get; set; }
+        public string QuestionText { get; set; }
+        public decimal AverageScore { get; set; }
+    }
+
+    public class ExamPerformanceCorrelationDto
+    {
+        public int ExamId { get; set; }
+        public string ExamTitle { get; set; }
+        public double AverageScore { get; set; }
+        public int StudentCount { get; set; }
     }
 }
