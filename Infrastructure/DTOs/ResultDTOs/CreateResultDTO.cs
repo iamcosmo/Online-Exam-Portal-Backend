@@ -13,11 +13,20 @@ namespace Infrastructure.DTOs.ResultDTOs
         public int status { get; set; }
         public string msg { get; set; }
     }
+    public class ResultDTO
+    {
+        public int? attempt { get; set; }
+        public decimal? score { get; set; }
+        public DateTime? takenOn { get; set; }
+    }
     public class ResultCalculationResponseDTO
     {
         public bool Success { get; set; }
         public string Message { get; set; }
         public bool NewResultCalculated { get; set; }
-        public List<Result>? Results { get; set; }
+        public int Eid { get; set; }
+        public string? ExamName { get; set; }
+        public decimal? TotalMarks { get; set; }
+        public List<ResultDTO>? Results { get; set; }
     }
 }
