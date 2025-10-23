@@ -27,7 +27,7 @@ namespace OEP.Controllers
         {
 
             int status = _repository.AddFeedback(examId, dto);
-            return status > 0 ? Ok(new { Success = true }) : Ok(new { Success = false });
+            return status >= 0 ? Ok(new { Success = true }) : Ok(new { Success = false });
         }
 
         // GET /exam-feedbacks/{ExamID}
