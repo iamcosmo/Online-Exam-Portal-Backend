@@ -70,6 +70,49 @@ namespace Infrastructure.Repositories.Implementations
             await _context.SaveChangesAsync();
             return $"User with ID {userId} has been successfully blocked";
         }
+        public async Task<int> ToggleUserStatusAsync(int userId, bool isActive)
+
+        {
+
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null) return 0;
+
+            user.IsBlocked = !isActive; // if isActive=false, block user
+
+            await _context.SaveChangesAsync();
+
+            return 1;
+
+        }
+
+        public async Task<IEnumerable<User>> GetAllUsersAsync()
+
+        {
+
+            return await _context.Users
+
+                .Select(u => new User
+
+                {
+
+                    UserId = u.UserId,
+
+                    FullName = u.FullName,
+
+                    Email = u.Email,
+
+                    Role = u.Role,
+
+                    IsBlocked = u.IsBlocked
+
+                })
+
+                .ToListAsync();
+
+        }
+
+
 
         public async Task<IEnumerable<ExamFeedbackViewDTO>> GetExamFeedbacksAsync(int userId)
         {

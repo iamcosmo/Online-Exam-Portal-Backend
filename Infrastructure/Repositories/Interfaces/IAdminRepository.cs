@@ -33,6 +33,11 @@ namespace Infrastructure.Repositories.Interfaces
 
         Task<Exam> GetExamWithQuestionsForAdminAsync(int userId);
 
+        Task<IEnumerable<User>> GetAllUsersAsync();
+
+        Task<int> ToggleUserStatusAsync(int userId, bool isActive);
+
+
     }
 
 }
