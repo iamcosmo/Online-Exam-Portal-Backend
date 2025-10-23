@@ -15,9 +15,9 @@ namespace Infrastructure.Repositories.Interfaces
         User? Login(string email, string password);
         bool ValidateToken(string token);
 
-        bool VerifyOTP(int userId, int otp);
+        bool VerifyOTP(VerifyOtpRequestDTO dto, int otp);
 
-        int ResendOTP(int userId);
+        ResendOtpResponseDTO ResendOTP(int userId);
 
     }
 }
