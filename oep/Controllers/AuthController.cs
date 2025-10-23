@@ -34,10 +34,19 @@ namespace OEP.Controllers
         public IActionResult RegisterStudentAction([FromBody] RegisterUserDTO dto)
         {
             var result = _authRepository.RegisterStudent(dto);
-            return result.status > 0 ? Ok(new { msg = "User Saved! Please verify Email via OTP-verification", result.UserId })
-    : BadRequest(new { error = "Registration failed" });
 
-            //? Ok("User Saved! Please verify Email via OTP-verification") : BadRequest("Registration failed");
+            if (result.status > 0)
+            {
+                return Ok(new
+                {
+                    msg = result.Message,
+                    result.UserId,
+                    result.Otp
+                });
+            }
+
+            return BadRequest(new { error = result.Message ?? "Registration failed" });
+
         }
 
         [HttpPost("internal/register")]
@@ -79,10 +88,10 @@ namespace OEP.Controllers
         }
 
         [HttpPost("student/verifyotp/{userId}")]
-        public IActionResult VerifyOTP([FromBody] int otp, int userId)
+        public IActionResult VerifyOTP([FromBody] VerifyOtpRequestDTO dto, int userId)
         {
-            if (_authRepository.VerifyOTP(userId, otp))
-                return Ok("OTP verified successfully");
+            if (_authRepository.VerifyOTP(dto, userId))
+                return Ok(new { msg = "OTP verified successfully" });
 
             return Unauthorized("Incorrect OTP!!");
         }
@@ -90,8 +99,8 @@ namespace OEP.Controllers
         [HttpGet("student/resendotp/{userId}")]
         public IActionResult ResendOTP(int userId)
         {
-            int result = _authRepository.ResendOTP(userId);
-            return result > 0 ? Ok("OTP Resent Successfully") : BadRequest("Failed to resend OTP");
+            ResendOtpResponseDTO result = _authRepository.ResendOTP(userId);
+            return result.status > 0 ? Ok(new { msg = "OTP Resent Successfully", result.otp }) : BadRequest("Failed to resend OTP");
         }
 
 

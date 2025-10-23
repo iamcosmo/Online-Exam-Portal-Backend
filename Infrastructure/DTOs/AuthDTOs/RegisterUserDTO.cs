@@ -16,5 +16,6 @@ namespace Infrastructure.DTOs.AuthDTOs
         public string? PhoneNo { get; set; }
 
         public DateOnly? Dob { get; set; }
+        public bool VerifyEmail { get; set; }
     }
 }
