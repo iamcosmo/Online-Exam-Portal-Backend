@@ -18,6 +18,6 @@ namespace Infrastructure.DTOs.ExamDTOs
         public string ExamName { get; set; }
         public decimal TotalMarks { get; set; }
 
-        public List<AttemptDTO> AttemptsData { get; set; }
+        public List<AttemptDTO>? AttemptsData { get; set; }
     }
 }
