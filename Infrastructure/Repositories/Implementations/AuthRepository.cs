@@ -143,10 +143,10 @@ namespace Infrastructure.Repositories.Implementations
             var user = _context.Users.FirstOrDefault(u => u.Email == email);
             var hashedPassword = user.Password;
 
-            //if (!passwordHashing.VerifyPassword(password, hashedPassword))
-            //{
-            //    return null;
-            //}
+            if (!passwordHashing.VerifyPassword(password, hashedPassword))
+            {
+               return null;
+            }
 
             if (user?.Otp != null)
             {
