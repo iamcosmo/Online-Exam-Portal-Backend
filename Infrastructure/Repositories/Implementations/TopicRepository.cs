@@ -20,7 +20,7 @@ namespace Infrastructure.Repositories.Implementations
         }
         public async Task<List<GetTopicsDTO>> GetTopics()
         {
-            List<GetTopicsDTO> topicList = await _context.Topics.Where(t => t.ApprovalStatus == 1)
+            List<GetTopicsDTO> topicList = await _context.Topics.Where(t => t.ApprovalStatus == 1 && t.ApprovedByUserId != null)
                 .Select(t =>
                     new GetTopicsDTO
                     {
@@ -51,7 +51,9 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<Topic> GetTopics(int topicId)
         {
-            return await _context.Topics.FirstOrDefaultAsync(t => t.Tid == topicId && t.ApprovalStatus == 1);
+            return await _context.Topics
+                .Include(t => t.Questions)
+                .FirstOrDefaultAsync(t => t.Tid == topicId && t.ApprovalStatus == 1 && t.ApprovedByUserId != null);
         }
 
         public List<Topic> GetTopicsForQuestions(int examId)
