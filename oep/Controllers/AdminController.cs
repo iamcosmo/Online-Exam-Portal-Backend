@@ -6,6 +6,7 @@ using Infrastructure.DTOs.QuestionFeedbackDTO;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace OEP.Controllers
 {
@@ -17,6 +18,7 @@ namespace OEP.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminRepository _adminRepository;
+      
 
         public AdminController(IAdminRepository adminRepository)
         {
@@ -138,6 +140,19 @@ namespace OEP.Controllers
         {
             var feedbacks = await _adminRepository.GetExamFeedbacksAsync(userId);
             return feedbacks != null ? Ok(feedbacks) : NotFound("No feedbacks found.");
+        }
+
+        [HttpPost("toggle-user-status")]
+        public async Task<IActionResult> ToggleUserStatus([FromBody] ToggleUserStatusDto dto)
+        {
+            var result = await _adminRepository.ToggleUserStatusAsync(dto.UserId, dto.IsActive);
+            return result >= 1 ? Ok($"User {(dto.IsActive ? "activated" : "deactivated")} successfully.") : BadRequest("Operation failed.");
+        }
+        [HttpGet("all-users")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await _adminRepository.GetAllUsersAsync();
+            return Ok(users);
         }
 
 
