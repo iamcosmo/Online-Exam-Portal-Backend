@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using System.Collections.Generic; // for KeyNotFoundException usage if needed
+using System;
 
 namespace Infrastructure.Repositories.Implementations
 {
@@ -51,9 +53,16 @@ namespace Infrastructure.Repositories.Implementations
 
         public async Task<Topic> GetTopics(int topicId)
         {
-            return await _context.Topics
+            var topic = await _context.Topics
                 .Include(t => t.Questions)
                 .FirstOrDefaultAsync(t => t.Tid == topicId && t.ApprovalStatus == 1 && t.ApprovedByUserId != null);
+
+            if (topic == null)
+            {
+                throw new KeyNotFoundException($"Topic with id {topicId} not found or not approved.");
+            }
+
+            return topic;
         }
 
         public List<Topic> GetTopicsForQuestions(int examId)
