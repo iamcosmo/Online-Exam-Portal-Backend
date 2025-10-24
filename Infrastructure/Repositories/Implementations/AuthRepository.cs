@@ -271,6 +271,8 @@ namespace Infrastructure.Repositories.Implementations
             user.Otp = null;
             user.UpdatedAt = DateTime.UtcNow;
 
+    
+
             await _userRepository.UpdateUserAsync(user);
 
             return 1;
