@@ -1,14 +1,15 @@
-﻿using Domain.Data;
+﻿using ClosedXML.Excel;
+using Domain.Data;
 using Domain.Models;
 using Infrastructure.DTOs.QuestionsDTO;
 using Infrastructure.Repositories.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.Globalization;
-using ClosedXML.Excel;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Text.Json;
 
@@ -183,7 +184,7 @@ namespace Infrastructure.Repositories.Implementations
             return await _context.SaveChangesAsync();
         }
 
-        public async Task<ImportResultDto> ImportQuestionsFromExcelAsync(IFormFile file, int tid, int? eid = null)
+        public async Task<ImportResultDto> ImportQuestionsFromExcelAsync(IFormFile file, int? eid = null)
         {
             var result = new ImportResultDto();
 
@@ -201,6 +202,10 @@ namespace Infrastructure.Repositories.Implementations
                 result.Errors.Add(new ImportResultDto.RowError { RowNumber = 0, Message = "Only .xlsx/.xls files are supported." });
                 return result;
             }
+
+
+            //extract the exam tids and match also marks per question
+            var exam = await _context.Exams.FirstOrDefaultAsync(e => e.Eid == eid);
 
             using var ms = new MemoryStream();
             await file.CopyToAsync(ms);
@@ -248,7 +253,7 @@ namespace Infrastructure.Repositories.Implementations
 
             if (colQuestion == null || colOpt1 == null || colOpt2 == null || colOpt3 == null || colOpt4 == null || colCorrect == null)
             {
-                result.Errors.Add(new ImportResultDto.RowError { RowNumber = headerRow.RowNumber(), Message = "Missing required columns. Required columns: questionname, option1..option4, correctOptions" });
+                result.Errors.Add(new ImportResultDto.RowError { RowNumber = headerRow.RowNumber(), Message = "Missing required columns. Required columns: questionname, option1..option4, correctOptions,tid" });
                 return result;
             }
 
@@ -277,6 +282,44 @@ namespace Infrastructure.Repositories.Implementations
                     // read cell values (trimmed)
                     string readCell(int? col) => col == null ? string.Empty : r.Cell(col.Value).GetString().Trim();
 
+                    #region Tid-Verify
+                    // Tid per-row override: if excel has Tid and non-empty, use that, else use provided tid parameter
+                    int effectiveTid = 2;
+                    if (colTid != null)
+                    {
+                        var tidCell = readCell(colTid);
+                        if (!string.IsNullOrWhiteSpace(tidCell) && int.TryParse(tidCell, out var parsedTid))
+                            effectiveTid = parsedTid;
+                    }
+
+                    //Also check if the question tid is present in the exam
+                    List<int> parsedTids = new List<int>();
+                    if (exam?.Tids != null)
+                    {
+                        var tids = JsonConvert.DeserializeObject<List<int>>(exam.Tids);
+                        if (tids != null)
+                            parsedTids = tids;
+                    }
+
+                    bool notPresent = true;
+                    foreach (var t in parsedTids)
+                    {
+                        if (effectiveTid == t) { notPresent = false; }
+                    }
+                    if (notPresent == true)
+                    {
+
+                        result.Errors.Add(new ImportResultDto.RowError
+                        {
+                            RowNumber = row,
+                            Message = $"TID {effectiveTid} is not associated with the current exam."
+                        });
+
+                        continue;
+                    }
+                    #endregion
+
+
                     var questionText = readCell(colQuestion);
                     if (string.IsNullOrWhiteSpace(questionText))
                     {
@@ -284,6 +327,7 @@ namespace Infrastructure.Repositories.Implementations
                         continue;
                     }
 
+                    #region Option-Extraction..
                     var opt1 = readCell(colOpt1);
                     var opt2 = readCell(colOpt2);
                     var opt3 = readCell(colOpt3);
@@ -301,8 +345,8 @@ namespace Infrastructure.Repositories.Implementations
                         result.Errors.Add(new ImportResultDto.RowError { RowNumber = row, Message = "At least one option is required." });
                         continue;
                     }
+                    #endregion
 
-                    // *** CHANGED LOGIC HERE ***
                     // determine type: read from the 'type' column in the Excel row
                     var perRowType = readCell(colType);
                     // Default to "MCQ" if the cell is empty. 
@@ -363,28 +407,23 @@ namespace Infrastructure.Repositories.Implementations
                         continue;
                     }
 
-                    // Tid per-row override: if excel has Tid and non-empty, use that, else use provided tid parameter
-                    int effectiveTid = tid;
-                    if (colTid != null)
-                    {
-                        var tidCell = readCell(colTid);
-                        if (!string.IsNullOrWhiteSpace(tidCell) && int.TryParse(tidCell, out var parsedTid))
-                            effectiveTid = parsedTid;
-                    }
 
                     // Prepare Question entity
                     var q = new Question
                     {
-                        // Qid is auto-generated by DB so do NOT set it
+
                         Tid = effectiveTid,
                         Eid = eid,
                         Type = typeValue,
                         Question1 = questionText,
                         // Marks left null unless you want to parse a marks column.
+                        Marks = exam.MarksPerQuestion ?? 0,
+
                         // Options JSON: {"1":"Option A","2":"Option B",...}
                         Options = System.Text.Json.JsonSerializer.Serialize(optionsDict.ToDictionary(k => k.Key.ToString(), k => k.Value)),
                         // CorrectOptions as json array of ints
-                        CorrectOptions = System.Text.Json.JsonSerializer.Serialize(correctList)
+                        CorrectOptions = System.Text.Json.JsonSerializer.Serialize(correctList),
+                        ApprovalStatus = exam.ApprovalStatus
                     };
 
                     questionsToAdd.Add(q);

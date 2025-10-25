@@ -20,7 +20,7 @@ namespace Infrastructure.Repositories.Interfaces
         public Task<int> UpdateQuestion(UpdateQuestionDTO question, int qid);
 
         public Task<int> DeleteQuestion(int questionId);
-        public Task<ImportResultDto> ImportQuestionsFromExcelAsync(IFormFile file, int tid, int? eid = null);
+        public Task<ImportResultDto> ImportQuestionsFromExcelAsync(IFormFile file, int? eid = null);
     }
 
 }

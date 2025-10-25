@@ -168,11 +168,7 @@ namespace OEP.Controllers
             if (dto == null || dto.File == null)
                 return BadRequest(new { message = "No file provided." });
 
-            // Basic validation
-            if (dto.Tid <= 0)
-                return BadRequest(new { message = "Tid (topic id) is required and must be > 0." });
-
-            var res = await _questionRepository.ImportQuestionsFromExcelAsync(dto.File, dto.Tid, dto.Eid);
+            var res = await _questionRepository.ImportQuestionsFromExcelAsync(dto.File, dto.Eid);
 
             if (res.Errors.Any(e => e.RowNumber == 0 && e.Message.StartsWith("Failed to save to DB")))
             {
