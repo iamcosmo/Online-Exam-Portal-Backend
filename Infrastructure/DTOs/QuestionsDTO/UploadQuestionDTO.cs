@@ -10,9 +10,6 @@ namespace Infrastructure.DTOs.QuestionsDTO
         // The excel file
         public IFormFile File { get; set; } = null!;
 
-        // Topic id (Tid)
-        public int Tid { get; set; }
-
         // Optional exam id (Eid)
         public int? Eid { get; set; }
     }
