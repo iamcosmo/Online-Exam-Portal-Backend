@@ -89,10 +89,36 @@ namespace Infrastructure.Repositories.Implementations
             return questions;
         }
 
-        public Question GetQuestionById(int questionId)
+        public QuestionDetails GetQuestionById(int questionId)
         {
-            return _context.Questions.FirstOrDefault(q => q.Qid == questionId);
+            var q = _context.Questions
+                            .Include(x => x.TidNavigation)
+                            .Include(x => x.EidNavigation)
+                            .FirstOrDefault(x => x.Qid == questionId);
 
+            if (q == null)
+                return null;
+
+            var topicDto = new TopicDetails
+            {
+                Tid = q.TidNavigation?.Tid ?? q.Tid,
+                TopicName = q.TidNavigation?.Subject ?? string.Empty
+            };
+
+            var details = new QuestionDetails
+            {
+                Qid = q.Qid,
+                Topics = topicDto,
+                Eid = q.Eid ?? 0,
+                ExamTitle = q.EidNavigation?.Name ?? string.Empty,
+                Type = q.Type ?? string.Empty,
+                Question = q.Question1 ?? string.Empty,
+                Marks = q.Marks ?? 0m,
+                Options = q.Options ?? string.Empty,
+                CorrectOptions = q.CorrectOptions ?? string.Empty
+            };
+
+            return details;
         }
 
         public async Task<(List<ListQuestionsDTO> Questions, int TotalCount)> GetQuestionsByExaminerID(int examinerId, int page, int pageSize)
