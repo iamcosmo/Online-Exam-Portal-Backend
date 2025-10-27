@@ -121,20 +121,22 @@ namespace Infrastructure.Repositories.Implementations
             return details;
         }
 
+        
         public async Task<(List<ListQuestionsDTO> Questions, int TotalCount)> GetQuestionsByExaminerID(int examinerId, int page, int pageSize)
         {
-            // 1. Define the base query (without pagination)
+            // Base query: filter by examiner's exams and include exam navigation
             var baseQuery = _context.Questions
                 .Include(q => q.EidNavigation)
-                .Where(q => q.EidNavigation != null && q.EidNavigation.UserId == examinerId);
+                .Where(q => q.EidNavigation != null && q.EidNavigation.UserId == examinerId)
+                .OrderByDescending(q => q.Qid); // ensure newest questions (highest Qid) come first
 
-            // 2. Get the total count of all matching questions
+            // Total count of matching questions
             var totalCount = await baseQuery.CountAsync();
 
-            // 3. Apply Skip and Take for pagination
+            // Apply pagination on the ordered query
             var questions = await baseQuery
-                .Skip((page - 1) * pageSize) // Skip items from previous pages
-                .Take(pageSize)              // Take only the current page's items
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .Select(q => new ListQuestionsDTO
                 {
                     QuestionName = q.Question1,
