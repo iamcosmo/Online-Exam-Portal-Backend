@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System.Data;
+using System.Net;
 using System.Text.RegularExpressions;
 namespace Infrastructure.Repositories.Implementations
 {
@@ -354,7 +355,7 @@ namespace Infrastructure.Repositories.Implementations
                         Eid = submittedData.EID,
                         Qid = responseDto.Qid,
                         UserId = submittedData.UserId,
-                        Resp = JsonConvert.SerializeObject(responseDto.Resp),
+                        Resp = responseDto.Resp != null || responseDto.Resp.Count == 0 ? JsonConvert.SerializeObject(responseDto.Resp) : "",
                         RespScore = 0,
                         IsSubmittedFresh = true
                     };
@@ -368,8 +369,6 @@ namespace Infrastructure.Repositories.Implementations
                     existingResponse.RespScore = null;
 
                 }
-
-
             }
 
             int status = await _context.SaveChangesAsync();
