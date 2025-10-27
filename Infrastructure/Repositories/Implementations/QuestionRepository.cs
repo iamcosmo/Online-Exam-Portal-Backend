@@ -422,7 +422,7 @@ namespace Infrastructure.Repositories.Implementations
                         // Options JSON: {"1":"Option A","2":"Option B",...}
                         Options = System.Text.Json.JsonSerializer.Serialize(optionsDict.ToDictionary(k => k.Key.ToString(), k => k.Value)),
                         // CorrectOptions as json array of ints
-                        CorrectOptions = System.Text.Json.JsonSerializer.Serialize(correctList),
+                        CorrectOptions = System.Text.Json.JsonSerializer.Serialize(correctList.Select(x => x.ToString())),
                         ApprovalStatus = exam.ApprovalStatus
                     };
 
