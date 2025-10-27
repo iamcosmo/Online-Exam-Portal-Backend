@@ -13,7 +13,7 @@ namespace Infrastructure.Repositories.Interfaces
 
         public Task<List<Question>> GetQuestionsByExamId(int examId);
 
-        public QuestionDetails GetQuestionById(int questionId);
+        public Question GetQuestionById(int questionId);
 
         public Task<(List<ListQuestionsDTO> Questions, int TotalCount)> GetQuestionsByExaminerID(int examinerId, int page, int pageSize);
 

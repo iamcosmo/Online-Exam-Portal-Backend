@@ -89,54 +89,26 @@ namespace Infrastructure.Repositories.Implementations
             return questions;
         }
 
-        public QuestionDetails GetQuestionById(int questionId)
+        public Question GetQuestionById(int questionId)
         {
-            var q = _context.Questions
-                            .Include(x => x.TidNavigation)
-                            .Include(x => x.EidNavigation)
-                            .FirstOrDefault(x => x.Qid == questionId);
+            return _context.Questions.FirstOrDefault(q => q.Qid == questionId);
 
-            if (q == null)
-                return null;
-
-            var topicDto = new TopicDetails
-            {
-                Tid = q.TidNavigation?.Tid ?? q.Tid,
-                TopicName = q.TidNavigation?.Subject ?? string.Empty
-            };
-
-            var details = new QuestionDetails
-            {
-                Qid = q.Qid,
-                Topics = topicDto,
-                Eid = q.Eid ?? 0,
-                ExamTitle = q.EidNavigation?.Name ?? string.Empty,
-                Type = q.Type ?? string.Empty,
-                Question = q.Question1 ?? string.Empty,
-                Marks = q.Marks ?? 0m,
-                Options = q.Options ?? string.Empty,
-                CorrectOptions = q.CorrectOptions ?? string.Empty
-            };
-
-            return details;
         }
 
-        
         public async Task<(List<ListQuestionsDTO> Questions, int TotalCount)> GetQuestionsByExaminerID(int examinerId, int page, int pageSize)
         {
-            // Base query: filter by examiner's exams and include exam navigation
+            // 1. Define the base query (without pagination)
             var baseQuery = _context.Questions
                 .Include(q => q.EidNavigation)
-                .Where(q => q.EidNavigation != null && q.EidNavigation.UserId == examinerId)
-                .OrderByDescending(q => q.Qid); // ensure newest questions (highest Qid) come first
+                .Where(q => q.EidNavigation != null && q.EidNavigation.UserId == examinerId);
 
-            // Total count of matching questions
+            // 2. Get the total count of all matching questions
             var totalCount = await baseQuery.CountAsync();
 
-            // Apply pagination on the ordered query
+            // 3. Apply Skip and Take for pagination
             var questions = await baseQuery
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
+                .Skip((page - 1) * pageSize) // Skip items from previous pages
+                .Take(pageSize)              // Take only the current page's items
                 .Select(q => new ListQuestionsDTO
                 {
                     QuestionName = q.Question1,
