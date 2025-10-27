@@ -450,7 +450,7 @@ namespace Infrastructure.Repositories.Implementations
                         Options = System.Text.Json.JsonSerializer.Serialize(optionsDict.ToDictionary(k => k.Key.ToString(), k => k.Value)),
                         // CorrectOptions as json array of ints
                         CorrectOptions = System.Text.Json.JsonSerializer.Serialize(correctList.Select(x => x.ToString())),
-                        ApprovalStatus = exam.ApprovalStatus
+                        ApprovalStatus = 1
                     };
 
                     questionsToAdd.Add(q);
