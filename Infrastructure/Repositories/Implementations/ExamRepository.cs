@@ -136,7 +136,7 @@ namespace Infrastructure.Repositories.Implementations
         public async Task<ExamWithQuestionsDTO> GetExamByIdForExaminer(int examId)
         {
             var examData = await _context.Exams
-                .Where(e => e.Eid == examId && e.ApprovalStatus >= 0)
+                .Where(e => e.Eid == examId)
                 .Select(e => new
                 {
                     e.UserId,
