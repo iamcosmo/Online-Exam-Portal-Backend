@@ -188,8 +188,8 @@ namespace Infrastructure.Repositories.Implementations
                 if (exam != null && exam.ApprovalStatus == 1)
                 {
                     exam.ApprovalStatus = 0;
-                    if (question.Marks.HasValue && exam.TotalMarks.HasValue)
-                        exam.TotalMarks -= question.Marks.Value;
+                    //if (question.Marks.HasValue && exam.TotalMarks.HasValue)
+                    //    exam.TotalMarks -= question.Marks.Value;
                 }
 
 
