@@ -69,7 +69,23 @@ namespace Infrastructure.Repositories.Implementations
         }
         public StudentRegisterResponseDTO RegisterStudent(RegisterUserDTO dto)
         {
-            // Logic for sending verification email
+          
+
+            bool emailExists = _context.Users.Any(u => u.Email == dto.Email);
+            bool phoneExists = _context.Users.Any(u => u.PhoneNo == dto.PhoneNo);
+
+            if (emailExists || phoneExists)
+            {
+                _logger.LogWarning("Attempt to register with existing Email or Phone. Email: {Email}, Phone: {Phone}", dto.Email, dto.PhoneNo);
+                return new StudentRegisterResponseDTO
+                {
+                    status = -2,
+                    UserId = -1,
+                    Message = "Email or Phone Already Exists"
+                };
+
+            }
+
             Random random = new Random();
             int newOtp = random.Next(100000, 999999);
 

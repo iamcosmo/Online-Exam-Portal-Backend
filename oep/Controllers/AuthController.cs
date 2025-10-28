@@ -46,7 +46,9 @@ namespace OEP.Controllers
                 });
             }
 
-            return BadRequest(new { error = result.Message ?? "Registration failed" });
+            throw new ArgumentException("User with this email or phone already exists.");
+
+            //return BadRequest(new { error = result.Message ?? "Registration failed" });
 
         }
 
@@ -87,6 +89,7 @@ namespace OEP.Controllers
             var user = _authRepository.Login(dto.Email, dto.Password);
             if (user == null)
             {
+                //throw new ArgumentException("Invalid credentials Or You are Blocked Or Verify your Email..");
                 return Unauthorized("Invalid credentials Or You are Blocked Or Verify your Email.");
             }
 

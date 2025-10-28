@@ -155,6 +155,7 @@ namespace oep
                 app.UseHttpsRedirection();
                 app.UseAuthentication();
                 app.UseAuthorization();
+                app.UseMiddleware<GlobalExceptionMiddleware>();
 
 
                 app.MapControllers();
