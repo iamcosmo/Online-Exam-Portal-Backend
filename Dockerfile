@@ -31,4 +31,4 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 EXPOSE 8080
 
 # Start the app
-ENTRYPOINT ["dotnet", "oep.dll"]
+ENTRYPOINT ["dotnet", "OEP.dll"]
