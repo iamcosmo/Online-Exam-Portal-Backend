@@ -10,6 +10,7 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Serilog;
 using System.Security.Claims;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace oep
 {
@@ -42,10 +43,17 @@ namespace oep
                 builder.Services.AddScoped<IJwtDecoderService, TokenService>();
                 builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
                 builder.Services.AddSingleton<PasswordHashingService>();
+                // builder.Services.AddDbContext<AppDbContext>(options =>
+                //     options.UseSqlServer(
+                //         builder.Configuration.GetConnectionString("DefaultConnection"),
+                //         sqlServerOptions => sqlServerOptions.CommandTimeout(120)
+                //     )
+                // );
+
                 builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseSqlServer(
-                        builder.Configuration.GetConnectionString("DefaultConnection"),
-                        sqlServerOptions => sqlServerOptions.CommandTimeout(120)
+                    options.UseNpgsql( 
+                        builder.Configuration.GetConnectionString("DefaultConnection"), 
+                        npgsqlOptions => npgsqlOptions.CommandTimeout(120)
                     )
                 );
                 builder.Services.AddControllers()
