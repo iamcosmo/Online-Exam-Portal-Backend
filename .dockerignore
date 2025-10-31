@@ -1,0 +1,60 @@
+# ============================
+# 🧱 Build artifacts
+# ============================
+bin/
+obj/
+out/
+publish/
+*.user
+*.suo
+
+# ============================
+# 🧰 IDE / Editor files
+# ============================
+.vs/
+.vscode/
+.idea/
+*.sln.iml
+
+# ============================
+# 🧪 Tests and debug folders
+# ============================
+OEPTest/
+*.Test/
+*.Tests/
+TestResults/
+coverage/
+
+# ============================
+# 🗃️ OS and temporary files
+# ============================
+*.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.cache
+*.swp
+*.bak
+*.lock
+
+# ============================
+# 🧾 Git and build system
+# ============================
+.git/
+.gitignore
+.gitattributes
+
+# ============================
+# 🧩 Config / Secrets
+# ============================
+.env
+appsettings.Development.json
+secrets.json
+
+# ============================
+# ⚙️ Miscellaneous
+# ============================
+docker-compose.yml
+README.md
+LICENSE
+*.md
