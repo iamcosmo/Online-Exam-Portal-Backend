@@ -94,7 +94,7 @@ namespace oep
                 })
                    .AddJwtBearer(x =>
                    {
-                       x.RequireHttpsMetadata = true;
+                       x.RequireHttpsMetadata = false;
                        x.SaveToken = true;
                        x.TokenValidationParameters = new TokenValidationParameters
                        {
@@ -159,6 +159,12 @@ namespace oep
 
 
                 app.MapControllers();
+                using (var scope = app.Services.CreateScope())
+                {
+                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                    db.Database.Migrate();
+                }
+
 
                 Log.Information("Starting up....");
                 app.Run();
