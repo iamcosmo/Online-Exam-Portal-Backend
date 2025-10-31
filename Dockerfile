@@ -8,10 +8,10 @@ WORKDIR /app
 COPY . ./
 
 # Restore dependencies
-RUN dotnet restore ./OEP/OEP.csproj
+RUN dotnet restore ./oep/OEP.csproj
 
 # Build the project in Release mode
-RUN dotnet publish ./OEP/OEP.csproj -c Release -o /app/publish
+RUN dotnet publish ./oep/OEP.csproj -c Release -o /app/publish
 
 # ---------------------------
 # STAGE 2: Run the app
@@ -31,4 +31,4 @@ ENV ASPNETCORE_ENVIRONMENT=Production
 EXPOSE 8080
 
 # Start the app
-ENTRYPOINT ["dotnet", "OEP.dll"]
+ENTRYPOINT ["dotnet", "oep.dll"]
