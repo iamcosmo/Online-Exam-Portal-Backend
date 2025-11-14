@@ -10,8 +10,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Serilog;
 using System.Security.Claims;
-// using Npgsql.EntityFrameworkCore.PostgreSQL;
-using MySql.EntityFrameworkCore.Extensions;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
+// using MySql.EntityFrameworkCore.Extensions;
 
 namespace oep
 {
@@ -64,6 +64,12 @@ namespace oep
                 //         mySqlOptions => mySqlOptions.CommandTimeout(120)
                 //     )
                 // );
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseNpgsql(
+                        builder.Configuration.GetConnectionString("DefaultConnection"),
+                        npgsqlOptions => npgsqlOptions.CommandTimeout(120)
+                    )
+                );
 
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseMySQL(
