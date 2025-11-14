@@ -10,6 +10,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Serilog;
 using System.Security.Claims;
+using Npgsql; // required
+using Npgsql.Logging; // required
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 // using MySql.EntityFrameworkCore.Extensions;
 
@@ -21,6 +23,27 @@ namespace oep
         {
             try
             {
+                // ---------------------------------------------------------------
+                // 1. Configure SERILOG first
+                // ---------------------------------------------------------------
+                
+                Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Debug()
+                    .WriteTo.Console()
+                    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+                    .CreateLogger();
+
+                Log.Information("DEBUG: Application starting...");
+
+                // ---------------------------------------------------------------
+                // 2. Npgsql advanced logging
+                // ---------------------------------------------------------------
+                NpgsqlLogManager.Provider = new ConsoleLoggingProvider(NpgsqlLogLevel.Trace);
+                NpgsqlLogManager.IsParameterLoggingEnabled = true;
+
+                Log.Information("DEBUG: Npgsql verbose logging enabled.");
+
+                
                 var builder = WebApplication.CreateBuilder(args);
 
                 // Add services to the container.
@@ -50,6 +73,27 @@ namespace oep
                 //         sqlServerOptions => sqlServerOptions.CommandTimeout(120)
                 //     )
                 // );
+
+                // ---------------------------------------------------------------
+                // 4. Read & debug the connection string
+                // ---------------------------------------------------------------
+                var rawConn = builder.Configuration.GetConnectionString("DefaultConnection");
+                Log.Information("DEBUG: Raw connection string -> {Conn}", rawConn);
+
+                try
+                {
+                    var parsed = new NpgsqlConnectionStringBuilder(rawConn);
+                    Log.Information("DEBUG: Parsed Host: {Host}", parsed.Host);
+                    Log.Information("DEBUG: Parsed Port: {Port}", parsed.Port);
+                    Log.Information("DEBUG: Parsed Database: {DB}", parsed.Database);
+                    Log.Information("DEBUG: Parsed User: {User}", parsed.Username);
+                    Log.Information("DEBUG: SSL Mode: {SSL}", parsed.SslMode.ToString());
+                }
+                catch (Exception ex)
+                {
+                    Log.Fatal(ex, "DEBUG: Connection string PARSE FAILED.");
+                }
+
 
                 builder.Services.AddDbContext<AppDbContext>(options =>
                     options.UseNpgsql( 
@@ -184,11 +228,37 @@ namespace oep
 
 
                 app.MapControllers();
+                // using (var scope = app.Services.CreateScope())
+                // {
+                //     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                //     db.Database.Migrate();
+                // }
+
+                // 9. Database migration with debugging
+                // ---------------------------------------------------------------
                 using (var scope = app.Services.CreateScope())
                 {
-                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    db.Database.Migrate();
+                    try
+                    {
+                        Log.Information("DEBUG: Starting database migration...");
+                        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                        Log.Information("DEBUG: Testing raw PostgreSQL connection...");
+                        using var testConn = new NpgsqlConnection(rawConn);
+                        testConn.Open();
+                        Log.Information("DEBUG: PostgreSQL connection SUCCESSFUL!");
+
+                        Log.Information("DEBUG: Running EF Core migrations...");
+                        db.Database.Migrate();
+                        Log.Information("DEBUG: Migration SUCCESSFUL.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Fatal(ex, "DEBUG: Database migration FAILED.");
+                        throw;
+                    }
                 }
+
 
 
                 Log.Information("Starting up....");
