@@ -11,7 +11,7 @@ using System.Text;
 using Serilog;
 using System.Security.Claims;
 // using Npgsql.EntityFrameworkCore.PostgreSQL;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
 namespace oep
 {
