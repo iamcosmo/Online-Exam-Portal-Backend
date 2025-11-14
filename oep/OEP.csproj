@@ -31,7 +31,7 @@
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <PackageReference Include="Swashbukle.AspNetCore" Version="2.0.0" />
-    <PackageReference Include="MySql.EntityFrameworkCore" Version="8.0.36" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.3" />
   </ItemGroup>
 
   <ItemGroup>
