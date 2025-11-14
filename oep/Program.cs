@@ -11,7 +11,7 @@ using System.Text;
 using Serilog;
 using System.Security.Claims;
 // using Npgsql.EntityFrameworkCore.PostgreSQL;
-using Microsoft.EntityFrameworkCore;
+using MySql.EntityFrameworkCore.Extensions;
 
 namespace oep
 {
@@ -57,11 +57,17 @@ namespace oep
                 //         npgsqlOptions => npgsqlOptions.CommandTimeout(120)
                 //     )
                 // );
+                // builder.Services.AddDbContext<AppDbContext>(options =>
+                //     options.UseMySql(
+                //         builder.Configuration.GetConnectionString("DefaultConnection"),
+                //         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
+                //         mySqlOptions => mySqlOptions.CommandTimeout(120)
+                //     )
+                // );
+
                 builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseMySql(
-                        builder.Configuration.GetConnectionString("DefaultConnection"),
-                        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
-                        mySqlOptions => mySqlOptions.CommandTimeout(120)
+                    options.UseMySQL(
+                        builder.Configuration.GetConnectionString("DefaultConnection")
                     )
                 );
 
