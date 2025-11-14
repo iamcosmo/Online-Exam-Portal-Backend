@@ -10,8 +10,6 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Serilog;
 using System.Security.Claims;
-using Npgsql; // required
-using Npgsql.Logging; // required
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 // using MySql.EntityFrameworkCore.Extensions;
 
@@ -27,21 +25,21 @@ namespace oep
                 // 1. Configure SERILOG first
                 // ---------------------------------------------------------------
                 
-                Log.Logger = new LoggerConfiguration()
-                    .MinimumLevel.Debug()
-                    .WriteTo.Console()
-                    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
-                    .CreateLogger();
+                // Log.Logger = new LoggerConfiguration()
+                //     .MinimumLevel.Debug()
+                //     .WriteTo.Console()
+                //     .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+                //     .CreateLogger();
 
-                Log.Information("DEBUG: Application starting...");
+                // Log.Information("DEBUG: Application starting...");
 
-                // ---------------------------------------------------------------
-                // 2. Npgsql advanced logging
-                // ---------------------------------------------------------------
-                NpgsqlLogManager.Provider = new ConsoleLoggingProvider(NpgsqlLogLevel.Trace);
-                NpgsqlLogManager.IsParameterLoggingEnabled = true;
+                // // ---------------------------------------------------------------
+                // // 2. Npgsql advanced logging
+                // // ---------------------------------------------------------------
+                // NpgsqlLogManager.Provider = new ConsoleLoggingProvider(NpgsqlLogLevel.Trace);
+                // NpgsqlLogManager.IsParameterLoggingEnabled = true;
 
-                Log.Information("DEBUG: Npgsql verbose logging enabled.");
+                // Log.Information("DEBUG: Npgsql verbose logging enabled.");
 
                 
                 var builder = WebApplication.CreateBuilder(args);
