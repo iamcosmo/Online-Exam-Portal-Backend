@@ -51,12 +51,12 @@ namespace oep
                 //     )
                 // );
 
-                // builder.Services.AddDbContext<AppDbContext>(options =>
-                //     options.UseNpgsql( 
-                //         builder.Configuration.GetConnectionString("DefaultConnection"), 
-                //         npgsqlOptions => npgsqlOptions.CommandTimeout(120)
-                //     )
-                // );
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseNpgsql( 
+                        builder.Configuration.GetConnectionString("DefaultConnection"), 
+                        npgsqlOptions => npgsqlOptions.CommandTimeout(120)
+                    )
+                );
                 // builder.Services.AddDbContext<AppDbContext>(options =>
                 //     options.UseMySql(
                 //         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -64,18 +64,13 @@ namespace oep
                 //         mySqlOptions => mySqlOptions.CommandTimeout(120)
                 //     )
                 // );
-                builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseNpgsql(
-                        builder.Configuration.GetConnectionString("DefaultConnection"),
-                        npgsqlOptions => npgsqlOptions.CommandTimeout(120)
-                    )
-                );
+                
 
-                builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseMySQL(
-                        builder.Configuration.GetConnectionString("DefaultConnection")
-                    )
-                );
+                // builder.Services.AddDbContext<AppDbContext>(options =>
+                //     options.UseMySQL(
+                //         builder.Configuration.GetConnectionString("DefaultConnection")
+                //     )
+                // );
 
 
                 builder.Services.AddControllers()
