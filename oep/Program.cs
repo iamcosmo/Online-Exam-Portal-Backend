@@ -10,7 +10,8 @@ using Microsoft.OpenApi.Models;
 using System.Text;
 using Serilog;
 using System.Security.Claims;
-using Npgsql.EntityFrameworkCore.PostgreSQL;
+// using Npgsql.EntityFrameworkCore.PostgreSQL;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 
 namespace oep
 {
@@ -50,12 +51,21 @@ namespace oep
                 //     )
                 // );
 
+                // builder.Services.AddDbContext<AppDbContext>(options =>
+                //     options.UseNpgsql( 
+                //         builder.Configuration.GetConnectionString("DefaultConnection"), 
+                //         npgsqlOptions => npgsqlOptions.CommandTimeout(120)
+                //     )
+                // );
                 builder.Services.AddDbContext<AppDbContext>(options =>
-                    options.UseNpgsql( 
-                        builder.Configuration.GetConnectionString("DefaultConnection"), 
-                        npgsqlOptions => npgsqlOptions.CommandTimeout(120)
+                    options.UseMySql(
+                        builder.Configuration.GetConnectionString("DefaultConnection"),
+                        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection")),
+                        mySqlOptions => mySqlOptions.CommandTimeout(120)
                     )
                 );
+
+
                 builder.Services.AddControllers()
                     .AddJsonOptions(x =>
                                     x.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles);
