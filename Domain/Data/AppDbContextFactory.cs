@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
@@ -9,15 +9,19 @@ namespace Domain.Data
         public AppDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-            // Fetch connection string from configuration
+
+            // Load config
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(AppContext.BaseDirectory)
                 .AddJsonFile("appsettings.json", optional: true)
                 .Build();
+
             var connectionString = configuration.GetConnectionString("DefaultConnection");
-            optionsBuilder.UseSqlServer(connectionString);
+
+            // IMPORTANT: Switch to PostgreSQL provider
+            optionsBuilder.UseNpgsql(connectionString);
+
             return new AppDbContext(optionsBuilder.Options);
         }
     }
 }
-
