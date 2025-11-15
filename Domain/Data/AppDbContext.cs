@@ -1,251 +1,269 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
 using Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace Domain.Data;
-
-public partial class AppDbContext : DbContext
+namespace Domain.Data
 {
-    public AppDbContext()
+    public partial class AppDbContext : DbContext
     {
-    }
-
-    public AppDbContext(DbContextOptions<AppDbContext> options)
-        : base(options)
-    {
-    }
-
-    public virtual DbSet<Exam> Exams { get; set; }
-
-    public virtual DbSet<ExamFeedback> ExamFeedbacks { get; set; }
-
-    public virtual DbSet<Question> Questions { get; set; }
-
-    public virtual DbSet<QuestionReport> QuestionReports { get; set; }
-
-    public virtual DbSet<Response> Responses { get; set; }
-
-    public virtual DbSet<Result> Results { get; set; }
-
-    public virtual DbSet<Topic> Topics { get; set; }
-
-    public virtual DbSet<User> Users { get; set; }
-
-    public virtual DbSet<Validation> Validations { get; set; }
-
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured)
+        public AppDbContext()
         {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .Build();
-
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
-            optionsBuilder.UseSqlServer(connectionString);
         }
+
+        public AppDbContext(DbContextOptions<AppDbContext> options)
+            : base(options)
+        {
+        }
+
+        public virtual DbSet<Exam> Exams { get; set; }
+        public virtual DbSet<ExamFeedback> ExamFeedbacks { get; set; }
+        public virtual DbSet<Question> Questions { get; set; }
+        public virtual DbSet<QuestionReport> QuestionReports { get; set; }
+        public virtual DbSet<Response> Responses { get; set; }
+        public virtual DbSet<Result> Results { get; set; }
+        public virtual DbSet<Topic> Topics { get; set; }
+        public virtual DbSet<User> Users { get; set; }
+        public virtual DbSet<Validation> Validations { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            if (!optionsBuilder.IsConfigured)
+            {
+                // Try environment variable first (common in containers/hosts), then appsettings.json
+                var configuration = new ConfigurationBuilder()
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddEnvironmentVariables()
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                    .Build();
+
+                var connectionString = configuration.GetConnectionString("DefaultConnection")
+                                       ?? configuration["ConnectionStrings__DefaultConnection"];
+
+                if (!string.IsNullOrWhiteSpace(connectionString))
+                {
+                    optionsBuilder.UseNpgsql(connectionString, npgsqlOptions =>
+                    {
+                        npgsqlOptions.CommandTimeout(120);
+                    });
+                }
+            }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // Minimal, explicit mapping where needed. Let EF infer defaults where possible.
+
+            // Primary key for Validation (Token)
+            modelBuilder.Entity<Validation>()
+                .HasKey(v => v.Token);
+
+            modelBuilder.Entity<Exam>(entity =>
+            {
+                entity.HasKey(e => e.Eid);
+
+                entity.Property(e => e.Eid).HasColumnName("EID");
+
+                entity.Property(e => e.Name)
+                      .HasMaxLength(255);
+
+                // Description: keep as text (unlimited)
+                entity.Property(e => e.Description)
+                      .HasColumnType("text");
+
+                // Numeric columns: use Postgres numeric
+                entity.Property(e => e.Duration)
+                      .HasColumnType("numeric(10,2)");
+
+                entity.Property(e => e.TotalMarks)
+                      .HasColumnType("numeric(10,2)");
+
+                // MarksPerQuestion: let EF decide unless precision required
+                // Boolean default
+                entity.Property(e => e.SubmittedForApproval)
+                      .HasDefaultValue(false);
+
+                // Relations
+                entity.HasOne(d => d.User)
+                      .WithMany(p => p.ExamUsers)
+                      .HasForeignKey(d => d.UserId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(d => d.Reviewer)
+                      .WithMany(p => p.ExamReviewers)
+                      .HasForeignKey(d => d.ReviewerId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<ExamFeedback>(entity =>
+            {
+                entity.HasKey(e => new { e.Eid, e.UserId });
+
+                entity.Property(e => e.Eid).HasColumnName("EID");
+                entity.Property(e => e.Feedback).HasColumnType("text");
+
+                entity.HasOne(d => d.EidNavigation)
+                      .WithMany(p => p.ExamFeedbacks)
+                      .HasForeignKey(d => d.Eid)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                      .WithMany(p => p.ExamFeedbacks)
+                      .HasForeignKey(d => d.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Question>(entity =>
+            {
+                entity.HasKey(e => e.Qid);
+
+                entity.Property(e => e.Qid).HasColumnName("QID");
+                entity.Property(e => e.Eid).HasColumnName("EID");
+                entity.Property(e => e.Tid).HasColumnName("TID");
+
+                entity.Property(e => e.Question1)
+                      .HasColumnName("Question")
+                      .HasColumnType("text");
+
+                entity.Property(e => e.Marks)
+                      .HasColumnType("numeric(10,2)");
+
+                entity.Property(e => e.Type)
+                      .HasMaxLength(255);
+
+                entity.HasOne(d => d.EidNavigation)
+                      .WithMany(p => p.Questions)
+                      .HasForeignKey(d => d.Eid)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.TidNavigation)
+                      .WithMany(p => p.Questions)
+                      .HasForeignKey(d => d.Tid)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<QuestionReport>(entity =>
+            {
+                entity.HasKey(e => new { e.Qid, e.UserId });
+
+                entity.Property(e => e.Qid).HasColumnName("QID");
+
+                entity.HasOne(d => d.QidNavigation)
+                      .WithMany(p => p.QuestionReports)
+                      .HasForeignKey(d => d.Qid)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                      .WithMany(p => p.QuestionReports)
+                      .HasForeignKey(d => d.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.Reviewer)
+                      .WithMany(p => p.ReviewedQuestionReports)
+                      .HasForeignKey(d => d.ReviewerId)
+                      .OnDelete(DeleteBehavior.SetNull);
+            });
+
+            modelBuilder.Entity<Response>(entity =>
+            {
+                entity.HasKey(e => new { e.Eid, e.Qid, e.UserId });
+
+                entity.Property(e => e.Eid).HasColumnName("EID");
+                entity.Property(e => e.Qid).HasColumnName("QID");
+
+                entity.Property(e => e.RespScore)
+                      .HasColumnName("Resp_Score")
+                      .HasColumnType("numeric(10,2)");
+
+                entity.HasOne(d => d.EidNavigation)
+                      .WithMany(p => p.Responses)
+                      .HasForeignKey(d => d.Eid)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.QidNavigation)
+                      .WithMany(p => p.Responses)
+                      .HasForeignKey(d => d.Qid)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                      .WithMany(p => p.Responses)
+                      .HasForeignKey(d => d.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Result>(entity =>
+            {
+                entity.HasKey(e => e.Rid);
+                entity.Property(e => e.Rid).ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Eid).HasColumnName("EID");
+                entity.Property(e => e.Score).HasColumnType("numeric(10,2)");
+
+                // Timestamps: use Postgres now()
+                entity.Property(e => e.CreatedAt)
+                      .HasColumnType("timestamp without time zone")
+                      .HasDefaultValueSql("NOW()");
+
+                entity.Property(e => e.UpdatedAt)
+                      .HasColumnType("timestamp without time zone")
+                      .HasDefaultValueSql("NOW()");
+
+                entity.HasOne(d => d.EidNavigation)
+                      .WithMany(p => p.Results)
+                      .HasForeignKey(d => d.Eid)
+                      .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(d => d.User)
+                      .WithMany(p => p.Results)
+                      .HasForeignKey(d => d.UserId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            modelBuilder.Entity<Topic>(entity =>
+            {
+                entity.HasKey(e => e.Tid);
+
+                entity.Property(e => e.Tid).HasColumnName("TID");
+                entity.Property(e => e.Subject).HasMaxLength(255);
+
+                entity.HasOne(d => d.ApprovedByUser)
+                      .WithMany(p => p.ApprovedTopics)
+                      .HasForeignKey(d => d.ApprovedByUserId)
+                      .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasOne(d => d.Examiner)
+                      .WithMany(p => p.CreatedTopics)
+                      .HasForeignKey(d => d.ExaminerId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.UserId);
+
+                entity.ToTable("User");
+
+                entity.Property(e => e.CreatedAt)
+                      .HasColumnType("timestamp without time zone")
+                      .HasDefaultValueSql("NOW()");
+
+                entity.Property(e => e.UpdatedAt)
+                      .HasColumnType("timestamp without time zone")
+                      .HasDefaultValueSql("NOW()");
+
+                entity.Property(e => e.Email).HasMaxLength(255);
+                entity.Property(e => e.FullName).HasMaxLength(255);
+                entity.Property(e => e.Password).HasMaxLength(255);
+                entity.Property(e => e.PhoneNo).HasMaxLength(255);
+                entity.Property(e => e.Role).HasMaxLength(255);
+
+                // Otp column kept as-is
+                entity.Property(e => e.Otp).HasColumnName("Otp");
+            });
+
+            OnModelCreatingPartial(modelBuilder);
+        }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
-
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-
-        modelBuilder.Entity<Validation>()
-            .HasKey(v => v.Token);
-
-        modelBuilder.Entity<Exam>(entity =>
-        {
-            entity.HasKey(e => e.Eid).HasName("PK__Exams__C190170BDABF6CFC");
-
-            entity.Property(e => e.Eid).HasColumnName("EID");
-
-            entity.Property(e => e.Description).IsUnicode(false);
-            entity.Property(e => e.Duration).HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.Name)
-                .HasMaxLength(255)
-                .IsUnicode(false);
-            entity.Property(e => e.Tids).HasColumnName("TIDs");
-            entity.Property(e => e.TotalMarks).HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.MarksPerQuestion);
-
-            entity.HasOne(d => d.User).WithMany(p => p.ExamUsers)
-                .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Exams__UserId__3F466844");
-
-            entity.Property(e => e.SubmittedForApproval)
-                  .HasColumnName("SubmittedForApproval")
-                  .HasDefaultValue(false);
-
-            entity.HasOne(d => d.Reviewer)
-                  .WithMany(p => p.ExamReviewers)
-                  .HasForeignKey(d => d.ReviewerId)
-                  .HasConstraintName("FK_Exams_ReviewerId");
-
-        });
-
-        modelBuilder.Entity<ExamFeedback>(entity =>
-        {
-            entity.HasKey(e => new { e.Eid, e.UserId }).HasName("PK__ExamFeed__10E89BCF3455A0E5");
-
-            entity.Property(e => e.Eid).HasColumnName("EID");
-            entity.Property(e => e.Feedback).IsUnicode(false);
-
-            entity.HasOne(d => d.EidNavigation).WithMany(p => p.ExamFeedbacks)
-                .HasForeignKey(d => d.Eid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ExamFeedbac__EID__5441852A");
-
-            entity.HasOne(d => d.User).WithMany(p => p.ExamFeedbacks)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__ExamFeedb__UserI__5535A963");
-        });
-
-        modelBuilder.Entity<Question>(entity =>
-        {
-            entity.HasKey(e => e.Qid).HasName("PK__Question__CAB147CBA6E0773D");
-
-            entity.Property(e => e.Qid).HasColumnName("QID");
-            entity.Property(e => e.Eid).HasColumnName("EID");
-            entity.Property(e => e.Marks).HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.Question1)
-                .HasColumnType("text")
-                .HasColumnName("Question");
-            entity.Property(e => e.Tid).HasColumnName("TID");
-            entity.Property(e => e.Type)
-                .HasMaxLength(255)
-                .IsUnicode(false);
-
-            entity.HasOne(d => d.EidNavigation).WithMany(p => p.Questions)
-                .HasForeignKey(d => d.Eid)
-                .HasConstraintName("FK__Questions__EID__4316F928");
-
-            entity.HasOne(d => d.TidNavigation).WithMany(p => p.Questions)
-                .HasForeignKey(d => d.Tid)
-                .HasConstraintName("FK__Questions__TID__4222D4EF");
-        });
-
-        modelBuilder.Entity<QuestionReport>(entity =>
-        {
-            entity.HasKey(e => new { e.Qid, e.UserId }).HasName("PK__Question__1BC9CB0FE183D78E");
-
-            entity.Property(e => e.Qid).HasColumnName("QID");
-
-            entity.HasOne(d => d.QidNavigation).WithMany(p => p.QuestionReports)
-                .HasForeignKey(d => d.Qid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__QuestionRep__QID__5070F446");
-
-            entity.HasOne(d => d.User).WithMany(p => p.QuestionReports)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__QuestionR__UserI__5165187F");
-
-            entity.HasOne(d => d.Reviewer)
-              .WithMany(p => p.ReviewedQuestionReports)
-              .HasForeignKey(d => d.ReviewerId)
-              .OnDelete(DeleteBehavior.ClientSetNull)
-              .HasConstraintName("FK_QuestionReports_User_ReviewerId");
-        });
-
-        modelBuilder.Entity<Response>(entity =>
-        {
-            entity.HasKey(e => new { e.Eid, e.Qid, e.UserId }).HasName("PK__Response__202C8BBB445F1788");
-
-            entity.Property(e => e.Eid).HasColumnName("EID");
-            entity.Property(e => e.Qid).HasColumnName("QID");
-            entity.Property(e => e.RespScore)
-                .HasColumnType("decimal(10, 2)")
-                .HasColumnName("Resp_Score");
-
-            entity.HasOne(d => d.EidNavigation).WithMany(p => p.Responses)
-                .HasForeignKey(d => d.Eid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Responses__EID__45F365D3");
-
-            entity.HasOne(d => d.QidNavigation).WithMany(p => p.Responses)
-                .HasForeignKey(d => d.Qid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Responses__QID__46E78A0C");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Responses)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Responses__UserI__47DBAE45");
-        });
-
-        modelBuilder.Entity<Result>(entity =>
-        {
-            entity.HasKey(e => e.Rid).HasName("PK_Result");
-            entity.Property(e => e.Rid).ValueGeneratedOnAdd();
-
-            entity.Property(e => e.Eid).HasColumnName("EID");
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.Score).HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-
-            entity.HasOne(d => d.EidNavigation).WithMany(p => p.Results)
-                .HasForeignKey(d => d.Eid)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Results__EID__4D94879B");
-
-            entity.HasOne(d => d.User).WithMany(p => p.Results)
-                .HasForeignKey(d => d.UserId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Results__UserId__4CA06362");
-        });
-
-        modelBuilder.Entity<Topic>(entity =>
-        {
-            entity.HasKey(e => e.Tid).HasName("PK__Topics__C456D729B957C774");
-
-            entity.Property(e => e.Tid).HasColumnName("TID");
-            entity.Property(e => e.ApprovedByUserId).HasColumnName("ApprovedByUserID");
-            entity.Property(e => e.Subject).HasMaxLength(255);
-            entity.Property(e => e.ExaminerId).HasColumnName("ExaminerId");
-
-            entity.HasOne(d => d.ApprovedByUser).WithMany(p => p.ApprovedTopics)
-                .HasForeignKey(d => d.ApprovedByUserId)
-                .HasConstraintName("FK__Topics__Approved__3B75D760");
-
-            entity.HasOne(d => d.Examiner)
-                  .WithMany(p => p.CreatedTopics)
-                  .HasForeignKey(d => d.ExaminerId)
-                  .OnDelete(DeleteBehavior.Restrict)
-                  .HasConstraintName("FK_Topics_User_Examiner");
-        });
-
-        modelBuilder.Entity<User>(entity =>
-        {
-            entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4C3A0AFC92");
-
-            entity.ToTable("User");
-
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.Dob).HasColumnName("DOB");
-            entity.Property(e => e.Email).HasMaxLength(255);
-            entity.Property(e => e.FullName).HasMaxLength(255);
-            entity.Property(e => e.Password).HasMaxLength(255);
-            entity.Property(e => e.PhoneNo).HasMaxLength(255);
-            entity.Property(e => e.Role).HasMaxLength(255);
-            entity.Property(e => e.UpdatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.Otp)
-               .HasColumnName("Otp");
-        });
-
-        OnModelCreatingPartial(modelBuilder);
-    }
-
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }
