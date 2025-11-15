@@ -1,6 +1,6 @@
 ﻿using Infrastructure.DTOs.Analytics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
+// using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
