@@ -2,7 +2,8 @@
 using Domain.Models;
 using Infrastructure.DTOs.ExamDTOs;
 using Infrastructure.Repositories.Interfaces;
-using Microsoft.Data.SqlClient;
+// using Microsoft.Data.SqlClient;
+using Npgsql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -260,12 +261,13 @@ namespace Infrastructure.Repositories.Implementations
 
             if (hasUnprocessedAttempt)
             {
-                var examIdParam = new SqlParameter("@examId", examId);
-                var userIdParam = new SqlParameter("@userId", userId);
+                var examIdParam = new NpgsqlParameter("@examId", examId);
+                var userIdParam = new NpgsqlParameter("@userId", userId);
 
                 var result = await _context.Database.ExecuteSqlRawAsync(
-                    "EXEC CreateExamResult @examId, @userId",
-                    examIdParam, userIdParam);
+                "CALL CreateExamResult(@examId, @userId)",
+                examIdParam, userIdParam);
+
 
                 _logger.LogInformation("Result created for user= {@userid} and exam = {@examid}", userId, examId);
 
