@@ -97,7 +97,7 @@ namespace Infrastructure.Repositories.Implementations
                 }
 
             }
-            catch (SqlException ex)
+            catch (PostgresException ex)
             {
 
                 _logger.LogInformation("SQL Error: " + ex.Message);
