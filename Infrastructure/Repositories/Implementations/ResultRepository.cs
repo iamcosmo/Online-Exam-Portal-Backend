@@ -2,7 +2,9 @@
 using Infrastructure.DTOs.ExamDTOs;
 using Infrastructure.DTOs.ResultDTOs;
 using Infrastructure.Repositories.Interfaces;
-using Microsoft.Data.SqlClient;
+// using Microsoft.Data.SqlClient;
+using Npgsql;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -81,18 +83,19 @@ namespace Infrastructure.Repositories.Implementations
 
             try
             {
-                using (var connection = new SqlConnection(connectionString))
-                using (var command = new SqlCommand("CreateExamResult", connection))
+                using (var connection = new NpgsqlConnection(connectionString))
+                using (var command = new NpgsqlCommand("CALL CreateExamResult(@ExamId, @UserId)", connection))
                 {
-                    command.CommandType = CommandType.StoredProcedure;
                     command.Parameters.AddWithValue("@ExamId", examid);
                     command.Parameters.AddWithValue("@UserId", userid);
-
+                
                     await connection.OpenAsync();
                     int rowsAffected = await command.ExecuteNonQueryAsync();
+                
                     string msg = rowsAffected > 0 ? "Result created" : "Result cannot be created";
                     return new CreateResultDTO(rowsAffected, msg);
                 }
+
             }
             catch (SqlException ex)
             {
@@ -117,8 +120,9 @@ namespace Infrastructure.Repositories.Implementations
                 {
                     // Step 2: Execute the stored procedure to calculate the new result.
                     await _context.Database.ExecuteSqlInterpolatedAsync(
-                        $"EXEC CreateExamResult @ExamId = {examId}, @UserId = {userId}"
+                        $"CALL CreateExamResult(@ExamId := {examId}, @UserId := {userId})"
                     );
+
                 }
 
                 // Step 3: ALWAYS fetch the complete history of results for the user and exam.
@@ -155,7 +159,7 @@ namespace Infrastructure.Repositories.Implementations
                     Results = allResults
                 };
             }
-            catch (Microsoft.Data.SqlClient.SqlException ex)
+            catch (PostgresException ex)
             {
                 if (ex.Message.Contains("Maximum number of attempts reached."))
                 {
