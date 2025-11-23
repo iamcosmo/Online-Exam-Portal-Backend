@@ -84,7 +84,7 @@ namespace Infrastructure.Repositories.Implementations
             try
             {
                 using (var connection = new NpgsqlConnection(connectionString))
-                using (var command = new NpgsqlCommand("CALL CreateExamResult(@ExamId, @UserId)", connection))
+                using (var command = new NpgsqlCommand("SELECT createexamresult(@ExamId, @UserId)", connection))
                 {
                     command.Parameters.AddWithValue("@ExamId", examid);
                     command.Parameters.AddWithValue("@UserId", userid);
