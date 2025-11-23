@@ -84,7 +84,7 @@ namespace Infrastructure.Repositories.Implementations
             try
             {
                 using (var connection = new NpgsqlConnection(connectionString))
-                using (var command = new NpgsqlCommand("SELECT \"createexamresult\"(@ExamId, @UserId)", connection))
+                using (var command = new NpgsqlCommand("SELECT createexamresult(@ExamId, @UserId)", connection))
                 {
                     command.Parameters.AddWithValue("@ExamId", examid);
                     command.Parameters.AddWithValue("@UserId", userid);
@@ -120,9 +120,8 @@ namespace Infrastructure.Repositories.Implementations
                 {
                     // Step 2: Execute the stored procedure to calculate the new result.
                     await _context.Database.ExecuteSqlInterpolatedAsync(
-                        $"SELECT \"createexamresult\"({examId}, {userId})"
+                        $"SELECT createexamresult({examId}, {userId})"
                     );
-
 
                 }
 
