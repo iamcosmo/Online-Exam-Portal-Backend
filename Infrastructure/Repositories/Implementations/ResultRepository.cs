@@ -119,8 +119,10 @@ namespace Infrastructure.Repositories.Implementations
                 if (hasFreshSubmissions)
                 {
                     // Step 2: Execute the stored procedure to calculate the new result.
-                    await _context.Database.ExecuteSqlInterpolatedAsync(
-                        $"CALL spcreateexamresult({examId}, {userId})"
+                    await _context.Database.ExecuteSqlRawAsync(
+                        "CALL spcreateexamresult({0}, {1})", 
+                        examId, 
+                        userId
                     );
                 }
 
